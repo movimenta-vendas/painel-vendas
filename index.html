@@ -2221,7 +2221,7 @@ async function montaOrc(host){
     const modo=src.fixo? 'viewer' : 'admin';
     const inj='<script>window.ORC_MODO='+JSON.stringify(modo)+';'+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
     html=html.replace(/<head[^>]*>/i, m=>m+inj);
-    const fr=document.createElement('iframe'); fr.className='orc-fr'; fr.title='Orçamentos'; fr.setAttribute('allow','clipboard-write');
+    const fr=document.createElement('iframe'); fr.className='orc-fr'; fr.title='Orçamentos'; fr.setAttribute('allow','clipboard-write; web-share');
     fr.srcdoc=html; host.innerHTML=''; host.appendChild(fr); ORC_FR=fr; orcAltura();
   }catch(e){ host.innerHTML='<div class="card"><div class="empty">Não foi possível abrir os orçamentos neste navegador ('+esc(e.message)+'). Use o Chrome, o Edge ou o Safari atualizado.</div></div>'; }
 }
