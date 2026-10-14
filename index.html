@@ -147,6 +147,14 @@ table.calor .barra{display:block;height:15px;border-radius:3px;min-width:3px}
 table.miuda{font-size:12px}
 table.miuda th{font-size:10px}
 table.miuda td,table.miuda th{padding:5px 8px}
+.mapas2 h3.mtit{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mag);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mapas2 h3.mtit span{color:var(--ink);text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
+.mapa svg path.clic{cursor:pointer}
+table.calor .barra.dupla{display:flex;height:12px;border-radius:4px;overflow:hidden;background:transparent;min-width:0}
+table.calor .barra.dupla i{display:block;height:100%;background:var(--mag)} table.calor .barra.dupla i+i{background:var(--sun)}
+table.calor a[data-ufdet]{color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+table.ufdet tr.rede td{background:var(--mag-soft);font-weight:600}
+table.ufdet tr.proj td.l{padding-left:22px}
 .mapa{position:relative}
 .mapa svg{width:100%;height:auto;display:block}
 .mapa path{transition:opacity .12s}
@@ -1063,9 +1071,10 @@ function viewFaturamento(){
   const todos = vendas();
   const anosCom = [...new Set(todos.map(v=>v.anoCom).filter(Boolean))].sort();
   if(!S.mAnoCom) S.mAnoCom = anosCom[anosCom.length-1] || new Date().getFullYear();
-  const filtra = ac => todos.filter(v=>v.anoCom===ac && v.projeto!==ACERVO
+  const TODOS = S.mAnoCom==='todos';
+  const filtra = ac => todos.filter(v=>(ac==='todos'||v.anoCom===ac) && v.projeto!==ACERVO
     &&(!S.mUF||v.uf===S.mUF)&&(!S.mReg||v.regiao===S.mReg)&&(!S.mRede||v.rede===S.mRede)&&(!S.mProj||v.projeto===S.mProj));
-  const f = filtra(+S.mAnoCom);
+  const f = filtra(TODOS? 'todos' : +S.mAnoCom);
   const money = S.mMed==='valor', pessoas = S.mMed==='pessoas';
   // pessoas: alunos atendidos (kits de aluno × unidades por kit) + um professor por kit de professor,
   // como nas abas RESULTADOS da planilha
@@ -1073,30 +1082,33 @@ function viewFaturamento(){
     : pessoas? ((v.kitsAluno||0)*multDe(v.projeto) + (v.kitsProf||0))
     : ((v.kitsAluno||0)+(v.kitsProf||0));
   const projs = [...new Set(f.map(v=>v.projeto))].sort();
-  const mat={}; projs.forEach(p=>mat[p]=Array(12).fill(0));
-  f.forEach(v=>{ const i=COM.indexOf(v.mes-1); if(i>=0) mat[v.projeto][i]+=med(v); });
-  const rot = COM.map(i=>MES[i]);
-  const tot = Array(12).fill(0); projs.forEach(p=>mat[p].forEach((x,i)=>tot[i]+=x));
+  // um ano: colunas = meses (ago a jul); todos os anos: colunas = anos comerciais
+  const NC = TODOS? anosCom.length : 12;
+  const col = v => TODOS? anosCom.indexOf(v.anoCom) : COM.indexOf(v.mes-1);
+  const mat={}; projs.forEach(p=>mat[p]=Array(NC).fill(0));
+  f.forEach(v=>{ const i=col(v); if(i>=0) mat[v.projeto][i]+=med(v); });
+  const rot = TODOS? anosCom.map(rotCom) : COM.map(i=>MES[i]);
+  const tot = Array(NC).fill(0); projs.forEach(p=>mat[p].forEach((x,i)=>tot[i]+=x));
   const geral = tot.reduce((a,b)=>a+b,0);
   const n = x => x? (money? curto(x) : fmt(x)) : '<span style="color:var(--muted)">·</span>';
   let corpo = projs.map(p=>{const t=mat[p].reduce((x,y)=>x+y,0);
     return `<tr><td class="l" title="${esc(p)}"><span class="sw" style="background:${corDe(p)}"></span>${esc(short(p))}</td>${mat[p].map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+(pessoas?' pessoas':' kits')} em ${rot[i]}">${n(x)}</td>`).join('')}<td><b>${fmt(t)}</b></td></tr>`;}).join('');
   corpo += `<tr class="tot"><td class="l">Total</td>${tot.map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+(pessoas?' pessoas':' kits')} em ${rot[i]}">${n(x)}</td>`).join('')}<td title="${money?BRLf(geral):''}">${fmt(geral)}</td></tr>`;
   // os quadros do topo não dependem do botão Valores/Kits/Alunos: sempre faturamento, kits, pedidos e redes
-  const ant = filtra(+S.mAnoCom-1);
+  const ant = TODOS? [] : filtra(+S.mAnoCom-1);
   const fat = f.reduce((s,v)=>s+(v.valor||0),0), fatAnt = ant.reduce((s,v)=>s+(v.valor||0),0);
   const varia = fatAnt? (fat-fatAnt)/fatAnt*100 : null;
   const redes = [...new Set(todos.filter(v=>!S.mUF||v.uf===S.mUF).map(v=>v.rede).filter(Boolean))].sort();
   let h = `<div class="kpis cinco">
-    <div class="kpi"><div class="l">Faturamento ${rotCom(+S.mAnoCom)}</div><div class="v" title="${BRLf(fat)}">${BRL(fat)}</div>
-      <div class="d">${varia==null?'sem base no ano anterior':`<span style="color:${varia>=0?'var(--ok)':'var(--bad)'};font-weight:600">${varia>=0?'▲':'▼'} ${dec(Math.abs(varia))}%</span> sobre ${rotCom(+S.mAnoCom-1)}`}</div></div>
+    <div class="kpi"><div class="l">Faturamento ${TODOS?'— todos os anos':rotCom(+S.mAnoCom)}</div><div class="v" title="${BRLf(fat)}">${BRL(fat)}</div>
+      <div class="d">${TODOS? `${anosCom.length} anos comerciais, de ${rotCom(anosCom[0])} a ${rotCom(anosCom[anosCom.length-1])}` : varia==null?'sem base no ano anterior':`<span style="color:${varia>=0?'var(--ok)':'var(--bad)'};font-weight:600">${varia>=0?'▲':'▼'} ${dec(Math.abs(varia))}%</span> sobre ${rotCom(+S.mAnoCom-1)}`}</div></div>
     <div class="kpi"><div class="l">Kits de aluno</div><div class="v">${fmt(f.reduce((s,v)=>s+(v.kitsAluno||0),0))}</div></div>
     <div class="kpi"><div class="l">Alunos</div><div class="v">${fmt(f.reduce((s,v)=>s+(v.kitsAluno||0)*multDe(v.projeto),0))}</div><div class="d">kits × alunos por kit</div></div>
     <div class="kpi"><div class="l">Kits de professor</div><div class="v">${fmt(f.reduce((s,v)=>s+(v.kitsProf||0),0))}</div></div>
     <div class="kpi"><div class="l">Pedidos</div><div class="v">${fmt(f.length)}</div></div>
     <div class="kpi"><div class="l">Redes atendidas</div><div class="v">${fmt(new Set(f.map(v=>v.rede+'|'+v.uf)).size)}</div></div></div>`;
   h += `<div class="card"><div class="filters">
-      <label class="f"><span>Ano comercial</span><select id="mano">${anosCom.slice().reverse().map(a=>`<option value="${a}"${+S.mAnoCom===a?' selected':''}>${rotCom(a)}</option>`).join('')}</select></label>
+      <label class="f"><span>Ano comercial</span><select id="mano"><option value="todos"${TODOS?' selected':''}>Todos os anos</option>${anosCom.slice().reverse().map(a=>`<option value="${a}"${+S.mAnoCom===a?' selected':''}>${rotCom(a)}</option>`).join('')}</select></label>
       <label class="f"><span>Região</span><select id="mreg"><option value="">Todas</option>${REGIOES().map(r=>`<option value="${esc(r)}"${S.mReg===r?' selected':''}>${esc(short(r))}</option>`).join('')}</select></label>
       <label class="f"><span>UF</span><select id="muf"><option value="">Todas</option>${UFS().map(u=>`<option${S.mUF===u?' selected':''}>${u}</option>`).join('')}</select></label>
       <label class="f" style="min-width:200px"><span>Rede de ensino</span><select id="mrede"><option value="">Todas</option>${redes.map(r=>`<option value="${esc(r)}"${S.mRede===r?' selected':''}>${esc(r)}</option>`).join('')}</select></label>
@@ -1109,18 +1121,19 @@ function viewFaturamento(){
     <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.'
       : pessoas?'Alunos atendidos (kits de aluno × unidades por kit) mais um professor por kit de professor, como nas abas RESULTADOS da planilha.'
       :'Kits de aluno e de professor somados.'} Ano comercial de agosto a julho. O acervo literário tem aba própria e fica fora desta tabela.</p></div>`;
-  h += caixa('g-fat','baixa','Mês a mês do ano comercial',
-    money?'Faturamento por projeto, de agosto a julho':pessoas?'Alunos e professores por projeto, de agosto a julho':'Kits por projeto, de agosto a julho');
-  h += mapaCalor(f, money);
+  const quem = money?'Faturamento':pessoas?'Alunos e professores':'Kits';
+  h += TODOS? caixa('g-fat','baixa','Ano a ano', quem+' por projeto em cada ano comercial (agosto a julho)')
+    : caixa('g-fat','baixa','Mês a mês do ano comercial', quem+' por projeto, de agosto a julho');
+  h += mapaCalor(f, money, med, TODOS);
   $('#main').innerHTML = h;
   liga('#mano','mAnoCom'); liga('#mreg','mReg'); liga('#muf','mUF'); liga('#mrede','mRede'); liga('#mproj','mProj');
   $$('[data-mmed]').forEach(b=>b.onclick=()=>{S.mMed=b.dataset.mmed; render();});
   const grupos=[...ORDEM,'Outros'];
-  const sets=grupos.map(g=>{const d=Array(12).fill(0);
+  const sets=grupos.map(g=>{const d=Array(NC).fill(0);
     projs.forEach(p=>{ if(grupoDe(p)===g) mat[p].forEach((x,i)=>d[i]+=x); });
     return {label:short(g),data:d,color:g==='Outros'?css('--muted'):corDe(g)};}).filter(s=>s.data.some(x=>x));
   grafico('g-fat',{kind:'vbar',stacked:true,money,labels:rot,sets});
-  ligaMapa(money);
+  ligaMapa(money, f, TODOS);
 }
 /* ---- mapa de calor por estado ---- */
 const MAPA = JSON.parse(document.getElementById('mapa').textContent);
@@ -1132,84 +1145,110 @@ function faixas(vals){                       // 5 faixas por quantil
   return c;
 }
 const faixaDe = (x,c) => { let k=0; while(k<c.length && x>c[k]) k++; return k; };
-function mapaCalor(f, money){
-  const med = v => money? (v.valor||0) : ((v.kitsAluno||0)+(v.kitsProf||0));
-  const m = new Map(); f.forEach(v=>{ if(v.uf && MAPA.ufs[v.uf]) m.set(v.uf,(m.get(v.uf)||0)+med(v)); });
-  const comValor = [...m.values()].filter(x=>x>0);
-  if(!comValor.length) return '';
-  const cortes = faixas(comValor), rampa = escuro()? RAMPA.escuro : RAMPA.claro;
+const ESTADUAL = v => v.rede==='_ESTADO';
+function svgMapa(id, m, cortes, rampa, rotulo){
   const neutro = css('--muted'), fundo = css('--panel');
-  const traco = escuro()? 'rgba(241,233,238,.55)' : 'rgba(42,34,48,.55)';   // contorno dos estados
-  const tintaRot = 'rgba(255,255,255,.95)';
-  const tintaRotClara = escuro()? 'rgba(27,21,25,.82)' : 'rgba(42,34,48,.82)';
-  // estado sem venda recebe hachura, para não se confundir com a faixa mais clara
-  const defs = `<defs><pattern id="semvenda" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  const traco = escuro()? 'rgba(241,233,238,.55)' : 'rgba(42,34,48,.55)';
+  const tintaRot = 'rgba(255,255,255,.95)', tintaRotClara = escuro()? 'rgba(27,21,25,.82)' : 'rgba(42,34,48,.82)';
+  const pid = 'semvenda-'+id;
+  const defs = `<defs><pattern id="${pid}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
     <rect width="7" height="7" fill="${fundo}"/><line x1="0" y1="0" x2="0" y2="7" stroke="${neutro}" stroke-width="1.6" opacity=".45"/></pattern></defs>`;
-  const unidade = money? '' : (S.mMed==='pessoas'? ' pessoas' : ' kits');
-  const fmtV = x => money? BRLf(x) : fmt(x)+unidade;
   const caminhos = Object.entries(MAPA.ufs).map(([uf,d])=>{
     const x = m.get(uf)||0;
-    const cor = x? rampa[faixaDe(x,cortes)] : 'url(#semvenda)';
-    return `<path d="${d}" fill="${cor}" stroke="${traco}" stroke-width="1.6" stroke-linejoin="round" data-uf="${uf}" data-v="${x}"/>`;
+    return `<path d="${d}" fill="${x? rampa[faixaDe(x,cortes)] : `url(#${pid})`}" stroke="${traco}" stroke-width="1.6" stroke-linejoin="round" data-uf="${uf}" data-v="${x}"${x?' class="clic"':''}/>`;
   }).join('');
-  // sigla dentro do estado quando há espaço; os pequenos do litoral saem na lateral, com linha de chamada
   const COUBE = 72, MARGEM = 150, ESPACO = 30;
   const rot = Object.entries(MAPA.rot||{});
   const dentro = rot.filter(([,r])=>r[2] >= COUBE).map(([uf,r])=>{
-    const [cx,cy,lado] = r;
-    const x = m.get(uf)||0, faixa = x? faixaDe(x,cortes) : -1;
-    const tinta = faixa >= 3 ? tintaRot : tintaRotClara;
+    const [cx,cy,lado] = r; const x = m.get(uf)||0, faixa = x? faixaDe(x,cortes) : -1;
     const tam = Math.max(16, Math.min(30, lado*0.26));
-    return `<text x="${cx}" y="${cy+tam*0.34}" text-anchor="middle" font-size="${tam.toFixed(0)}" font-weight="600" fill="${tinta}" style="pointer-events:none">${uf}</text>`;
+    return `<text x="${cx}" y="${cy+tam*0.34}" text-anchor="middle" font-size="${tam.toFixed(0)}" font-weight="600" fill="${faixa>=3?tintaRot:tintaRotClara}" style="pointer-events:none">${uf}</text>`;
   }).join('');
-  const fora = rot.filter(([,r])=>r[2] < COUBE).sort((p,q)=>p[1][1]-q[1][1]);
-  let ultimo = -1e9;
-  const xRot = MAPA.w + 46;
-  const chamadas = fora.map(([uf,r])=>{
-    const [cx,cy] = r;
-    const y = Math.max(cy, ultimo + ESPACO); ultimo = y;
-    const tinta = css('--ink2') || css('--muted');
-    return `<g style="pointer-events:none"><path d="M${cx} ${cy} L${(cx+xRot)/2-10} ${y} L${xRot-8} ${y}" fill="none" stroke="${traco}" stroke-width="1.4"/>`
-      + `<circle cx="${cx}" cy="${cy}" r="3.2" fill="${traco}"/>`
-      + `<text x="${xRot}" y="${y+7}" font-size="21" font-weight="600" fill="${css('--ink')}">${uf}</text></g>`;
+  let ultimo = -1e9; const xRot = MAPA.w + 46;
+  const chamadas = rot.filter(([,r])=>r[2] < COUBE).sort((p,q)=>p[1][1]-q[1][1]).map(([uf,r])=>{
+    const [cx,cy] = r; const y = Math.max(cy, ultimo + ESPACO); ultimo = y;
+    return `<g style="pointer-events:none"><path d="M${cx} ${cy} L${(cx+xRot)/2-10} ${y} L${xRot-8} ${y}" fill="none" stroke="${traco}" stroke-width="1.4"/><circle cx="${cx}" cy="${cy}" r="3.2" fill="${traco}"/><text x="${xRot}" y="${y+7}" font-size="21" font-weight="600" fill="${css('--ink')}">${uf}</text></g>`;
   }).join('');
-  const siglas = dentro + chamadas;
+  return `<div class="mapa" id="${id}" data-tipo="${id==='mapa-est'?'estadual':'municipal'}"><svg viewBox="0 0 ${MAPA.w + MARGEM} ${MAPA.h}" role="img" aria-label="${esc(rotulo)}">${defs}${caminhos}${dentro}${chamadas}</svg></div>`;
+}
+function mapaCalor(f, money, med, todosAnos){
+  med = med || (v => money? (v.valor||0) : ((v.kitsAluno||0)+(v.kitsProf||0)));
+  const mMun = new Map(), mEst = new Map();
+  f.forEach(v=>{ if(!v.uf || !MAPA.ufs[v.uf]) return; const m = ESTADUAL(v)? mEst : mMun; m.set(v.uf,(m.get(v.uf)||0)+med(v)); });
+  const valores = [...mMun.values(), ...mEst.values()].filter(x=>x>0);
+  if(!valores.length) return '';
+  const cortes = faixas(valores), rampa = escuro()? RAMPA.escuro : RAMPA.claro;   // mesma escala nos dois mapas
+  const unidade = money? '' : (S.mMed==='pessoas'? ' pessoas' : ' kits');
+  const vv = x => money? BRLf(x) : fmt(x)+unidade;
+  const soma = m => [...m.values()].reduce((a,b)=>a+b,0);
   const curtoV = x => money? BRL(x) : fmt(x);
-  const rotulos = ['até '+curtoV(cortes[0])]
-    .concat(cortes.slice(1).map((c,i)=>curtoV(cortes[i])+' a '+curtoV(c)))
-    .concat(['acima de '+curtoV(cortes[cortes.length-1])]);
-  const legenda = rampa.map((c,i)=>`<span><span class="sw" style="background:${c}"></span>${esc(rotulos[i])}</span>`).join('')
-    + `<span><span class="sw hachura"></span>sem vendas</span>`;
-  const lista = [...m.entries()].filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
-  const max = lista.length? lista[0][1] : 1;
-  const linhas = lista.map(([uf,x])=>`<tr><td class="l"><b>${uf}</b> <span class="tag">${esc(short(regiaoDe(uf)))}</span></td>
-    <td style="width:45%"><span class="barra" style="width:${Math.max(2,x/max*100)}%;background:${rampa[faixaDe(x,cortes)]}"></span></td>
-    <td>${money?BRLf(x):fmt(x)}</td></tr>`).join('');
-  return `<div class="card"><h2>Por estado</h2><p class="sub">${money?'Faturamento':S.mMed==='pessoas'?'Alunos e professores':'Kits'} do ano comercial selecionado, em cinco faixas de intensidade</p>
-    <div class="grid">
-      <div class="c6"><div class="mapa" id="mapa-br"><svg viewBox="0 0 ${MAPA.w + MARGEM} ${MAPA.h}" role="img" aria-label="Mapa do Brasil por estado">${defs}${caminhos}${siglas}</svg></div>
-        <div class="legend">${legenda}</div>
-        <p class="note" style="margin-top:8px">Mapa: simplemaps.com (CC BY 4.0)</p></div>
-      <div class="c6"><div class="tw" style="max-height:420px"><table class="calor"><tbody>${linhas}</tbody></table></div></div>
-    </div></div>`;
+  const rotulos = ['até '+curtoV(cortes[0])].concat(cortes.slice(1).map((c,i)=>curtoV(cortes[i])+' a '+curtoV(c))).concat(['acima de '+curtoV(cortes[cortes.length-1])]);
+  const legenda = rampa.map((c,i)=>`<span><span class="sw" style="background:${c}"></span>${esc(rotulos[i])}</span>`).join('') + `<span><span class="sw hachura"></span>sem vendas</span>`;
+  const ufs = [...new Set([...mMun.keys(), ...mEst.keys()])].map(uf=>({uf, mun:mMun.get(uf)||0, est:mEst.get(uf)||0})).map(o=>({...o,t:o.mun+o.est})).filter(o=>o.t>0).sort((a,b)=>b.t-a.t);
+  const max = ufs.length? ufs[0].t : 1;
+  const cel = (uf,x,tipo) => x? `<a href="#" data-ufdet="${uf}" data-tipo="${tipo}">${vv(x)}</a>` : '<span style="color:var(--muted)">—</span>';
+  const linhas = ufs.map(o=>`<tr><td class="l"><b>${o.uf}</b> <span class="tag">${esc(short(regiaoDe(o.uf)))}</span></td>
+    <td>${cel(o.uf,o.mun,'municipal')}</td><td>${cel(o.uf,o.est,'estadual')}</td>
+    <td style="width:28%"><span class="barra dupla"><i style="width:${(o.mun/max*100).toFixed(1)}%"></i><i style="width:${(o.est/max*100).toFixed(1)}%"></i></span></td>
+    <td><b>${vv(o.t)}</b></td></tr>`).join('');
+  return `<div class="card"><h2>Por estado</h2><p class="sub">${money?'Faturamento':S.mMed==='pessoas'?'Alunos e professores':'Kits'} ${todosAnos?'de todos os anos':'do ano comercial selecionado'}, separado entre redes municipais e redes estaduais. Clique num estado para ver as redes e os projetos.</p>
+    <div class="grid mapas2">
+      <div class="c6"><h3 class="mtit">Redes municipais <span>${vv(soma(mMun))}</span></h3>${svgMapa('mapa-mun', mMun, cortes, rampa, 'Vendas a redes municipais por estado')}</div>
+      <div class="c6"><h3 class="mtit">Redes estaduais <span>${vv(soma(mEst))}</span></h3>${svgMapa('mapa-est', mEst, cortes, rampa, 'Vendas a redes estaduais por estado')}</div>
+    </div>
+    <div class="legend">${legenda}</div>
+    <div class="tw" style="max-height:420px;margin-top:12px"><table class="calor"><thead><tr><th class="l">Estado</th><th><span class="sw" style="background:var(--mag)"></span>Municipais</th><th><span class="sw" style="background:var(--sun)"></span>Estaduais</th><th></th><th>Total</th></tr></thead><tbody>${linhas}</tbody></table></div>
+    <p class="note" style="margin-top:8px">Redes municipais incluem também escolas e instituições privadas; estaduais são as vendas às secretarias de Estado. Mapa: simplemaps.com (CC BY 4.0)</p></div>`;
 }
-function ligaMapa(money){
-  const cx = $('#mapa-br'); if(!cx) return;
-  const tip = document.createElement('div'); tip.className='tip'; tip.hidden=true; cx.appendChild(tip);
-  const svg = cx.querySelector('svg');
-  svg.addEventListener('pointermove', e=>{
-    const alvo = e.target.closest('path');
-    if(!alvo){ tip.hidden=true; return; }
-    const uf = alvo.dataset.uf, v = +alvo.dataset.v;
-    const r = cx.getBoundingClientRect();
-    const un = money? '' : (S.mMed==='pessoas'? ' pessoas' : ' kits');
-    tip.innerHTML = `<b>${esc(uf)}</b> · ${esc(short(regiaoDe(uf)))}<div>${v? (money?BRLf(v):fmt(v)+un) : 'sem vendas no período'}</div>`;
-    tip.hidden=false;
-    tip.style.left = Math.min(Math.max(e.clientX-r.left+14,4), r.width-tip.offsetWidth-4)+'px';
-    tip.style.top  = Math.min(Math.max(e.clientY-r.top-tip.offsetHeight-10,4), r.height-tip.offsetHeight-4)+'px';
+function janelaUF(uf, tipo, f, todosAnos){
+  const lista = f.filter(v=>v.uf===uf && (tipo==='estadual'? ESTADUAL(v) : !ESTADUAL(v)));
+  if(!lista.length) return;
+  const nomeRede = v => v.rede==='_ESTADO'? 'Secretaria de Estado ('+uf+')' : v.rede;
+  const redes = new Map();
+  lista.forEach(v=>{ const k=nomeRede(v); if(!redes.has(k)) redes.set(k,new Map()); const pm=redes.get(k);
+    const o=pm.get(v.projeto)||{ped:0,ka:0,kp:0,val:0}; o.ped++; o.ka+=v.kitsAluno||0; o.kp+=v.kitsProf||0; o.val+=v.valor||0; pm.set(v.projeto,o); });
+  const soma = arr => arr.reduce((a,o)=>({ped:a.ped+o.ped,ka:a.ka+o.ka,kp:a.kp+o.kp,val:a.val+o.val}),{ped:0,ka:0,kp:0,val:0});
+  const ord = [...redes.entries()].map(([r,pm])=>({r, pm:[...pm.entries()].sort((a,b)=>b[1].val-a[1].val), t:soma([...pm.values()])})).sort((a,b)=>b.t.val-a.t.val);
+  const T = soma(ord.map(o=>o.t));
+  const linha = (rot,o,cls) => `<tr class="${cls||''}"><td class="l">${rot}</td><td>${fmt(o.ped)}</td><td>${fmt(o.ka)}</td><td>${fmt(o.kp)}</td><td>${BRLf(o.val)}</td></tr>`;
+  const corpo = ord.map(o=> linha(`<b>${esc(o.r)}</b>`, o.t, 'rede') + o.pm.map(([p,x])=>linha(`<span class="sw" style="background:${corDe(p)}"></span>${esc(short(p))}`, x, 'proj')).join('')).join('')
+    + linha('Total', T, 'tot');
+  const projs = new Map(); lista.forEach(v=>projs.set(v.projeto,(projs.get(v.projeto)||0)+(v.valor||0)));
+  const periodo = todosAnos? 'todos os anos' : 'ano comercial '+rotCom(+S.mAnoCom);
+  abreJanela(`<h2>${esc(nomeEstado(uf))} <span class="tag">${uf}</span></h2><p class="sub">Vendas ${tipo==='estadual'?'estaduais':'municipais'} · ${periodo}</p>
+    <div class="mk">
+      <div class="hl"><span>Faturamento</span><b>${BRLf(T.val)}</b><small>${fmt(T.ped)} pedidos</small></div>
+      <div><span>Redes</span><b>${fmt(ord.length)}</b><small>${tipo==='estadual'?'secretaria estadual':'municípios e escolas'}</small></div>
+      <div><span>Kits de aluno</span><b>${fmt(T.ka)}</b><small>${fmt(lista.reduce((s,v)=>s+(v.kitsAluno||0)*multDe(v.projeto),0))} alunos</small></div>
+      <div><span>Kits de professor</span><b>${fmt(T.kp)}</b><small>${fmt(projs.size)} ${projs.size===1?'projeto':'projetos'}</small></div>
+    </div>
+    <h3>Redes e projetos</h3>
+    <div class="tw" style="max-height:60vh"><table class="miuda ufdet"><thead><tr><th class="l">Rede / projeto</th><th>Pedidos</th><th>Kits aluno</th><th>Kits prof.</th><th>Valor</th></tr></thead><tbody>${corpo}</tbody></table></div>
+    <p class="note" style="margin-top:8px">Respeita os filtros de região, rede e projeto da aba. Acervo literário fica de fora.</p>`, true);
+}
+function ligaMapa(money, f, todosAnos){
+  const un = money? '' : (S.mMed==='pessoas'? ' pessoas' : ' kits');
+  ['mapa-mun','mapa-est'].forEach(id=>{
+    const cx = $('#'+id); if(!cx) return;
+    const tipo = cx.dataset.tipo;
+    const tip = document.createElement('div'); tip.className='tip'; tip.hidden=true; cx.appendChild(tip);
+    const svg = cx.querySelector('svg');
+    svg.addEventListener('pointermove', e=>{
+      const alvo = e.target.closest('path[data-uf]');
+      if(!alvo){ tip.hidden=true; return; }
+      const uf = alvo.dataset.uf, v = +alvo.dataset.v, r = cx.getBoundingClientRect();
+      tip.innerHTML = `<b>${esc(uf)}</b> · ${tipo==='estadual'?'rede estadual':'redes municipais'}<div>${v? (money?BRLf(v):fmt(v)+un)+'<br><span class="note">clique para ver redes e projetos</span>' : 'sem vendas no período'}</div>`;
+      tip.hidden=false;
+      tip.style.left = Math.min(Math.max(e.clientX-r.left+14,4), r.width-tip.offsetWidth-4)+'px';
+      tip.style.top  = Math.min(Math.max(e.clientY-r.top-tip.offsetHeight-10,4), r.height-tip.offsetHeight-4)+'px';
+    });
+    svg.addEventListener('pointerleave', ()=>{ tip.hidden=true; });
+    svg.addEventListener('click', e=>{ const alvo=e.target.closest('path[data-uf]'); if(alvo && +alvo.dataset.v){ tip.hidden=true; janelaUF(alvo.dataset.uf, tipo, f, todosAnos); } });
   });
-  svg.addEventListener('pointerleave', ()=>{ tip.hidden=true; });
+  $$('[data-ufdet]').forEach(a=>a.onclick=ev=>{ ev.preventDefault(); janelaUF(a.dataset.ufdet, a.dataset.tipo, f, todosAnos); });
 }
+const NOMEUF={AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
+const nomeEstado = uf => NOMEUF[uf]||uf;
 
 /* ---------------- aba: acervo literário ---------------- */
 function viewAcervo(){
