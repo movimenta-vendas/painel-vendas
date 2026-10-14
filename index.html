@@ -33,6 +33,8 @@
   --field:#1F181D; --field-line:#4D3C47; --ok:#6CC59B; --ok-forte:#8FE0B8; --warn:#F09A70; --bad:#F08A80;
   --grid:#352A31; --axis:#4A3542; --wash:rgba(208,122,170,.12); --plate:#F5EFF2; color-scheme:dark}
 *{box-sizing:border-box}
+#orc-host{padding-top:4px}
+.orc-fr{display:block;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff}
 .ms{position:relative;min-width:120px}
 .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:7px 9px;font:inherit;font-family:var(--body);color:var(--ink);background:var(--field);border:1px solid var(--field-line);border-radius:7px;cursor:pointer;text-align:left}
 .ms-btn .ms-tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
@@ -346,6 +348,7 @@ window.__VIEWER={
 </header>
 <div class="wrap"><div class="basebar" id="basebar" hidden></div></div>
 <main id="main" class="wrap"><div class="empty">Carregando…</div></main>
+<div id="orc-host" class="wrap" hidden></div>
 <footer class="credito">Desenvolvido por Dhug™</footer>
 </div>
 
@@ -405,7 +408,7 @@ const S = {tab:'faturamento',
   fq:'', fProj:'', fUF:'', fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
   eProj:'', eSoltos:false};
 const TABS = [['faturamento','Faturamento mensal'],['acervo','Acervo literário'],
-  ['vendas','Vendas'],['pagamentos','Pagamentos'],['futuras','Vendas futuras'],['estoque','Estoque'],['tabelas','Tabelas']];
+  ['vendas','Vendas'],['pagamentos','Pagamentos'],['futuras','Vendas futuras'],['orc','Orçamentos'],['estoque','Estoque'],['tabelas','Tabelas']];
 
 /* ---------------- derivados ---------------- */
 const vendas = () => BASE.vendas;
@@ -1025,12 +1028,13 @@ async function publicarBase(){
   await kv('put','pub-cfg',cfg); bt.disabled=true;
   try{
     const em=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',',' às');
-    const completa={em, base:BASE, est:EST||null, conc:CONC||null};
-    const geral={em, base:BASE, est:EST||null, conc:null};
+    const orc = (()=>{ const f=orcFonte(); return f&&f.gz? {gz:f.gz, fixo:orcConfig()} : null; })();
+    const completa={em, base:BASE, est:EST||null, conc:CONC||null, orc};
+    const geral={em, base:BASE, est:EST||null, conc:null, orc};
     // 1) cópia aberta na pasta-fonte
     if(PASTA.handle){
       let p=await PASTA.handle.queryPermission({mode:'readwrite'}); if(p!=='granted') p=await PASTA.handle.requestPermission({mode:'readwrite'});
-      if(p==='granted'){ const fh=await PASTA.handle.getFileHandle('base_vendas.json',{create:true}); const w=await fh.createWritable(); await w.write(JSON.stringify(completa)); await w.close(); passo('base_vendas.json gravado na pasta '+PASTA.nome+'.','ok'); }
+      if(p==='granted'){ const fh=await PASTA.handle.getFileHandle('base_vendas.json',{create:true}); const w=await fh.createWritable(); await w.write(JSON.stringify(Object.assign({},completa,{orc:undefined}))); await w.close(); passo('base_vendas.json gravado na pasta '+PASTA.nome+'.','ok'); }
       else passo('Sem permissão de escrita na pasta '+PASTA.nome+': a cópia local não foi gravada.','warn');
     } else passo('Pasta-fonte não escolhida: a cópia local não foi gravada.','warn');
     // 2) página de visualização
@@ -2197,7 +2201,32 @@ function painelAcoes(aberto,naoId,extratos){
 }
 
 /* ---------------- render ---------------- */
-const VIEWS={pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
+const VIEWS={orc:()=>{},pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
+/* ---------------- aba: orçamentos (gerador embutido numa moldura) ----------------
+   A moldura é criada uma vez e fica viva enquanto o app estiver aberto: trocar de aba
+   ou de tema não perde o orçamento em andamento. Histórico fica no navegador de cada um. */
+let ORC_FR=null;
+async function gunzipB64(b64){ const u=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
+function orcFonte(){ if(window.__SNAP) return window.__SNAP.orc||null;
+  const e=document.getElementById('orc-src'); return e? {gz:e.textContent.trim(), fixo:null} : null; }
+function orcConfig(){ const ls=k=>{ try{ return JSON.parse(localStorage.getItem('orcmov.'+k)); }catch(e){ return null; } };
+  return {conds:ls('conds'), prices:ls('prices'), pricesMeta:ls('pricesMeta')}; }
+async function montaOrc(host){
+  const src=orcFonte();
+  if(!src||!src.gz){ host.innerHTML='<div class="card"><div class="empty">Os orçamentos chegam junto com a próxima publicação da base.</div></div>'; return; }
+  host.innerHTML='<div class="card"><div class="empty">Carregando orçamentos…</div></div>';
+  try{
+    let html=await gunzipB64(src.gz);
+    const modo=src.fixo? 'viewer' : 'admin';
+    const inj='<script>window.ORC_MODO='+JSON.stringify(modo)+';'+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
+    html=html.replace(/<head[^>]*>/i, m=>m+inj);
+    const fr=document.createElement('iframe'); fr.className='orc-fr'; fr.title='Orçamentos'; fr.setAttribute('allow','clipboard-write');
+    fr.srcdoc=html; host.innerHTML=''; host.appendChild(fr); ORC_FR=fr; orcAltura();
+  }catch(e){ host.innerHTML='<div class="card"><div class="empty">Não foi possível abrir os orçamentos neste navegador ('+esc(e.message)+'). Use o Chrome, o Edge ou o Safari atualizado.</div></div>'; }
+}
+function orcAltura(){ if(!ORC_FR) return; const h=$('header.top'); ORC_FR.style.height=Math.max(420, innerHeight-(h?h.offsetHeight:0)-14)+'px'; }
+addEventListener('resize',orcAltura);
 function abas(){
   $('#tabs').innerHTML = TABS.map(([k,l])=>`<button role="tab" type="button" data-t="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('');
   $$('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;
@@ -2210,6 +2239,8 @@ function cabecalho(){
 }
 function render(){
   matar(); abas(); cabecalho(); barraBase();
+  const naOrc = S.tab==='orc'; $('#orc-host').hidden=!naOrc; $('#main').hidden=naOrc;
+  if(naOrc){ if(!ORC_FR){ if(!montaOrc.rodando){ montaOrc.rodando=true; montaOrc($('#orc-host')).finally(()=>{montaOrc.rodando=false;}); } } else orcAltura(); return; }
   if(!pronto){
     $('#main').innerHTML = `<div class="card"><div class="empty">${ARQ.lendo? 'Lendo a planilha…' :
       'Clique em <b>Escolher planilha</b> acima e aponte o arquivo CONTROLE - VENDAS.xlsx. O app lê os números e se atualiza sempre que você salvar a planilha.'}</div></div>`;
