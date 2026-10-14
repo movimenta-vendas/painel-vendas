@@ -33,6 +33,19 @@
   --field:#1F181D; --field-line:#4D3C47; --ok:#6CC59B; --ok-forte:#8FE0B8; --warn:#F09A70; --bad:#F08A80;
   --grid:#352A31; --axis:#4A3542; --wash:rgba(208,122,170,.12); --plate:#F5EFF2; color-scheme:dark}
 *{box-sizing:border-box}
+.ms{position:relative;min-width:120px}
+.ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:7px 9px;font:inherit;font-family:var(--body);color:var(--ink);background:var(--field);border:1px solid var(--field-line);border-radius:7px;cursor:pointer;text-align:left}
+.ms-btn .ms-tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.ms-btn svg{width:12px;height:12px;flex:none;color:var(--muted)}
+.ms-btn.ativo{border-color:var(--mag);box-shadow:inset 0 0 0 1px var(--mag)}
+.ms-pop{position:absolute;top:100%;left:0;margin-top:4px;z-index:35;min-width:230px;max-width:min(340px,90vw);background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(42,34,48,.16);padding:6px}
+.ms-acoes{display:flex;justify-content:space-between;gap:8px;padding:4px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.ms-acoes button{background:none;border:0;padding:2px 0;font:600 12.5px var(--body);color:var(--mag);cursor:pointer}
+.ms-lista{max-height:300px;overflow:auto}
+.ms-lista label{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:6px;cursor:pointer;font-size:13.5px;text-transform:none;letter-spacing:0;color:var(--ink)}
+.ms-lista label:hover{background:var(--mag-soft)}
+.ms-lista input{width:16px;height:16px;min-height:0;margin:0;padding:0;flex:none;accent-color:var(--mag)}
+
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;padding:0 0 56px}
 h1,h2,h3,.disp{font-family:var(--disp);letter-spacing:-.01em}
 .wrap{max-width:1280px;margin:0 auto;padding-inline:16px}
@@ -175,6 +188,17 @@ table.ufdet tr.proj td.l{padding-left:22px}
 .modal-bg{position:fixed;inset:0;z-index:60;background:rgba(30,15,25,.48);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto}
 .modal{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 48px rgba(0,0,0,.28);width:min(860px,100%);padding:20px 22px 22px}
 .modal.larga{width:min(1120px,100%)}
+.pdf-bg{padding:2vh 16px;align-items:center}
+.modal.pdfjan{width:min(1100px,100%);height:94vh;display:flex;flex-direction:column;padding:14px 16px 16px}
+.pdfcab{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.pdftit h2{margin:0;font-size:18px;color:var(--mag)}
+.pdftit .sub{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.pdfbtn{display:flex;gap:8px}
+.pdfbtn .btn{display:inline-flex;align-items:center;gap:6px}
+.pdfbtn svg{width:16px;height:16px}
+.pdfvis{flex:1;width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+@media (max-width:560px){.pdfbtn .btn span{display:none}}
+
 .mk .pill{display:inline-block;width:auto}
 .aviso{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:9px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
 .jcab{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin:-2px 0 16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
@@ -377,7 +401,7 @@ const S = {tab:'faturamento',
   mAnoCom:0, mUF:'', mReg:'', mRede:'', mProj:'', mMed:'valor',
   aAno:0, aUF:'', aReg:'', aVia:'', aOp:'VENDA', aMed:'kits', aEsc:'linear',
   sAno:0, sProj:'', sUF:'', sReg:'', sOp:'VENDA', sPub:'aluno', sEixo:'projeto',
-  vq:'', vAno:'', vProj:'', vUF:'', vOp:'VENDA', vLim:60, vDet:'',
+  vq:'', vAno:[], vProj:[], vUF:[], vOp:'VENDA', vLim:60, vDet:'',
   fq:'', fProj:'', fUF:'', fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
   eProj:'', eSoltos:false};
 const TABS = [['faturamento','Faturamento mensal'],['acervo','Acervo literário'],
@@ -1382,7 +1406,7 @@ function viewSeries(){
 
 /* ---------------- aba: vendas ---------------- */
 function vendasFiltradas(){
-  let r = vendas().filter(v=>(!S.vAno||v.ano===+S.vAno)&&(!S.vProj||v.projeto===S.vProj)&&(!S.vUF||v.uf===S.vUF)&&(!S.vOp||v.operacao===S.vOp));
+  let r = vendas().filter(v=>(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(!S.vOp||v.operacao===S.vOp));
   if(S.vq){const q=S.vq.toLowerCase(); r=r.filter(v=>[v.rede,v.uf,v.via,v.pedido,v.nf,v.projeto].join(' ').toLowerCase().includes(q));}
   return r.sort((a,b)=>String(b.emissao||'').localeCompare(String(a.emissao||'')));
 }
@@ -1505,7 +1529,7 @@ async function imprimeJanela(modo){
     aviso(modo==='copiar'? 'Não deu para copiar; a imagem foi baixada como '+nome+'.' : 'Imagem salva em Downloads: '+nome);
   }catch(e){ aviso('Não foi possível gerar a imagem: '+e.message); }
 }
-function fechaJanela(){ const j=document.getElementById('janela'); if(j) j.remove(); document.body.classList.remove('modal-on'); }
+function fechaJanela(){ const j=document.getElementById('janela'); if(j) j.remove(); document.body.classList.remove('modal-on'); if(typeof PDF_URL!=='undefined' && PDF_URL){ const u=PDF_URL; PDF_URL=''; setTimeout(()=>URL.revokeObjectURL(u),60000); } }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') fechaJanela(); });
 const campo=(l,v)=>`<div><span>${l}</span><b>${v||v===0? v : '—'}</b></div>`;
 function tabelaSeriesJanela(v){
@@ -1623,9 +1647,9 @@ function viewVendas(){
     <div class="kpi"><div class="l">Faturamento</div><div class="v">${BRL(r.reduce((s,v)=>s+(v.valor||0),0))}</div></div></div>`;
   h += `<div class="card"><div class="row" style="margin-bottom:12px">
       <label class="f grow"><span>Buscar</span><input type="search" id="vq" value="${esc(S.vq)}" placeholder="Rede, UF, pedido, NF ou projeto"></label>
-      <label class="f"><span>Ano</span><select id="vano"><option value="">Todos</option>${anos.map(a=>`<option${+S.vAno===a?' selected':''}>${a}</option>`).join('')}</select></label>
-      <label class="f"><span>Projeto</span><select id="vproj"><option value="">Todos</option>${projetos().map(p=>`<option value="${esc(p)}"${S.vProj===p?' selected':''}>${esc(short(p))}</option>`).join('')}</select></label>
-      <label class="f"><span>UF</span><select id="vuf"><option value="">Todas</option>${UFS().map(u=>`<option${S.vUF===u?' selected':''}>${u}</option>`).join('')}</select></label>
+      ${multi('ms-ano','Ano',anos.map(a=>[String(a),String(a)]),S.vAno,'Todos','anos',4)}
+      ${multi('ms-proj','Projeto',projetos().map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)}
+      ${multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)}
       <label class="f"><span>Operação</span><select id="vop"><option value="">Todas</option>${BASE.operacoes.map(o=>`<option${S.vOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>
       <button class="btn" id="csv" type="button">Baixar CSV</button></div>`;
   h += r.length? `<div class="tw" style="max-height:640px"><table><thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th class="l">Operação</th><th>Kits aluno</th><th>Kits prof.</th><th>Valor</th><th class="l">NF</th><th></th></tr></thead><tbody>`+
@@ -1638,7 +1662,7 @@ function viewVendas(){
     : '<div class="empty">Nenhuma venda neste filtro.</div>';
   h += '</div>';
   $('#main').innerHTML = h;
-  liga('#vq','vq',true); liga('#vano','vAno'); liga('#vproj','vProj'); liga('#vuf','vUF'); liga('#vop','vOp');
+  liga('#vq','vq',true); ligaMulti('ms-ano','vAno'); ligaMulti('ms-proj','vProj'); ligaMulti('ms-uf','vUF'); liga('#vop','vOp');
   $$('[data-det]').forEach(b=>b.onclick=()=>{ const v=r.find(x=>x.id===b.dataset.det); if(v) janelaVenda(v); });
   const m=$('#mais'); if(m) m.onclick=()=>{S.vLim+=100; viewVendas();};
   $('#csv').onclick=()=>baixarCsv(r);
@@ -1880,6 +1904,32 @@ function viewTabelas(){
 }
 
 /* ---------------- utilidades de tela ---------------- */
+/* seleção múltipla: lista vazia = todos */
+function multi(id, rotulo, opcoes, sel, todosTxt, plural, juntaAte){
+  const n = sel.length, nome = v => (opcoes.find(o=>o[0]===v)||[v,v])[1];
+  const txt = !n? todosTxt : n<=juntaAte? sel.map(nome).join(', ') : `${n} ${plural}`;
+  const aberto = S._msAberto===id;
+  return `<div class="f ms" id="${id}"><span>${rotulo}</span>
+    <button type="button" class="ms-btn${n?' ativo':''}" aria-haspopup="true" aria-expanded="${aberto}" title="${esc(n?sel.map(nome).join(', '):todosTxt)}"><span class="ms-tx">${esc(txt)}</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="ms-pop"${aberto?'':' hidden'}><div class="ms-acoes"><button type="button" data-ms-todos>Ver ${todosTxt.toLowerCase()}</button><button type="button" data-ms-fecha>Fechar</button></div>
+    <div class="ms-lista">${opcoes.map(([v,t])=>`<label><input type="checkbox" value="${esc(v)}"${sel.includes(v)?' checked':''}><span>${esc(t)}</span></label>`).join('')}</div></div></div>`;
+}
+function ligaMulti(id, chave){
+  const cx = $('#'+id); if(!cx) return;
+  const pop = $('.ms-pop',cx), btn = $('.ms-btn',cx);
+  const fecha = ()=>{ S._msAberto=''; pop.hidden=true; btn.setAttribute('aria-expanded','false'); };
+  btn.onclick = e=>{ e.stopPropagation(); const abrir = pop.hidden;
+    $$('.ms-pop').forEach(p=>p.hidden=true); $$('.ms-btn').forEach(b=>b.setAttribute('aria-expanded','false'));
+    if(abrir){ S._msAberto=id; pop.hidden=false; btn.setAttribute('aria-expanded','true'); } else S._msAberto=''; };
+  pop.onclick = e=>e.stopPropagation();
+  const aplica = ()=>{ S[chave] = $$('input[type=checkbox]:checked',pop).map(i=>i.value); S.vLim=60; S._msAberto=id;
+    const sc = $('.ms-lista',pop).scrollTop; render(); const l=$('#'+id+' .ms-lista'); if(l) l.scrollTop=sc; };
+  $$('input[type=checkbox]',pop).forEach(i=>i.onchange=aplica);
+  $('[data-ms-todos]',pop).onclick = ()=>{ $$('input[type=checkbox]',pop).forEach(i=>i.checked=false); aplica(); };
+  $('[data-ms-fecha]',pop).onclick = fecha;
+}
+document.addEventListener('click',()=>{ if(!S._msAberto) return; S._msAberto=''; $$('.ms-pop').forEach(p=>p.hidden=true); $$('.ms-btn').forEach(b=>b.setAttribute('aria-expanded','false')); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && S._msAberto){ S._msAberto=''; $$('.ms-pop').forEach(p=>p.hidden=true); } });
 function liga(sel,chave,texto){
   const e=$(sel); if(!e) return;
   if(texto){ e.oninput=()=>{S[chave]=e.value; clearTimeout(liga.t); liga.t=setTimeout(()=>{render(); const n=$(sel); if(n){n.focus(); n.setSelectionRange(n.value.length,n.value.length);}},260);}; }
@@ -1959,14 +2009,41 @@ async function arquivoDaPasta(caminho){
   for(let i=0;i<partes.length-1;i++) d = await d.getDirectoryHandle(partes[i]);
   return (await d.getFileHandle(partes[partes.length-1])).getFile();
 }
-async function abrePDF(caminho, janela){
+async function abrePDF(caminho, titulo){
   try{
     if(ARQC.estado==='aguardando'){ await autorizaConc(); }
     const f = await arquivoDaPasta(caminho);
-    const url = URL.createObjectURL(f);
-    if(janela && !janela.closed){ janela.location.href = url; } else window.open(url,'_blank');
+    janelaPDF(f, titulo||String(caminho).split('/').pop());
     return true;
-  }catch(e){ if(janela && !janela.closed) janela.close(); ARQC.erro = 'Não encontrei '+caminho+' na pasta de conciliação.'; render(); return false; }
+  }catch(e){ ARQC.erro = 'Não encontrei '+caminho+' na pasta de conciliação.'; render(); return false; }
+}
+/* janela do PDF: o documento dentro da tela, com imprimir, baixar e fechar */
+let PDF_URL='';
+function janelaPDF(arquivo, titulo){
+  fechaJanela();
+  const blob = arquivo.type==='application/pdf'? arquivo : new Blob([arquivo],{type:'application/pdf'});
+  PDF_URL = URL.createObjectURL(blob);
+  const nome = arquivo.name || (titulo+'.pdf');
+  const ic='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  const bg=document.createElement('div'); bg.className='modal-bg pdf-bg'; bg.id='janela';
+  bg.innerHTML=`<div class="modal pdfjan" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
+    <div class="pdfcab"><div class="pdftit"><h2>${esc(titulo)}</h2><p class="sub">${esc(nome)}</p></div>
+      <div class="pdfbtn">
+        <button class="btn sm" type="button" data-pdfa="imprimir" title="Imprimir o documento">${ic}<path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span>Imprimir</span></button>
+        <button class="btn sm" type="button" data-pdfa="baixar" title="Salvar o PDF na pasta Downloads">${ic}<path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/></svg><span>Baixar</span></button>
+        <button class="btn sm" type="button" data-pdfa="fechar" title="Fechar (Esc)">${ic}<path d="M6 6l12 12M18 6 6 18"/></svg><span>Fechar</span></button>
+      </div></div>
+    <iframe class="pdfvis" src="${PDF_URL}#view=FitH" title="${esc(titulo)}"></iframe></div>`;
+  document.body.appendChild(bg); document.body.classList.add('modal-on');
+  bg.onclick=e=>{ if(e.target===bg) fechaJanela(); };
+  const fr=bg.querySelector('iframe');
+  bg.querySelector('[data-pdfa="fechar"]').onclick=fechaJanela;
+  bg.querySelector('[data-pdfa="baixar"]').onclick=()=>{ const a=document.createElement('a'); a.href=PDF_URL; a.download=nome; document.body.appendChild(a); a.click(); a.remove(); };
+  bg.querySelector('[data-pdfa="imprimir"]').onclick=()=>{
+    try{ fr.contentWindow.focus(); fr.contentWindow.print(); }
+    catch(e){ const w=window.open(PDF_URL,'_blank'); if(!w) aviso('Libere as janelas pop-up deste arquivo para imprimir.'); else aviso('O PDF abriu em outra aba — use Ctrl+P lá.'); }
+  };
+  bg.querySelector('[data-pdfa="fechar"]').focus();
 }
 function copia(txt){
   const ok = ()=>{ ARQC.msg = 'Pedido copiado. Cole aqui na conversa com o Claude.'; render(); };
@@ -2083,13 +2160,13 @@ function viewPagamentos(){
   on('#p-atu', async()=>{ ARQC.msg=''; await confereMudanca(true); if(ARQC.handle&&ARQC.estado==='ok') await leConc(); ARQC.msg='Planilha relida às '+hhmm(Date.now())+'.'; render(); });
   on('#p-con', ()=>{ S_P.painel = S_P.painel==='con'?'':'con'; copia(pedidoConsulta(aberto)); });
   on('#p-pes', ()=>{ S_P.painel = S_P.painel==='pes'?'':'pes'; copia(pedidoPesquisa(naoId)); });
-  on('#p-rel', ()=>{ const w=window.open('','_blank'); abrePDF(CONC.relatorio||'Relatorio_Geral_Pagamentos.pdf', w); });
+  on('#p-rel', ()=>{ abrePDF(CONC.relatorio||'Relatorio_Geral_Pagamentos.pdf', 'Relatório geral de pagamentos'); });
   const sx=$('#p-ext'); if(sx) sx.onchange=()=>{ S_P.ext=sx.value; };
   on('#p-vex', ()=>{
-    if(S_P.ext){ const w=window.open('','_blank'); abrePDF(CONC.extratos[S_P.ext].arquivo, w); }
+    if(S_P.ext){ abrePDF(CONC.extratos[S_P.ext].arquivo, 'Extrato — '+S_P.ext); }
     else { S_P.painel='ext'; render(); }
   });
-  $$('[data-pdf]').forEach(a=>a.onclick=(e)=>{ e.preventDefault(); const w=window.open('','_blank'); abrePDF(a.dataset.pdf, w); });
+  $$('[data-pdf]').forEach(a=>a.onclick=(e)=>{ e.preventDefault(); abrePDF(a.dataset.pdf, a.dataset.tit? 'Extrato — '+a.dataset.tit : ''); });
   $$('[data-portal]').forEach(a=>a.onclick=()=>{});
   on('#p-abretodos', ()=>{ $$('[data-portal]').forEach(a=>window.open(a.href,'_blank','noopener')); });
   on('#p-fecha', ()=>{ S_P.painel=''; ARQC.msg=''; render(); });
@@ -2113,7 +2190,7 @@ function painelAcoes(aberto,naoId,extratos){
   }
   if(S_P.painel==='ext' && extratos.length){
     return `<div class="banner" style="margin:14px 0 0"><b>Extratos por credor</b> — clique para abrir cada um:
-      <ul style="margin:8px 0 4px;padding-left:18px">${extratos.map(n=>`<li><a href="#" data-pdf="${esc(CONC.extratos[n].arquivo)}">${esc(n)}</a> <span class="note">CNPJ ${esc(CONC.extratos[n].cnpj||'')}</span></li>`).join('')}</ul>
+      <ul style="margin:8px 0 4px;padding-left:18px">${extratos.map(n=>`<li><a href="#" data-pdf="${esc(CONC.extratos[n].arquivo)}" data-tit="${esc(n)}">${esc(n)}</a> <span class="note">CNPJ ${esc(CONC.extratos[n].cnpj||'')}</span></li>`).join('')}</ul>
       <div class="row" style="margin-top:6px"><button class="btn sm" id="p-fecha" type="button">Fechar</button></div></div>`;
   }
   return '';
