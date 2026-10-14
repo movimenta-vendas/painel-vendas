@@ -34,7 +34,7 @@
   --grid:#352A31; --axis:#4A3542; --wash:rgba(208,122,170,.12); --plate:#F5EFF2; color-scheme:dark}
 *{box-sizing:border-box}
 #orc-host{padding-top:4px}
-.orc-fr{display:block;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff}
+.orc-fr{display:block;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .ms{position:relative;min-width:120px}
 .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:7px 9px;font:inherit;font-family:var(--body);color:var(--ink);background:var(--field);border:1px solid var(--field-line);border-radius:7px;cursor:pointer;text-align:left}
 .ms-btn .ms-tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
@@ -2219,13 +2219,13 @@ async function montaOrc(host){
   try{
     let html=await gunzipB64(src.gz);
     const modo=src.fixo? 'viewer' : 'admin';
-    const inj='<script>window.ORC_MODO='+JSON.stringify(modo)+';'+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
+    const inj='<script>document.documentElement.setAttribute("data-theme",'+JSON.stringify(escuro()?'dark':'light')+');window.ORC_MODO='+JSON.stringify(modo)+';'+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
     html=html.replace(/<head[^>]*>/i, m=>m+inj);
     const fr=document.createElement('iframe'); fr.className='orc-fr'; fr.title='Orçamentos'; fr.setAttribute('allow','clipboard-write; web-share');
     fr.srcdoc=html; host.innerHTML=''; host.appendChild(fr); ORC_FR=fr; orcAltura();
   }catch(e){ host.innerHTML='<div class="card"><div class="empty">Não foi possível abrir os orçamentos neste navegador ('+esc(e.message)+'). Use o Chrome, o Edge ou o Safari atualizado.</div></div>'; }
 }
-function orcAltura(){ if(!ORC_FR) return; const h=$('header.top'); ORC_FR.style.height=Math.max(420, innerHeight-(h?h.offsetHeight:0)-14)+'px'; }
+function orcAltura(){ if(!ORC_FR) return; try{ const r=ORC_FR.contentDocument&&ORC_FR.contentDocument.documentElement; if(r) r.setAttribute('data-theme', escuro()?'dark':'light'); }catch(e){} const h=$('header.top'); ORC_FR.style.height=Math.max(420, innerHeight-(h?h.offsetHeight:0)-14)+'px'; }
 addEventListener('resize',orcAltura);
 function abas(){
   $('#tabs').innerHTML = TABS.map(([k,l])=>`<button role="tab" type="button" data-t="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('');
