@@ -1874,18 +1874,18 @@ function viewFuturas(){
   const semMes = BASE.futuras.filter(f=>!f.mesPrevisto).length;
   const todas = BASE.futuras.filter(f=>f.mesPrevisto);
   const ind = S.fModo==='ind';
-  // a alocação roda sobre o funil inteiro, não sobre o filtro: a fila é a mesma
-  // seja qual for a tela que o usuário está olhando
-  const al = EST? alocaFunil(S.fModo) : null;
+  const chRede = f => f.rede+' | '+f.uf;
+  const semSit = todas.filter(f=>(!S.fMes.length||S.fMes.includes(f.mesPrevisto))&&(!S.fRede.length||S.fRede.includes(chRede(f)))
+    &&(!S.fVia.length||S.fVia.includes(f.via))&&(!S.fProj.length||S.fProj.includes(f.projeto)));
+  // a fila do estoque roda só sobre as negociações do filtro (mês, rede, distribuidor, projeto):
+  // o estoque é consumido apenas por elas, na ordem do mês previsto
+  const al = EST? alocaFunil(S.fModo, semSit) : null;
   const sit = al? S.fSit : '';
   const cobre = f => (al.get(f.id)||{}).cobertura||0;
   const passaSit = f => !sit || (sit==='int'? cobre(f)>=0.999
     : sit==='par'? (cobre(f)>0 && cobre(f)<0.999)
     : sit==='sem'? cobre(f)<=0
     : /* 'falta' */ cobre(f)<0.999);
-  const chRede = f => f.rede+' | '+f.uf;
-  const semSit = todas.filter(f=>(!S.fMes.length||S.fMes.includes(f.mesPrevisto))&&(!S.fRede.length||S.fRede.includes(chRede(f)))
-    &&(!S.fVia.length||S.fVia.includes(f.via))&&(!S.fProj.length||S.fProj.includes(f.projeto)));
   const lista = semSit.filter(passaSit)
     .sort((a,b)=>(a.mesPrevisto||'9').localeCompare(b.mesPrevisto||'9')||b.valor-a.valor);
   const mostra = lista.slice(0,S.fLim);
@@ -1910,7 +1910,7 @@ function viewFuturas(){
         <button type="button" data-fmodo="ind" aria-pressed="${ind}">Individual</button></div></div></div>
       <p class="note" style="margin:0 0 12px">${ind
       ? 'Individual: cada negociação é comparada com o estoque cheio, como se fosse a única. Serve para responder "esta rede eu atendo?" — a soma dos atendimentos passa do estoque que existe.'
-      : 'Fila: o estoque é consumido na ordem do mês previsto (empate, a maior primeiro). Mostra até onde o estoque de hoje chega se o calendário for cumprido.'}</p>`:''}
+      : 'Fila: o estoque é consumido na ordem do mês previsto (empate, a maior primeiro), só pelas negociações do filtro de mês, rede, distribuidor e projeto. Mostra até onde o estoque de hoje chega para elas.'}</p>`:''}
     <div class="fcols" id="fcols" style="grid-template-columns:${COLS.map(c=>c+'%').join(' ')}">
       <div ${gc(1)}>${multi('ms-fmes','Mês',[...new Set(todas.map(f=>f.mesPrevisto))].sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)}</div>
       <div ${gc(2)}>${multi('ms-frede','Rede',[...new Set(todas.map(chRede))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)}</div>
@@ -1971,10 +1971,10 @@ function mapaEstoque(){
    'ind'  — cada negociação é comparada contra o estoque cheio, sem reservar nada.
             Responde "esta rede, se fosse a única, seria atendida?". A soma dos
             atendimentos pode passar do estoque existente. */
-function alocaFunil(modo){
+function alocaFunil(modo, conj){
   const consome = modo !== 'ind';
   const disp = mapaEstoque();
-  const fila = BASE.futuras.filter(f=>f.mesPrevisto)
+  const fila = (conj||BASE.futuras).filter(f=>f.mesPrevisto).slice()
     .sort((x,y)=> x.mesPrevisto.localeCompare(y.mesPrevisto) || (y.valor||0)-(x.valor||0));
   const saida = new Map();
   fila.forEach(f=>{
