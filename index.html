@@ -800,6 +800,7 @@ async function interpretaArquivo(file){
   SST = [];
   if(TABP){ aplicaTabelaProjetos(base, TABP); base.tabProj = TABP; }
   if(COMP) base.comp = COMP;
+  if(CENSOF) base.censo = CENSOF;
   recalculaFuturas(base);
   return base;
 }
@@ -807,7 +808,26 @@ async function interpretaArquivo(file){
    Uma aba por projeto, com blocos por segmento (título com INFANTIL / INICIAIS / FINAIS / MÉDIO)
    e linhas Público | Escolaridade | Quantidade | Preço. Vale para as vendas futuras, o valor do
    estoque e o gerador de orçamentos. Projetos fora dela (PCE, Colcha, Seu Amanhã) seguem a T_PREÇOS. */
-let TABP = null, COMP = null;
+let TABP = null, COMP = null, CENSOF = null;
+/* matrículas do Censo (1 - FONTES\PROJETOS - Censo escolar.xlsx, aba Matrículas): uma linha por município e rede.
+   Vira o formato do gerador: [UF, município, 14 números da rede municipal, 14 da estadual]. */
+async function interpretaCenso(file){
+  const z = await abreZip(await file.arrayBuffer()); leSST(z);
+  const nome = [...xml(z['xl/workbook.xml']).getElementsByTagName('sheet')].map(x=>x.getAttribute('name')).find(n=>/^MATRICULA/.test(SEMACENTO(n)));
+  const L = nome? (lePlanilha(z,nome)||[]) : []; SST=[];
+  const titulo = (L[0]||[]).map(c=>String(c==null?'':c)).join(' ');
+  const m = titulo.match(/Censo Escolar\s*\d{4}(\s*\(Inep\))?/i);
+  const hi = L.findIndex(r=>r && r.some(c=>SEMACENTO(c).trim()==='MUNICIPIO'));
+  if(hi<0) throw new Error('censo');
+  const cab = L[hi].map(c=>SEMACENTO(c).trim()), iU=cab.indexOf('UF'), iM=cab.indexOf('MUNICIPIO'), iR=cab.indexOf('REDE'), i0=cab.indexOf('CRECHE');
+  const mapa = new Map();
+  for(const r of L.slice(hi+1)){ if(!r||!limpa(r[iM])) continue;
+    const k = limpa(r[iU])+'|'+limpa(r[iM]); if(!mapa.has(k)) mapa.set(k,[limpa(r[iU]),limpa(r[iM]),...Array(28).fill(0)]);
+    const o = /^EST/.test(SEMACENTO(r[iR]))? 14 : 0, a = mapa.get(k);
+    for(let j=0;j<14;j++) a[2+o+j] = Math.round(numero(r[i0+j])||0); }
+  if(!mapa.size) throw new Error('censo');
+  return {linhas:[...mapa.values()], rotulo: m? (m[0].replace(/\s+/g,' ')+(m[1]?'':' (Inep)')) : 'Censo Escolar', arquivo:file.name, modificado:file.lastModified};
+}
 async function interpretaComposicao(file){
   const z = await abreZip(await file.arrayBuffer()); leSST(z);
   const nome = [...xml(z['xl/workbook.xml']).getElementsByTagName('sheet')].map(x=>x.getAttribute('name')).find(n=>/^composi/i.test(SEMACENTO(n)));
@@ -1086,6 +1106,8 @@ async function carregaVendasDaPasta(){
     const arqs=await arquivosDaPasta();
     const ht=arqs.find(x=>/^PROJETOS\s*-\s*TABELA/.test(SEMACENTO(x.name)));
     if(ht){ try{ TABP = await interpretaTabelaProjetos(await ht.getFile()); kv('put','tabproj',TABP).catch(()=>{}); }catch(e){ /* fica a T_PREÇOS */ } }
+    const hz=arqs.find(x=>/^PROJETOS\s*-\s*CENSO/.test(SEMACENTO(x.name)));
+    if(hz){ try{ CENSOF = await interpretaCenso(await hz.getFile()); kv('put','censo',CENSOF).catch(()=>{}); ORC_FR=null; }catch(e){} }
     const hc=arqs.find(x=>/^PROJETOS\s*-\s*COMPOSI/.test(SEMACENTO(x.name)));
     if(hc){ try{ COMP = await interpretaComposicao(await hc.getFile()); kv('put','comp',COMP).catch(()=>{}); }catch(e){} }
     ARQ.handle=h; ARQ.nome=h.name; await leArquivo(await h.getFile());
@@ -1196,7 +1218,7 @@ async function publicarBase(){
   await kv('put','pub-cfg',cfg); bt.disabled=true;
   try{
     const em=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',',' às');
-    const orc = (()=>{ const f=orcFonte(); return f&&f.gz? {gz:f.gz, fixo:Object.assign(orcConfig(),{tabela:(BASE.tabProj&&BASE.tabProj.gerador)||null})} : null; })();
+    const orc = (()=>{ const f=orcFonte(); return f&&f.gz? {gz:f.gz, fixo:Object.assign(orcConfig(),{tabela:(BASE.tabProj&&BASE.tabProj.gerador)||null, censo:BASE.censo||null})} : null; })();
     const lit = (()=>{ const e=document.getElementById('lit-src'); return e&&LIT? {gz:e.textContent.trim(), fonte:{catalogo:LIT.catalogo, catMeta:LIT.catMeta, distribuidores:LIT.distribuidores, config:litConfig()}} : null; })();
     const completa={em, base:BASE, est:EST||null, conc:CONC||null, orc, lit};
     const geral={em, base:BASE, est:EST||null, conc:null, orc, lit};
@@ -1236,7 +1258,7 @@ async function iniciar(){
     if(D.conc){ CONC=D.conc; ARQC.estado='snap'; }
     render(); return;
   }
-  try{ TABP = (await kv('get','tabproj')) || null; COMP = (await kv('get','comp')) || null; }catch(e){}
+  try{ TABP = (await kv('get','tabproj')) || null; COMP = (await kv('get','comp')) || null; CENSOF = (await kv('get','censo')) || null; }catch(e){}
   const salvo = await kv('get','base');
   if(salvo && salvo.vendas){ assume(salvo); ARQ.nome = salvo.arquivo||''; ARQ.estado='cache'; }
   const cc = await kv('get','conc'); if(cc && cc.itens){ CONC = cc; ARQC.estado='cache'; }
@@ -2709,7 +2731,8 @@ async function montaOrc(host){
     let html=await gunzipB64(src.gz);
     const modo=src.fixo? 'viewer' : 'admin';
     const tabG = (src.fixo&&src.fixo.tabela) || (BASE&&BASE.tabProj&&BASE.tabProj.gerador) || null;
-    const inj='<script>document.documentElement.setAttribute("data-theme",'+JSON.stringify(escuro()?'dark':'light')+');window.ORC_MODO='+JSON.stringify(modo)+';'+(tabG? 'window.ORC_TABELA='+JSON.stringify(tabG)+';' : '')+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
+    const cen = (src.fixo&&src.fixo.censo) || (BASE&&BASE.censo) || null;
+    const inj='<script>document.documentElement.setAttribute("data-theme",'+JSON.stringify(escuro()?'dark':'light')+');window.ORC_MODO='+JSON.stringify(modo)+';'+(tabG? 'window.ORC_TABELA='+JSON.stringify(tabG)+';' : '')+(cen? 'window.ORC_CENSO='+JSON.stringify({linhas:cen.linhas,rotulo:cen.rotulo}).replace(/</g,'\\u003c')+';' : '')+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
     html=html.replace(/<head[^>]*>/i, m=>m+inj);
     const fr=document.createElement('iframe'); fr.className='orc-fr'; fr.title='Orçamentos'; fr.setAttribute('allow','clipboard-write; web-share');
     fr.srcdoc=html; host.innerHTML=''; host.appendChild(fr); ORC_FR=fr; orcAltura();
