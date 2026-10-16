@@ -897,16 +897,21 @@ async function autorizaArquivo(){
   }catch(e){ ARQ.erro='Não foi possível reabrir o arquivo.'; render(); }
 }
 /* ---------------- pasta-fonte ----------------
-   O app aponta para uma pasta (ex.: CLAUDE\_VENDAS). Dentro dela:
-   - CONTROLE - VENDAS.xlsx  → vendas e vendas futuras
-   - a planilha de estoque mais recente (qualquer outro .xlsx com a coluna "Em estoque").
-   Trocou o relatório de estoque? Salve o novo na pasta, apague o anterior e clique em Atualizar estoque. */
+   O app aponta para a pasta CLAUDE, organizada assim:
+     1 - FONTES\  VENDAS - Controle.xlsx · ESTOQUE - NetSuite.xlsx · LITERATURA - Catalogo.xlsx · LITERATURA - Clientes.xlsx
+     3 - APP\     visualizacao.html e base_vendas.json (gerados pelo Publicar base)
+   Ainda aceita a organização antiga (uma pasta só com CONTROLE - VENDAS.xlsx e o estoque).
+   Novo relatório de estoque: substitua o ESTOQUE - NetSuite.xlsx (ou salve o novo com qualquer nome e apague o anterior). */
 const PASTA = {handle:null, nome:''};
 const temPasta = typeof window.showDirectoryPicker === 'function';
-const ehArqVendas = n => /^CONTROLE\s*-\s*VENDAS.*\.xls[xm]$/i.test(n);
+const ehArqVendas = n => /^(VENDAS\s*-\s*CONTROLE|CONTROLE\s*-\s*VENDAS).*\.xls[xm]$/i.test(n);
+const ehOutraFonte = n => /^(LITERATURA|PROJETOS)\s*-/i.test(n);
+async function subPasta(nome){ try{ return await PASTA.handle.getDirectoryHandle(nome); }catch(e){ return null; } }
+async function dirFontes(){ return (await subPasta('1 - FONTES')) || PASTA.handle; }
+async function dirApp(){ return (await subPasta('3 - APP')) || PASTA.handle; }
 async function arquivosDaPasta(){
-  const out=[];
-  for await (const [nome,h] of PASTA.handle.entries()){
+  const out=[], dir=await dirFontes();
+  for await (const [nome,h] of dir.entries()){
     if(h.kind!=='file' || nome.startsWith('~$') || !/\.xls[xm]$/i.test(nome)) continue;
     out.push(h);
   }
@@ -921,16 +926,17 @@ async function permissaoPasta(pedir){
 async function carregaVendasDaPasta(){
   try{
     const h=(await arquivosDaPasta()).find(x=>ehArqVendas(x.name));
-    if(!h){ ARQ.erro='Não encontrei o arquivo CONTROLE - VENDAS.xlsx na pasta '+PASTA.nome+'.'; render(); return; }
+    if(!h){ ARQ.erro='Não encontrei a planilha VENDAS - Controle.xlsx em '+PASTA.nome+(PASTA.nome==='CLAUDE'?'\\1 - FONTES':'')+'. Escolha a pasta CLAUDE.'; render(); return; }
     ARQ.handle=h; ARQ.nome=h.name; await leArquivo(await h.getFile());
   }catch(e){ ARQ.erro='Não consegui ler a pasta '+PASTA.nome+'.'; render(); }
 }
 async function carregaEstoqueDaPasta(){
   ARQE.lendo=true; ARQE.erro=''; render();
   try{
-    const hs=(await arquivosDaPasta()).filter(x=>!ehArqVendas(x.name));
+    const hs=(await arquivosDaPasta()).filter(x=>!ehArqVendas(x.name) && !ehOutraFonte(x.name));
     const fs=await Promise.all(hs.map(async h=>({h, f:await h.getFile()})));
-    fs.sort((a,b)=>b.f.lastModified-a.f.lastModified);          // a mais recente primeiro
+    // primeiro o ESTOQUE - …; depois, o mais recente
+    fs.sort((a,b)=>(/^ESTOQUE/i.test(b.h.name)-/^ESTOQUE/i.test(a.h.name)) || (b.f.lastModified-a.f.lastModified));
     for(const {h,f} of fs){
       try{
         EST = await interpretaEstoque(f);
@@ -1034,11 +1040,11 @@ async function publicarBase(){
     // 1) cópia aberta na pasta-fonte
     if(PASTA.handle){
       let p=await PASTA.handle.queryPermission({mode:'readwrite'}); if(p!=='granted') p=await PASTA.handle.requestPermission({mode:'readwrite'});
-      if(p==='granted'){ const fh=await PASTA.handle.getFileHandle('base_vendas.json',{create:true}); const w=await fh.createWritable(); await w.write(JSON.stringify(Object.assign({},completa,{orc:undefined}))); await w.close(); passo('base_vendas.json gravado na pasta '+PASTA.nome+'.','ok'); }
+      if(p==='granted'){ const dA=await dirApp(); const fh=await dA.getFileHandle('base_vendas.json',{create:true}); const w=await fh.createWritable(); await w.write(JSON.stringify(Object.assign({},completa,{orc:undefined}))); await w.close(); passo('base_vendas.json gravado em '+PASTA.nome+(PASTA.nome==='CLAUDE'?'\\3 - APP':'')+'.','ok'); }
       else passo('Sem permissão de escrita na pasta '+PASTA.nome+': a cópia local não foi gravada.','warn');
     } else passo('Pasta-fonte não escolhida: a cópia local não foi gravada.','warn');
     // 2) página de visualização
-    let pag=null; if(PASTA.handle){ try{ pag=await (await (await PASTA.handle.getFileHandle('visualizacao.html')).getFile()).text(); }catch(e){} }
+    let pag=null; if(PASTA.handle){ try{ pag=await (await (await (await dirApp()).getFileHandle('visualizacao.html')).getFile()).text(); }catch(e){} }
     if(pag){ await ghPut(cfg,'index.html',b64txt(pag),'Página de visualização'); passo('Página de visualização enviada.','ok'); }
     else passo('visualizacao.html não está na pasta: a página do site não foi atualizada.','warn');
     // 3) bases criptografadas
@@ -1102,7 +1108,7 @@ function barraBase(){
     h = `<div class="st"><span class="dot off"></span><span>Clique para liberar a leitura ${PASTA.nome? 'da pasta <b>'+esc(PASTA.nome)+'</b>' : 'de <b>'+esc(ARQ.nome)+'</b>'} nesta sessão. Até lá, os números são os da última leitura.</span></div>
       <div class="acoes"><button class="btn primary" id="b-aut" type="button">${PASTA.handle?'Reconectar pasta':'Reconectar planilha'}</button><button class="btn sm" id="b-pasta" type="button">Trocar pasta</button></div>`;
   } else {
-    h = `<div class="st"><span class="dot off"></span><span>${ARQ.estado==='cache'? 'Mostrando a última leitura. ' : ''}Escolha a pasta onde estão o <b>CONTROLE - VENDAS.xlsx</b> e a planilha de estoque.</span></div>
+    h = `<div class="st"><span class="dot off"></span><span>${ARQ.estado==='cache'? 'Mostrando a última leitura. ' : ''}Escolha a pasta <b>CLAUDE</b> (em Comercial - Gestão). O app lê as planilhas de <b>1 - FONTES</b>.</span></div>
       <div class="acoes"><button class="btn primary" id="b-pasta" type="button">Escolher pasta</button></div>`;
   }
   if(!temPasta) h = `<div class="st"><span class="dot off"></span><span>Este navegador não abre pastas. Use o <b>Chrome ou o Edge no computador</b>.</span></div>
