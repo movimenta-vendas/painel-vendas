@@ -59,7 +59,21 @@ details.fora{margin-top:14px}details.fora summary{cursor:pointer;color:var(--mut
 #orc-host,#lit-host{padding-top:4px}
 .orc-fr{display:block;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .ms{position:relative;min-width:120px}
+.legend .sw,.pz-leg .sw{background-image:linear-gradient(180deg,rgba(255,255,255,.28),rgba(0,0,0,.12))}
 .fcols{display:grid;margin:0 0 10px;padding-left:1px}
+th.thf{overflow:visible}
+th #csv{min-height:26px;padding:2px 8px;font-size:11.5px;letter-spacing:0;text-transform:none;white-space:nowrap}
+th.thf .ms{position:static;min-width:0;display:inline-block;gap:0}
+th.thf .ms>span:first-child{display:none}
+th.thf .ms-btn{display:inline-flex;align-items:center;gap:5px;width:auto;min-height:0;padding:2px 0;border:0;background:none;box-shadow:none;border-radius:0;
+  font:inherit;font-family:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;cursor:pointer}
+th.thf .ms-btn .ms-tx{display:none}
+th.thf .ms-btn svg{width:10px;height:10px;opacity:.75}
+th.thf .ms-btn:hover,th.thf .ms-btn[aria-expanded="true"]{color:var(--ink)}
+th.thf .ms-btn.ativo{text-decoration:underline;text-underline-offset:3px}
+th.thf .ms-btn.ativo{color:var(--mag);box-shadow:none}
+th.thf .ms-btn.ativo::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--mag)}
+th.thf .ms-pop{position:fixed;text-transform:none;letter-spacing:0;font-weight:400;font-size:13.5px;text-align:left;white-space:normal}
 .fcols>div{padding:0 8px;min-width:0}.fcols>div:first-child{padding-left:8px}
 .fcols .ms{min-width:0;width:100%}.fcols .ms-btn .ms-tx{max-width:100%}.fcols select{width:100%}
 .fcols .f>input,.fcols .f>select{width:100%}
@@ -80,6 +94,7 @@ table.alinhada td.wrap-t{min-width:0}
 .ms-acoes{display:flex;justify-content:space-between;gap:8px;padding:4px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:4px}
 .ms-acoes button{background:none;border:0;padding:2px 0;font:600 12.5px var(--body);color:var(--mag);cursor:pointer}
 .ms-lista{max-height:300px;overflow:auto}
+.ms-busca{width:100%;min-height:32px;margin:0 0 6px;padding:5px 8px;font:inherit;font-size:13.5px;border:1px solid var(--field-line);border-radius:6px;background:var(--field);color:var(--ink)}
 .ms-lista label{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:6px;cursor:pointer;font-size:13.5px;text-transform:none;letter-spacing:0;color:var(--ink)}
 .ms-lista label:hover{background:var(--mag-soft)}
 .ms-lista input{width:16px;height:16px;min-height:0;margin:0;padding:0;flex:none;accent-color:var(--mag)}
@@ -146,7 +161,8 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 table{font-size:13px}
 th,td{padding:6px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--grid)}
 th:first-child,td:first-child,.l{text-align:left}
-th{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--panel);position:sticky;top:0;z-index:1}
+th{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mag-2);font-weight:700;background:color-mix(in srgb,var(--mag) 13%,var(--panel));position:sticky;top:0;z-index:1;box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--mag) 55%,transparent)}
+th .un{color:color-mix(in srgb,var(--mag-2) 70%,var(--muted))}
 tbody tr:last-child td{border-bottom:0}
 tbody tr:hover td{background:var(--wash)}
 tr.tot td{font-weight:600;border-top:1px solid var(--axis);background:var(--mag-soft)}
@@ -220,6 +236,13 @@ table.ufdet tr.proj td.l{padding-left:22px}
 .mapa svg text{font-family:var(--disp);letter-spacing:.02em}
 .sw.hachura{background:repeating-linear-gradient(45deg,var(--panel) 0 2px,color-mix(in srgb,var(--muted) 55%,transparent) 2px 3.4px);border:1px solid var(--line)}
 .banner.aviso-neg{border-color:color-mix(in srgb,var(--bad) 45%,var(--line));background:color-mix(in srgb,var(--bad) 7%,var(--panel))}.banner.aviso-neg summary{cursor:pointer;color:var(--bad);font-weight:600}
+.selo{display:inline-block;min-width:96px;text-align:center;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.selo.s-int{background:linear-gradient(180deg,color-mix(in srgb,var(--ok) 82%,#fff),var(--ok))}
+.selo.s-sem{background:linear-gradient(180deg,color-mix(in srgb,var(--bad) 82%,#fff),var(--bad))}
+.selo.s-par{color:#4a2a00;background:linear-gradient(90deg,#E8A33B var(--pc),#F7DDB0 var(--pc))}
+:root[data-theme="dark"] .selo.s-int,:root[data-theme="dark"] .selo.s-sem,:root[data-theme="dark"] .selo[style]{color:#14100f!important}
+:root[data-theme="dark"] .selo.s-par{color:#1a1206;background:linear-gradient(90deg,#F5B94F var(--pc),#C9A46A var(--pc))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .selo.s-int,:root:not([data-theme="light"]) .selo.s-sem,:root:not([data-theme="light"]) .selo[style]{color:#14100f!important}:root:not([data-theme="light"]) .selo.s-par{color:#1a1206;background:linear-gradient(90deg,#F5B94F var(--pc),#C9A46A var(--pc))}}
 .banner{background:var(--mag-soft);border:1px solid var(--line);border-radius:9px;padding:10px 14px;color:var(--ink);font-size:13px;margin-bottom:14px}
 .ac{display:flex;gap:6px;justify-content:flex-end}
 /* janela de detalhe (Séries) */
@@ -447,7 +470,7 @@ const S = {tab:'faturamento',
   mAnoCom:0, mUF:'', mReg:'', mRede:'', mProj:'', mMed:'valor',
   aAno:0, aUF:'', aReg:'', aVia:'', aOp:'VENDA', aMed:'kits', aEsc:'linear',
   sAno:0, sProj:'', sUF:'', sReg:'', sOp:'VENDA', sPub:'aluno', sEixo:'projeto',
-  vq:'', vAno:[], vProj:[], vUF:[], vVia:[], vPag:[], vOp:'VENDA', pRede:[], pProj:[], pCred:[], pSit:[], vLim:60, vDet:'',
+  vq:'', vAno:[], vProj:[], vUF:[], vVia:[], vPag:[], vRede:[], vOp:'VENDA', pRede:[], pProj:[], pCred:[], pSit:[], vLim:60, vDet:'',
   fq:'', fProj:[], fUF:'', fMes:[], fRede:[], fVia:[], fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
   eProj:'', eSoltos:false};
 /* duas linhas de negócio, cada uma com as suas abas */
@@ -512,8 +535,17 @@ function grafico(id,spec){
       : [0,.25,.5,.75,1].map(f=>top*f);
     const tw=Math.max(...ticks.map(t=>vc(t).length))*6.6+12, hor=spec.kind==='hbar';
     const lw = hor? Math.min(170,Math.max(...spec.labels.map(l=>Math.min(String(l).length,24)))*7.2+18) : Math.ceil(tw);
-    const m = hor? {l:lw,r:Math.max(54,tw*0.9),t:6,b:22} : {l:lw,r:12,t:10,b:24};
+    const m = hor? {l:lw,r:Math.max(54,tw*0.9),t:6,b:22} : {l:lw,r:12,t:spec.rotulos?22:10,b:24};
     const pw=W-m.l-m.r, ph=H-m.t-m.b; let g='';
+    // visual encorpado: cada cor ganha um degradê (mais claro em cima / na ponta) e as barras uma sombra suave
+    const gid={}, defs=[]; const grad=(c,dir)=>{ const k=c+'|'+dir; if(gid[k]) return gid[k]; const nm=id+'-g'+defs.length; gid[k]=nm;
+      const [x2,y2]=dir==='h'?['100%','0']:['0','100%'];
+      defs.push(`<linearGradient id="${nm}" x1="0" y1="0" x2="${x2}" y2="${y2}">${dir==='h'
+        ? `<stop offset="0" style="stop-color:color-mix(in srgb,${c} 88%,#000)"/><stop offset="1" style="stop-color:color-mix(in srgb,${c} 72%,#fff)"/>`
+        : dir==='a' ? `<stop offset="0" style="stop-color:${c};stop-opacity:.28"/><stop offset="1" style="stop-color:${c};stop-opacity:0"/>`
+        : `<stop offset="0" style="stop-color:color-mix(in srgb,${c} 72%,#fff)"/><stop offset="1" style="stop-color:color-mix(in srgb,${c} 90%,#000)"/>`}</linearGradient>`);
+      return nm; };
+    defs.push(`<filter id="${id}-sh" x="-10%" y="-10%" width="130%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="${escuro()?.45:.16}"/></filter>`);
     const esc1 = v => log? (v<=piso? 0 : Math.log10(v)/Math.log10(top)) : v/top;
     const X=v=>m.l+esc1(v)*pw, Y=v=>m.t+ph-esc1(v)*ph, band=(hor?ph:pw)/n;
     if(!hor){
@@ -523,32 +555,35 @@ function grafico(id,spec){
           const pts=s.data.map((v,i)=>[m.l+band*(i+.5), Y(v||0)]);
           // na escala logarítmica, mês sem venda não tem ponto: a linha é interrompida ali
           let d='', ant=false; pts.forEach((p,i)=>{ const ok=!log||(s.data[i]>0); if(ok) d+=(ant?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1); ant=ok; });
-          g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${s.dash?' stroke-dasharray="5 4"':''}/>`;
-          pts.forEach((p,i)=>{ if(s.data[i]) g+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="${s.color}" stroke="${pn}" stroke-width="1.5"/>`; });
+          if(K<=2 && !s.dash && !log){ const a=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')+`L${pts[pts.length-1][0].toFixed(1)} ${Y(0)}L${pts[0][0].toFixed(1)} ${Y(0)}Z`;
+            g+=`<path d="${a}" fill="url(#${grad(s.color,'a')})"/>`; }
+          g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.75" stroke-linejoin="round" stroke-linecap="round" filter="url(#${id}-sh)"${s.dash?' stroke-dasharray="5 4"':''}/>`;
+          pts.forEach((p,i)=>{ if(s.data[i]) g+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4.5" fill="${s.color}" stroke="${pn}" stroke-width="2"/>`; });
         });
         spec.labels.forEach((lab,i)=>{ g+=`<text x="${m.l+band*(i+.5)}" y="${H-7}" text-anchor="middle" fill="${ink2}" font-size="11">${esc(lab)}</text>`; });
       } else {
-      const bw=Math.min(band*.74,spec.stacked?40:32*K), sw=spec.stacked?bw:bw/K;
+      const bw=Math.min(band*.74,spec.stacked?46:34*K), sw=spec.stacked?bw:bw/K;
       spec.labels.forEach((lab,i)=>{const cx=m.l+band*(i+.5); let acc=0;
         sets.forEach((s,k)=>{const v=s.data[i]||0; if(!v) return;
           const x=spec.stacked? cx-bw/2 : cx-bw/2+k*sw;
           const y0=spec.stacked?Y(acc):Y(0), y1=spec.stacked?Y(acc+v):Y(v); acc+=v;
-          g+=`<rect x="${x}" y="${y1}" width="${Math.max(sw-(spec.stacked?0:2),1)}" height="${Math.max(y0-y1,1)}" rx="2" fill="${s.color}" stroke="${pn}" stroke-width="${spec.stacked?1.5:0}"/>`;});
+          g+=`<rect x="${x}" y="${y1}" width="${Math.max(sw-(spec.stacked?0:2),1)}" height="${Math.max(y0-y1,1)}" rx="3" fill="url(#${grad(s.color,'v')})" stroke="${pn}" stroke-width="${spec.stacked?1.5:0}" filter="url(#${id}-sh)"/>`;
+          if(spec.rotulos && !spec.stacked && sw>=22) g+=`<text x="${x+sw/2-1}" y="${y1-5}" text-anchor="middle" fill="${ink}" font-size="${K>1?10:11}" font-weight="600">${vc(v)}</text>`;});
         g+=`<text x="${cx}" y="${H-7}" text-anchor="middle" fill="${ink2}" font-size="11">${esc(lab)}</text>`;});
       }
     } else {
       const step=(pw/4)<tw?2:1;
       ticks.forEach((t,ti)=>{g+=`<line y1="${m.t}" y2="${m.t+ph}" x1="${X(t)}" x2="${X(t)}" stroke="${t===0?ax:gr}"/>`;
         if(ti%step===0) g+=`<text x="${X(t)}" y="${H-7}" text-anchor="${ti===0?'start':ti===ticks.length-1?'end':'middle'}" fill="${ink2}" font-size="11">${vc(t)}</text>`;});
-      const bh=Math.min(16,(band-8)/K);
+      const bh=Math.min(18,(band-7)/K);
       spec.labels.forEach((lab,i)=>{const cy=m.t+band*(i+.5);
         g+=`<text x="${m.l-8}" y="${cy+4}" text-anchor="end" fill="${ink2}" font-size="11.5">${esc(String(lab).length>24?String(lab).slice(0,23)+'…':lab)}</text>`;
         sets.forEach((s,k)=>{const v=s.data[i]||0, y=cy-K*bh/2+k*bh, w=Math.max(X(v)-m.l,v?2:0);
-          g+=`<rect x="${m.l}" y="${y}" width="${w}" height="${bh-1.5}" rx="2" fill="${s.color}"/>`;
+          g+=`<rect x="${m.l}" y="${y}" width="${w}" height="${bh-1.5}" rx="3" fill="url(#${grad(s.color,'h')})" filter="url(#${id}-sh)"/>`;
           if(v&&(K===1||bh>=9)) g+=`<text x="${m.l+w+5}" y="${y+bh/2+3.5}" fill="${K===1?ink:ink2}" font-size="${K===1?11:10}">${vc(v)}</text>`;});});
     }
     g+=`<g id="${id}-cr"></g>`;
-    el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Gráfico">${g}</svg>`; el.appendChild(tip);
+    el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Gráfico"><defs>${defs.join('')}</defs>${g}</svg>`; el.appendChild(tip);
     const svg=el.firstChild, cr=svg.querySelector('#'+id+'-cr');
     const mostra=e=>{const r=svg.getBoundingClientRect(), px=e.clientX-r.left, py=e.clientY-r.top;
       const i=Math.floor((hor?py-m.t:px-m.l)/band);
@@ -1446,11 +1481,11 @@ function viewAcervo(){
       <thead><tr><th class="l">Ano</th>${MES.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':'exemplares'}</span></th></tr></thead>
       <tbody>${corpo}</tbody></table></div>
     <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.':'Exemplares vendidos.'}${semData?` ${money?BRLf(semData):fmt(semData)} sem data de emissão entram no total do ano, mas não em nenhum mês.`:''}</p></div>`;
-  h += caixa('g-acv','baixa','Acervo mês a mês', money?'Receita por mês, uma linha para cada ano · escala logarítmica':'Exemplares por mês, uma linha para cada ano · escala logarítmica');
+  h += caixa('g-acv','baixa','Acervo mês a mês', money?'Receita por mês, uma barra para cada ano · escala logarítmica':'Exemplares por mês, uma barra para cada ano · escala logarítmica');
   $('#main').innerHTML = h;
   liga('#aano','aAno'); liga('#areg','aReg'); liga('#auf','aUF'); liga('#avia','aVia'); liga('#aop','aOp');
   $$('[data-amed]').forEach(b=>b.onclick=()=>{S.aMed=b.dataset.amed; render();});
-  grafico('g-acv',{kind:'line',money,log:true,labels:MES,
+  grafico('g-acv',{kind:'vbar',money,log:true,rotulos:true,labels:MES,
     sets:vis.map((a,i)=>({label:String(a),data:mat[a].slice(0,12),color:pal()[i%8]}))});
 }
 
@@ -1547,9 +1582,9 @@ function viewEstoqueLivros(){
   const cat=estoqueLivros().filter(x=>x.cat);   // só as obras do catálogo (LITERATURA - Catalogo)
   if(!cat.length){ $('#main').innerHTML = barraEstoque() + `<div class="card"><div class="empty">Catálogo da literatura não carregado. Clique em <b>Atualizar fonte</b> para ler a LITERATURA - Catalogo.</div></div>`; ligaEstoqueBotoes(); return; }
   const eds=['Movimenta','Prefácio','Rovelle'].filter(e=>cat.some(x=>x.e===e));
-  const q=normT(S.lq||''), sit=S.lsit||'', fe=S.lEd||[];
-  const f=cat.filter(x=>(!fe.length||fe.includes(x.e)) && (!sit||sitLivro(x)===sit) && (!q||normT(x.t+' '+x.isbn+' '+x.a).includes(q)))
-             .sort((a,b)=>(S.lOrd==='qtd'? a.qtd-b.qtd : 0) || a.t.localeCompare(b.t,'pt-BR'));
+  const sit=S.lsit||'', fe=S.lEd||[], fo=S.lObra||[];
+  const f=cat.filter(x=>(!fe.length||fe.includes(x.e)) && (!sit||sitLivro(x)===sit) && (!fo.length||fo.includes(x.isbn)))
+             .sort((a,b)=>a.t.localeCompare(b.t,'pt-BR'));
   const n=k=>cat.filter(x=>sitLivro(x)===k).length;
   const ex=cat.reduce((t,x)=>t+x.qtd,0), val=cat.reduce((t,x)=>t+x.qtd*(x.p||0),0);
   const card=e=>{ const g=cat.filter(x=>x.e===e), ok=g.filter(x=>sitLivro(x)==='ok').length, bx=g.filter(x=>sitLivro(x)==='baixo').length, sm=g.filter(x=>sitLivro(x)==='sem').length, tot=g.length||1;
@@ -1569,10 +1604,9 @@ function viewEstoqueLivros(){
   const COLS=[38,16,16,14,16];
   h += `<div class="card"><p class="note" style="margin:0 0 12px">Estoque do relatório <b>${esc(EST.arquivo||'')}</b>. Obras marcadas com ◆ foram encontradas pelo título, porque o ISBN no NetSuite é diferente do catálogo.</p>
     ${fcols(COLS,[
-      [1,1,`<label class="f"><span>Título, autor ou ISBN</span><input type="search" id="lq" value="${esc(S.lq||'')}" placeholder="Digite para procurar"></label>`],
+      [1,1,multi('ms-lobra','Obra',cat.slice().sort((a,b)=>a.t.localeCompare(b.t,'pt-BR')).map(x=>[x.isbn,x.t]),fo,'Todas','obras',1)],
       [2,1,multi('ms-led','Editora',eds.map(e=>[e,ED_NOME[e]||e]),fe,'Todas','editoras',3)],
-      [4,1,`<label class="f"><span>Ordem</span><select id="lord"><option value="tit">Título</option><option value="qtd"${S.lOrd==='qtd'?' selected':''}>Menor estoque</option></select></label>`],
-      [5,1,`<label class="f"><span>Situação</span><select id="lsit"><option value="">Todas</option><option value="ok"${sit==='ok'?' selected':''}>Com estoque</option><option value="baixo"${sit==='baixo'?' selected':''}>Estoque baixo</option><option value="sem"${sit==='sem'?' selected':''}>Sem saldo</option></select></label>`]])}
+      [5,1,multi('ms-lsit','Situação',[['ok','Com estoque'],['baixo','Estoque baixo'],['sem','Sem saldo']],sit||'','Todas','situações',1,true)]])}
     ${f.length? `<div class="tw" style="max-height:640px"><table class="est-lit alinhada">${colg(COLS)}<thead><tr><th class="l">Obra</th><th class="l">Editora</th><th class="l">ISBN</th><th>Preço de capa</th><th>Em estoque</th></tr></thead><tbody>${
       f.map(x=>`<tr class="s-${sitLivro(x)}"><td class="l wrap-t"><b>${esc(x.t)}</b>${x.a?`<span class="sub-a">${esc(x.a)}</span>`:''}</td>
         <td class="l"><span class="ed-chip" style="--ed:${ED_COR[x.e]||'var(--muted)'}">${esc(ED_NOME[x.e]||x.e||'—')}</span></td>
@@ -1580,7 +1614,7 @@ function viewEstoqueLivros(){
         <td>${x.p!=null? BRLf(x.p) : '<span class="tag">sem preço</span>'}</td><td>${pill(x)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nenhuma obra neste filtro.</div>'}
 </div>`;
   $('#main').innerHTML = barraEstoque() + h; ligaEstoqueBotoes();
-  liga('#lq','lq',true); ligaMulti('ms-led','lEd');
+  ligaMulti('ms-lobra','lObra'); ligaMulti('ms-led','lEd'); ligaMulti('ms-lsit','lsit');
   const ls=$('#lsit'); if(ls) ls.onchange=()=>{ S.lsit=ls.value; render(); };
   const lo=$('#lord'); if(lo) lo.onchange=()=>{ S.lOrd=lo.value; render(); };
   $$('[data-ed]').forEach(b=>b.onclick=()=>{ const e=b.dataset.ed; S.lEd = (fe.length===1&&fe[0]===e)? [] : [e]; render(); });
@@ -1594,7 +1628,7 @@ function sitPag(v){ const t=String(v.pagamento==null?'':v.pagamento).trim();
 const corPag = k => k==='Pago'? 'var(--ok)' : k==='Em aberto'? 'var(--warn)' : 'var(--muted)';
 function vendasFiltradas(){
   const daLinha = v => S.linha==='lit'? v.projeto===ACERVO : v.projeto!==ACERVO;
-  let r = vendas().filter(v=>daLinha(v)&&(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(S.linha==='lit'||!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(!S.vVia.length||S.vVia.includes(v.via))&&(!S.vPag.length||S.vPag.includes(sitPag(v)))&&(!S.vOp||v.operacao===S.vOp));
+  let r = vendas().filter(v=>daLinha(v)&&(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(S.linha==='lit'||!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(S.linha==='lit'||!S.vRede.length||S.vRede.includes(v.rede+' | '+v.uf))&&(!S.vVia.length||S.vVia.includes(v.via))&&(!S.vPag.length||S.vPag.includes(sitPag(v)))&&(!S.vOp||v.operacao===S.vOp));
   if(S.vq){const q=S.vq.toLowerCase(); r=r.filter(v=>[v.rede,v.uf,v.via,v.pedido,v.nf,v.projeto].join(' ').toLowerCase().includes(q));}
   return r.sort((a,b)=>String(b.emissao||'').localeCompare(String(a.emissao||'')));
 }
@@ -1733,10 +1767,10 @@ function tabelaSeriesJanela(v){
 }
 function janelaVenda(v){
   const mult=multDe(v.projeto);
-  const pagto = v.pagamento? (/^\d{4}-\d{2}-\d{2}$/.test(v.pagamento)? brD(v.pagamento) : esc(v.pagamento)) : '<span style="color:var(--warn)">em aberto</span>';
+  const pagto = v.pagamento? (/^\d{4}-\d{2}-\d{2}$/.test(v.pagamento)? brD(v.pagamento) : esc(v.pagamento)) : seloCor('Em aberto','var(--warn)');
   let conc='';
   try{ if(typeof CONC!=='undefined' && CONC && CONC.itens && !v.pagamento){ const c=CONC.itens.find(i=>chaveNF(i.rede,i.nf)===chaveNF(v.rede,v.nf));
-    if(c) conc=`<section class="caixa"><h3>Conciliação do pagamento</h3><div class="ficha">${campo('Situação',`<span class="pill" style="color:${SITCOR[c.situacao]||'var(--muted)'}">${esc(c.situacao)}</span>`)}${campo('Credor',esc(c.credor))}${campo('Empenhos',esc([...new Set((c.empenhos||[]).map(e=>e.numero))].join(', ')))}${campo('Próximo passo',esc(c.proximo))}</div></section>`; } }catch(e){}
+    if(c) conc=`<section class="caixa"><h3>Conciliação do pagamento</h3><div class="ficha">${campo('Situação',`${seloCor(c.situacao, SITCOR[c.situacao]||'var(--muted)', (SITCOR[c.situacao]||'').indexOf('--sun')>=0)}`)}${campo('Credor',esc(c.credor))}${campo('Empenhos',esc([...new Set((c.empenhos||[]).map(e=>e.numero))].join(', ')))}${campo('Próximo passo',esc(c.proximo))}</div></section>`; } }catch(e){}
   abreJanela(`<h2>${esc(v.rede)} <span class="tag">${esc(v.uf)}</span></h2>
     <p class="sub">${v.emissao? 'Venda em '+brD(v.emissao) : 'Venda sem data de emissão'}</p>
     <div class="caixas">
@@ -1840,32 +1874,32 @@ function viewVendas(){
     <div class="kpi"><div class="l">Faturamento</div><div class="v">${BRL(r.reduce((s,v)=>s+(v.valor||0),0))}</div></div></div>`;
   const COLS = LIT? [9,7,17,13,9,8,11,6,11,9] : [8,6,13,10,8,9,7.5,6,9.5,5,10,8];
   const pags = [...new Set(vendas().filter(v=>LIT? v.projeto===ACERVO : v.projeto!==ACERVO).map(sitPag))].sort((a,b)=>(a==='Pago'?0:a==='Em aberto'?1:2)-(b==='Pago'?0:b==='Em aberto'?1:2)||a.localeCompare(b,'pt-BR'));
-  const fOp = `<label class="f"><span>Operação</span><select id="vop"><option value="">Todas</option>${BASE.operacoes.map(o=>`<option${S.vOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
-  h += `<div class="card"><div class="fbusca">
-      <label class="f grow"><span>Buscar</span><input type="search" id="vq" value="${esc(S.vq)}" placeholder="Rede, UF, pedido, NF ou projeto"></label>
-      <button class="btn" id="csv" type="button">Baixar CSV</button></div>
+  const fOp = multi('ms-vop','Operação',BASE.operacoes.map(o=>[o,o]),S.vOp,'Todas','operações',1,true);
+  S.vq='';
+  h += `<div class="card">
     ${fcols(COLS,[
       [1,1,multi('ms-ano','Ano',anos.map(a=>[String(a),String(a)]),S.vAno,'Todos','anos',4)],
-      [3,1,multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)],
+      LIT? [3,1,multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)]
+          : [3,1,multi('ms-vrede','Rede',[...new Set(vendas().filter(v=>v.projeto!==ACERVO).map(v=>v.rede+' | '+v.uf))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.vRede,'Todas','redes',1)],
       [4,1,multi('ms-vvia','Distribuidor',[...new Set(vendas().filter(v=>LIT? v.projeto===ACERVO : v.projeto!==ACERVO).map(v=>v.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.vVia,'Todos','distribuidores',1)],
       LIT? null : [5,1,multi('ms-proj','Projeto',projetos().filter(p=>p!==ACERVO).map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)],
       [LIT?5:6,1,fOp],
       [LIT?9:11,1,multi('ms-vpag','Pagamento',pags.map(x=>[x,x]),S.vPag,'Todos','situações',2)]])}`;
-  h += r.length? `<div class="tw" style="max-height:640px"><table class="alinhada">${colg(COLS)}<thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th class="l">Pagamento</th><th></th></tr></thead><tbody>`+
+  h += r.length? `<div class="tw" style="max-height:640px"><table class="alinhada">${colg(COLS)}<thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th class="l">Pagamento</th><th><button class="btn sm" id="csv" type="button" title="Baixar as vendas deste filtro em CSV">Baixar CSV</button></th></tr></thead><tbody>`+
     mostra.map(v=>`<tr><td class="l">${brD(v.emissao)||'<span class="tag">sem data</span>'}</td><td class="l">${esc(v.pedido)}</td>
       <td class="l wrap-t">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(v.via)}</td>
       ${LIT?'':`<td class="l"><span class="sw" style="background:${corDe(v.projeto)}"></span>${esc(short(v.projeto))}</td>`}
       <td class="l">${esc(v.operacao)}</td>${LIT?`<td>${fmt(v.kitsAluno)}</td>`:`<td>${fmt(v.kitsAluno)}</td><td>${fmt(v.kitsProf)}</td>`}<td>${BRLf(v.valor)}</td><td class="l">${esc(v.nf)}</td>
-      <td class="l">${(k=>`<span class="pill" style="color:${corPag(k)}" title="${esc(k)}">${esc(k)}</span>`)(sitPag(v))}</td>
+      <td class="l">${(k=>seloCor(k, k==='Pago'?'var(--ok)':k==='Em aberto'?'var(--warn)':'var(--muted)'))(sitPag(v))}</td>
       <td><button class="btn sm" data-det="${v.id}" type="button">Detalhes</button></td></tr>`).join('')+
     `</tbody></table></div>${r.length>mostra.length?`<p style="margin-top:12px"><button class="btn" id="mais" type="button">Mostrar mais 100 (${fmt(r.length-mostra.length)} restantes)</button></p>`:''}`
     : '<div class="empty">Nenhuma venda neste filtro.</div>';
   h += '</div>';
   $('#main').innerHTML = h;
-  liga('#vq','vq',true); ligaMulti('ms-ano','vAno'); ligaMulti('ms-proj','vProj'); ligaMulti('ms-uf','vUF'); ligaMulti('ms-vvia','vVia'); ligaMulti('ms-vpag','vPag'); liga('#vop','vOp');
+  liga('#vq','vq',true); ligaMulti('ms-ano','vAno'); ligaMulti('ms-proj','vProj'); ligaMulti('ms-uf','vUF'); ligaMulti('ms-vrede','vRede'); ligaMulti('ms-vvia','vVia'); ligaMulti('ms-vpag','vPag'); ligaMulti('ms-vop','vOp'); liga('#vop','vOp');
   $$('[data-det]').forEach(b=>b.onclick=()=>{ const v=r.find(x=>x.id===b.dataset.det); if(v) janelaVenda(v); });
   const m=$('#mais'); if(m) m.onclick=()=>{S.vLim+=100; viewVendas();};
-  $('#csv').onclick=()=>baixarCsv(r);
+  const cb=$('#csv'); if(cb) cb.onclick=()=>baixarCsv(r);
 }
 
 /* ---------------- aba: vendas futuras ---------------- */
@@ -1903,7 +1937,7 @@ function viewFuturas(){
   h += `<div class="grid"><div class="c7">${caixa('g-fut','','Previsão por mês','Faturamento por projeto, no mês previsto')}</div>
         <div class="c5">${caixa('g-futp','','Previsão por projeto','Total previsto')}</div></div>`;
   // filtros alinhados às colunas da tabela: mesma grade de larguras
-  const COLS = al? [8,19,15,13,7,7,11,11,9] : [9,22,19,16,9,9,12,4];
+  const COLS = al? [10,18,15,12,7,7,11,11,9] : [10,22,19,15,9,9,12,4];
   const gc = (i,n=1)=>`style="grid-column:${i} / span ${n}"`;
   h += `<div class="card">${al? `<div class="row" style="margin-bottom:6px"><div class="f"><span>Leitura do estoque</span><div class="seg" role="group">
         <button type="button" data-fmodo="fila" aria-pressed="${!ind}">Fila</button>
@@ -1911,18 +1945,17 @@ function viewFuturas(){
       <p class="note" style="margin:0 0 12px">${ind
       ? 'Individual: cada negociação é comparada com o estoque cheio, como se fosse a única. Serve para responder "esta rede eu atendo?" — a soma dos atendimentos passa do estoque que existe.'
       : 'Fila: o estoque é consumido na ordem do mês previsto (empate, a maior primeiro), só pelas negociações do filtro de mês, rede, distribuidor e projeto. Mostra até onde o estoque de hoje chega para elas.'}</p>`:''}
-    <div class="fcols" id="fcols" style="grid-template-columns:${COLS.map(c=>c+'%').join(' ')}">
-      <div ${gc(1)}>${multi('ms-fmes','Mês',[...new Set(todas.map(f=>f.mesPrevisto))].sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)}</div>
-      <div ${gc(2)}>${multi('ms-frede','Rede',[...new Set(todas.map(chRede))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)}</div>
-      <div ${gc(3)}>${multi('ms-fvia','Distribuidor',[...new Set(todas.map(f=>f.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)}</div>
-      <div ${gc(4)}>${multi('ms-fproj','Projeto',[...new Set(todas.map(f=>f.projeto).filter(Boolean))].sort().map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)}</div>
-      ${al? `<div ${gc(8,2)}><label class="f"><span>Situação</span><select id="fsit">${
-        [['','Todas',semSit.length],['int','Atende integral',semSit.filter(f=>cobre(f)>=0.999).length],
+    ${fcols(COLS,[
+      [1,1,multi('ms-fmes','Mês',[...new Set(todas.map(f=>f.mesPrevisto))].sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)],
+      [2,1,multi('ms-frede','Rede',[...new Set(todas.map(chRede))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)],
+      [3,1,multi('ms-fvia','Distribuidor',[...new Set(todas.map(f=>f.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)],
+      [4,1,multi('ms-fproj','Projeto',[...new Set(todas.map(f=>f.projeto).filter(Boolean))].sort().map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)],
+      al? [8,1,multi('ms-fsit','Estoque',
+        [['int','Atende integral',semSit.filter(f=>cobre(f)>=0.999).length],
          ['par','Atende parcial',semSit.filter(f=>cobre(f)>0&&cobre(f)<0.999).length],
          ['sem','Sem estoque',semSit.filter(f=>cobre(f)<=0).length],
-         ['falta','Falta algo (parcial + sem)',semSit.filter(f=>cobre(f)<0.999).length]]
-        .map(([v,r,n])=>`<option value="${v}"${S.fSit===v?' selected':''}>${r} (${fmt(n)})</option>`).join('')
-      }</select></label></div>`:''}</div>`;
+         ['falta','Falta algo (parcial + sem)',semSit.filter(f=>cobre(f)<0.999).length]].map(([v,r,n])=>[v,r+' ('+fmt(n)+')']),
+        S.fSit,'Todas','situações',1,true)] : null])}`;
   h += lista.length? `<div class="tw tw-fut" style="max-height:600px"><table class="alinhada"><colgroup>${COLS.map(c=>`<col style="width:${c}%">`).join('')}</colgroup><thead><tr><th class="l">Mês previsto</th><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th>Kits aluno</th><th>Kits prof.</th><th>Faturamento</th>${al?'<th class="l">Estoque</th>':''}<th></th></tr></thead><tbody>`+
     mostra.map(f=>`<tr><td class="l">${MES[+f.mesPrevisto.slice(5,7)-1]}/${f.mesPrevisto.slice(2,4)}</td>
       <td class="l wrap-t">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td>
@@ -1935,7 +1968,7 @@ function viewFuturas(){
   if(semMes) h += `<p class="note" style="margin-top:10px">${fmt(semMes)} negociaç${semMes===1?'ão':'ões'} da planilha sem mês previsto fica${semMes===1?'':'m'} de fora desta tela, inclusive dos totais e dos gráficos.</p>`;
   h += '</div>';
   $('#main').innerHTML = h;
-  ligaMulti('ms-fmes','fMes'); ligaMulti('ms-frede','fRede'); ligaMulti('ms-fvia','fVia'); ligaMulti('ms-fproj','fProj');
+  ligaMulti('ms-fsit','fSit'); ligaMulti('ms-fmes','fMes'); ligaMulti('ms-frede','fRede'); ligaMulti('ms-fvia','fVia'); ligaMulti('ms-fproj','fProj');
   const fs=$('#fsit'); if(fs) fs.onchange=()=>{ S.fSit=fs.value; S.fLim=60; viewFuturas(); };
   $$('[data-fmodo]').forEach(b=>b.onclick=()=>{ S.fModo = b.dataset.fmodo; viewFuturas(); });
   $$('[data-fdet]').forEach(b=>b.onclick=()=>{ const f=lista.find(x=>x.id===b.dataset.fdet); if(f) janelaFutura(f, al&&al.get(f.id)); });
@@ -2002,10 +2035,14 @@ function alocaFunil(modo, conj){
   });
   return saida;
 }
+function seloCor(txt, cor, textoEscuro){
+  return `<span class="selo" style="background:linear-gradient(180deg,color-mix(in srgb,${cor} 80%,#fff),${cor});color:${textoEscuro?'#2a1d05':'#fff'}" title="${esc(txt)}">${esc(txt)}</span>`; }
 function selo(c){
-  if(c >= 0.999) return '<span class="pill ok">Integral</span>';
-  if(c <= 0) return '<span class="pill low">Sem estoque</span>';
-  return `<span class="pill mid">Parcial ${dec(c*100,0)}%</span>`;
+  if(c >= 0.999) return '<span class="selo s-int">Integral</span>';
+  if(c <= 0) return '<span class="selo s-sem">Sem estoque</span>';
+  // parcial: a pílula vem preenchida até a porcentagem atendida
+  const pc=Math.max(4,Math.min(96,c*100));
+  return `<span class="selo s-par" style="--pc:${pc}%">Parcial ${dec(c*100,0)}%</span>`;
 }
 function barraEstoque(){
   if(ARQE.estado==='snap') return `<div class="basebar" style="margin-top:0"><div class="st"><span class="dot"></span><span>Estoque de <b>${esc(ARQE.nome)}</b> · ${fmt(EST.itens.length)} kits classificados</span></div></div>`;
@@ -2048,16 +2085,18 @@ function tabelaEstoque(pub, itens, projs){
 /* pizza (rosca) em SVG: fatias [{rot, v, cor}] */
 function pizza(fatias, money){
   const tot=fatias.reduce((t,f)=>t+f.v,0); if(!tot) return '<div class="empty">Sem estoque.</div>';
-  const R=80, r=48, cx=90, cy=90; let a0=-Math.PI/2, arcs='';
+  const R=82, r=50, cx=90, cy=90; let a0=-Math.PI/2, arcs='', defs='';
+  const uid='pz'+(pizza.n=(pizza.n||0)+1);
   const pt=(a,rr)=>[cx+rr*Math.cos(a), cy+rr*Math.sin(a)];
   fatias.forEach(f=>{ const frac=f.v/tot; if(frac<=0) return; const a1=a0+frac*2*Math.PI;
     const g=frac>0.5?1:0, [x0,y0]=pt(a0,R), [x1,y1]=pt(a1,R), [x2,y2]=pt(a1,r), [x3,y3]=pt(a0,r);
     const d = frac>=0.9999 ? `M${cx-R},${cy}a${R},${R} 0 1,0 ${2*R},0a${R},${R} 0 1,0 ${-2*R},0M${cx-r},${cy}a${r},${r} 0 1,1 ${2*r},0a${r},${r} 0 1,1 ${-2*r},0`
       : `M${x0},${y0}A${R},${R} 0 ${g},1 ${x1},${y1}L${x2},${y2}A${r},${r} 0 ${g},0 ${x3},${y3}Z`;
-    arcs += `<path d="${d}" fill="${f.cor}" fill-rule="evenodd" stroke="var(--panel)" stroke-width="1.5"><title>${esc(f.rot)}: ${money?BRLf(f.v):fmt(f.v)+' kits'} (${dec(frac*100,1)}%)</title></path>`;
+    const gi=uid+'g'+defs.length; defs+=`<radialGradient id="${gi}" cx="90" cy="90" r="${R}" gradientUnits="userSpaceOnUse"><stop offset="${r/R}" style="stop-color:color-mix(in srgb,${f.cor} 82%,#000)"/><stop offset="1" style="stop-color:color-mix(in srgb,${f.cor} 80%,#fff)"/></radialGradient>`;
+    arcs += `<path d="${d}" fill="url(#${gi})" fill-rule="evenodd" stroke="var(--panel)" stroke-width="1.5"><title>${esc(f.rot)}: ${money?BRLf(f.v):fmt(f.v)+' kits'} (${dec(frac*100,1)}%)</title></path>`;
     a0=a1; });
   const ord=fatias.filter(f=>f.v>0).sort((a,b)=>b.v-a.v);
-  return `<div class="pizza"><svg viewBox="0 0 180 180" role="img" aria-label="Distribuição">${arcs}
+  return `<div class="pizza"><svg viewBox="0 0 180 180" role="img" aria-label="Distribuição"><defs>${defs}<filter id="${uid}-sh" x="-15%" y="-15%" width="130%" height="135%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="${escuro()?.5:.18}"/></filter></defs><g filter="url(#${uid}-sh)">${arcs}</g>
       <text x="90" y="86" text-anchor="middle" class="pz-t">${money? BRL(tot) : fmt(tot)}</text><text x="90" y="104" text-anchor="middle" class="pz-s">${money?'valor líquido':'kits'}</text></svg>
     <ul class="pz-leg">${ord.map(f=>`<li><span class="sw" style="background:${f.cor}"></span><span class="pz-n">${esc(f.rot)}</span><b>${money? BRL(f.v) : fmt(f.v)}</b><span class="pz-p">${dec(f.v/tot*100,1)}%</span></li>`).join('')}</ul></div>`;
 }
@@ -2144,31 +2183,59 @@ function viewTabelas(){
 /* seleção múltipla: lista vazia = todos */
 /* filtros de tabela: cada filtro fica em cima da coluna a que se refere (mesma grade de larguras) */
 const colg = C => `<colgroup>${C.map(c=>`<col style="width:${c}%">`).join('')}</colgroup>`;
-const fcols = (C, itens) => `<div class="fcols" style="grid-template-columns:${C.map(c=>c+'%').join(' ')}">${itens.filter(Boolean).sort((x,y)=>x[0]-y[0]).map(([i,n,h])=>`<div style="grid-column:${i} / span ${n};grid-row:1">${h}</div>`).join('')}</div>`;
-function ajustaFcols(){ $$('.fcols').forEach(fc=>{ let t=fc.nextElementSibling; while(t&&!(t.classList&&t.classList.contains('tw'))) t=t.nextElementSibling;
-  if(t) fc.style.paddingRight=Math.max(0,t.offsetWidth-t.clientWidth-2)+'px'; }); }
-function multi(id, rotulo, opcoes, sel, todosTxt, plural, juntaAte){
+/* filtros no título da coluna: o filtro é montado escondido e, depois de desenhada a tela,
+   vai para dentro do cabeçalho da coluna i da tabela seguinte. Clicar no título abre a caixa. */
+const fcols = (C, itens) => `<div class="fcols-t" hidden>${itens.filter(Boolean).map(([i,n,h])=>`<div data-col="${i}">${h}</div>`).join('')}</div>`;
+function ajustaFcols(){
+  $$('.fcols-t').forEach(fc=>{ let t=fc.nextElementSibling; while(t&&!(t.classList&&t.classList.contains('tw'))) t=t.nextElementSibling;
+    if(!t){ fc.remove(); return; }
+    const ths=$$('thead tr:first-child th',t);
+    [...fc.children].forEach(d=>{ const th=ths[+d.dataset.col-1], w=d.firstElementChild; if(!th||!w) return;
+      const b=w.querySelector('.ms-btn'); if(b) b.insertAdjacentHTML('afterbegin',`<span class="th-nome">${esc(th.textContent.trim())}</span>`);
+      th.textContent=''; th.classList.add('thf'); th.appendChild(w); });
+    fc.remove(); });
+  $$('th.thf .ms-pop').forEach(p=>{ if(!p.hidden) ajustaPop(p); });
+}
+// a caixa aberta no cabeçalho fica presa à janela: ao rolar a tela ou a tabela, ela acompanha o título
+window.addEventListener('scroll', e=>{ if(e.target&&e.target.closest&&e.target.closest('.ms-pop')) return;
+  $$('th.thf .ms-pop').forEach(p=>{ if(!p.hidden) ajustaPop(p); }); }, true);
+window.addEventListener('resize', ()=>$$('th.thf .ms-pop').forEach(p=>{ if(!p.hidden) ajustaPop(p); }));
+function multi(id, rotulo, opcoes, sel, todosTxt, plural, juntaAte, unico){
+  if(unico) sel = sel? [sel] : [];
   const n = sel.length, nome = v => (opcoes.find(o=>o[0]===v)||[v,v])[1];
   const txt = !n? todosTxt : n<=juntaAte? sel.map(nome).join(', ') : `${n} ${plural}`;
   const aberto = S._msAberto===id;
-  return `<div class="f ms" id="${id}"><span>${rotulo}</span>
+  return `<div class="f ms" id="${id}"${unico?' data-unico="1"':''}><span>${rotulo}</span>
     <button type="button" class="ms-btn${n?' ativo':''}" aria-haspopup="true" aria-expanded="${aberto}" title="${esc(n?sel.map(nome).join(', '):todosTxt)}"><span class="ms-tx">${esc(txt)}</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="ms-pop"${aberto?'':' hidden'}><div class="ms-acoes"><button type="button" data-ms-todos>Ver ${todosTxt.toLowerCase()}</button><button type="button" data-ms-fecha>Fechar</button></div>
-    <div class="ms-lista">${opcoes.map(([v,t])=>`<label><input type="checkbox" value="${esc(v)}"${sel.includes(v)?' checked':''}><span>${esc(t)}</span></label>`).join('')}</div></div></div>`;
+    ${opcoes.length>12? `<input type="search" class="ms-busca" placeholder="Procurar…" aria-label="Procurar na lista">` : ''}<div class="ms-lista">${opcoes.map(([v,t])=>`<label><input type="${unico?'radio':'checkbox'}" name="${id}-op" value="${esc(v)}"${sel.includes(v)?' checked':''}><span>${esc(t)}</span></label>`).join('')}</div></div></div>`;
 }
-function ajustaPop(pop){ pop.style.left=''; pop.style.right=''; const r=pop.getBoundingClientRect(); if(r.right>document.documentElement.clientWidth-8){ pop.style.left='auto'; pop.style.right='0'; } }
+function ajustaPop(pop){ pop.style.left=''; pop.style.right=''; pop.style.top='';
+  const th=pop.closest('th');
+  if(th){ const b=(pop.parentNode.querySelector('.ms-btn')||th).getBoundingClientRect(), vw=document.documentElement.clientWidth;
+    const vh=window.innerHeight, l=$('.ms-lista',pop);
+    th.style.zIndex='40';
+    const baixo=vh-b.bottom-14, cima=b.top-14, emCima = baixo<220 && cima>baixo;
+    if(l) l.style.maxHeight=Math.max(120,Math.min(300,(emCima?cima:baixo)-60))+'px';
+    pop.style.left=Math.max(8,Math.min(b.left-6, vw-pop.offsetWidth-8))+'px';
+    pop.style.top=(emCima? Math.max(8,b.top-6-pop.offsetHeight) : b.bottom+6)+'px'; return; }
+  const r=pop.getBoundingClientRect(); if(r.right>document.documentElement.clientWidth-8){ pop.style.left='auto'; pop.style.right='0'; } }
 function ligaMulti(id, chave){
   const cx = $('#'+id); if(!cx) return;
   const pop = $('.ms-pop',cx), btn = $('.ms-btn',cx); if(!pop.hidden) ajustaPop(pop);
-  const fecha = ()=>{ S._msAberto=''; pop.hidden=true; btn.setAttribute('aria-expanded','false'); };
+  const unico = !!cx.dataset.unico;
+  const fecha = ()=>{ S._msAberto=''; pop.hidden=true; btn.setAttribute('aria-expanded','false'); const th=cx.closest('th'); if(th) th.style.zIndex=''; };
   btn.onclick = e=>{ e.stopPropagation(); const abrir = pop.hidden;
     $$('.ms-pop').forEach(p=>p.hidden=true); $$('.ms-btn').forEach(b=>b.setAttribute('aria-expanded','false'));
     if(abrir){ S._msAberto=id; pop.hidden=false; btn.setAttribute('aria-expanded','true'); ajustaPop(pop); } else S._msAberto=''; };
   pop.onclick = e=>e.stopPropagation();
-  const aplica = ()=>{ S[chave] = $$('input[type=checkbox]:checked',pop).map(i=>i.value); S.vLim=60; S.fLim=60; S._msAberto=id;
+  const aplica = ()=>{ const v=$$('input:checked',pop).map(i=>i.value); S[chave] = unico? (v[0]||'') : v; S.vLim=60; S.fLim=60; S._msAberto=unico? '' : id;
     const sc = $('.ms-lista',pop).scrollTop; render(); const l=$('#'+id+' .ms-lista'); if(l) l.scrollTop=sc; };
-  $$('input[type=checkbox]',pop).forEach(i=>i.onchange=aplica);
-  $('[data-ms-todos]',pop).onclick = ()=>{ $$('input[type=checkbox]',pop).forEach(i=>i.checked=false); aplica(); };
+  $$('.ms-lista input',pop).forEach(i=>i.onchange=aplica);
+  const bu=$('.ms-busca',pop); if(bu){ const filtra=()=>{ const q=SEMACENTO(bu.value).trim(); $$('.ms-lista label',pop).forEach(l=>l.hidden=!!q && SEMACENTO(l.textContent).indexOf(q)<0); };
+    bu.value=S._msBusca&&S._msAberto===id? S._msBusca : ''; filtra();
+    bu.oninput=()=>{ S._msBusca=bu.value; filtra(); }; }
+  $('[data-ms-todos]',pop).onclick = ()=>{ $$('.ms-lista input',pop).forEach(i=>i.checked=false); S._msBusca=''; aplica(); };
   $('[data-ms-fecha]',pop).onclick = fecha;
 }
 document.addEventListener('click',()=>{ if(!S._msAberto) return; S._msAberto=''; $$('.ms-pop').forEach(p=>p.hidden=true); $$('.ms-btn').forEach(b=>b.setAttribute('aria-expanded','false')); });
@@ -2396,7 +2463,7 @@ function viewPagamentos(){
       const emp=Object.values(gE).map(g=>`${esc(g.numero)}${g.quitado?' ✔':''} <span class="note">${g.datas.length>1? g.datas.length+' pagamentos, '+esc(g.datas[0])+' a '+esc(g.datas[g.datas.length-1]) : esc(g.datas[0])}</span>`).join('<br>');
       const url=c.link||(CONC&&CONC.portais&&CONC.portais[p.rede]&&CONC.portais[p.rede].url)||'';
       return `<tr><td class="l">${esc(nomeRede(p))}</td><td class="l">${esc(p.nfn)}</td><td class="l">${brD(p.emissao)}</td><td>${p.dias==null?'':fmt(p.dias)}</td><td class="l">${esc(short(p.projeto))}</td><td>${BRLf(p.valor)}</td>
-        <td class="l"><span class="pill" style="color:${SITCOR[p.situacao]||'var(--muted)'}">${esc(p.situacao)}</span></td><td class="l wrap-t">${esc(c.credor||'')}</td><td class="l">${emp||'—'}</td>
+        <td class="l">${seloCor(p.situacao, SITCOR[p.situacao]||'var(--muted)', (SITCOR[p.situacao]||'').indexOf('--sun')>=0)}</td><td class="l wrap-t">${esc(c.credor||'')}</td><td class="l">${emp||'—'}</td>
         <td class="l wrap-t" style="min-width:220px" title="${esc(c.achado||'')}">${esc(c.proximo||(p.situacao==='Não consultado'?'Pesquisar empenho e pagamento':''))}</td>
         <td class="l">${url?`<a href="${esc(url)}" target="_blank" rel="noopener">abrir</a>`:'—'}</td></tr>`;}).join('') || '<tr><td colspan="11" class="l"><span class="note">Nenhuma nota neste filtro.</span></td></tr>'}
     </tbody></table></div></div>`;
