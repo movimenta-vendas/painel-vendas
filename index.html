@@ -273,7 +273,12 @@ body.modal-on{overflow:hidden}
 <style>:root{color-scheme:light}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <script>try{if(localStorage.getItem('mvt-tema')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 <style>
-.tema-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 12.5px var(--body);cursor:pointer}
+.linhas{margin-left:auto;display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--panel);gap:2px}
+.linhas button{border:0;background:transparent;color:var(--muted);font:600 13.5px var(--disp);padding:7px 16px;border-radius:999px;cursor:pointer}
+.linhas button[aria-pressed=true]{background:var(--mag);color:#fff}
+.linhas button:not([aria-pressed=true]):hover{color:var(--ink);background:var(--wash)}
+@media (max-width:520px){.linhas button{padding:6px 11px;font-size:12.5px}}
+.tema-btn{margin-left:0;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 12.5px var(--body);cursor:pointer}
 .tema-btn:hover{border-color:var(--mag);color:var(--mag)}
 .tema-btn svg{width:16px;height:16px}
 .tema-btn .ic-sol{display:none}
@@ -337,6 +342,7 @@ window.__VIEWER={
         <h1>Controle de Vendas</h1>
         <p class="sub" id="meta">Carregando…</p>
       </div>
+      <div class="linhas" id="linhas" role="group" aria-label="Linha de negócio"></div>
       <button type="button" class="tema-btn" id="b-tema" title="Alternar tela clara / escura" aria-label="Alternar tela clara / escura" onclick="(function(){var r=document.documentElement,d=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',d);try{localStorage.setItem('mvt-tema',d)}catch(e){}var t=document.querySelector('#b-tema .tx');if(t)t.textContent=d==='dark'?'Claro':'Escuro';})()">
         <svg class="ic-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="ic-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -407,8 +413,15 @@ const S = {tab:'faturamento',
   vq:'', vAno:[], vProj:[], vUF:[], vOp:'VENDA', vLim:60, vDet:'',
   fq:'', fProj:'', fUF:'', fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
   eProj:'', eSoltos:false};
-const TABS = [['faturamento','Faturamento mensal'],['acervo','Acervo literário'],
-  ['vendas','Vendas'],['pagamentos','Pagamentos'],['futuras','Vendas futuras'],['orc','Orçamentos'],['estoque','Estoque'],['tabelas','Tabelas']];
+/* duas linhas de negócio, cada uma com as suas abas */
+const LINHAS = [['proj','Projetos'],['lit','Literatura']];
+const TABS_LINHA = {
+  proj:[['faturamento','Faturamento'],['vendas','Vendas'],['futuras','Vendas futuras'],['pagamentos','Pagamentos'],['estoque','Estoque'],['orc','Orçamentos'],['tabelas','Tabelas']],
+  lit:[['acervo','Faturamento'],['lvendas','Vendas'],['lestoque','Estoque'],['lorc','Orçamentos']] };
+const tabsAtuais = () => TABS_LINHA[S.linha] || TABS_LINHA.proj;
+S.linha='proj'; S.tabL={proj:'faturamento', lit:'acervo'};
+try{ const l=localStorage.getItem('mvt-linha'); if(TABS_LINHA[l]) S.linha=l; const t=JSON.parse(localStorage.getItem('mvt-tabs')||'null'); if(t) Object.assign(S.tabL,t); }catch(e){}
+S.tab=S.tabL[S.linha];
 
 /* ---------------- derivados ---------------- */
 const vendas = () => BASE.vendas;
@@ -778,12 +791,14 @@ async function interpretaEstoque(file){
   const iItem = cab.indexOf('ITEM');
   const iQtd = cab.indexOf('EM ESTOQUE');
   const iCont = cab.indexOf('CONTAGEM FÍSICA')>=0? cab.indexOf('CONTAGEM FÍSICA') : cab.indexOf('CONTAGEM FISICA');
-  const itens = [], soltos = [];
+  const itens = [], soltos = [], livros = [];
   for(let r=1;r<linhas.length;r++){
     const L = linhas[r]; if(!L) continue;
     const desc = limpa(L[iDesc>=0? iDesc : iItem]);
     if(!desc) continue;
     const u = SEMACENTO(desc);
+    const isbn = iItem>=0? limpa(L[iItem]).replace(/[^0-9X]/gi,'') : '';
+    if(/^97[89]\d{10}$/.test(isbn) && u.indexOf('KIT')<0){ livros.push({isbn, titulo:desc, qtd:numero(L[iQtd])}); continue; }
     const kitSemNome = (u.indexOf('BANCO MAIS')>=0 || u.indexOf('A VOZ E A VEZ')>=0) && u.indexOf('PROJETO DO')>=0;   // Banco Mais e VV vêm como "PROJETO DO ALUNO/PROFESSOR", sem a palavra KIT
     if(u.indexOf('KIT') < 0 && !kitSemNome) continue;          // só kits de projeto
     const qtd = numero(L[iQtd]);
@@ -794,7 +809,7 @@ async function interpretaEstoque(file){
     if(projeto && serie && (publico==='aluno'||publico==='professor')) itens.push(linha);
     else soltos.push(linha);
   }
-  return {itens, soltos, arquivo:file.name, modificado:file.lastModified, lidoEm:Date.now()};
+  return {itens, soltos, livros, arquivo:file.name, modificado:file.lastModified, lidoEm:Date.now()};
 }
 /* ---------------- leitura da planilha ---------------- */
 function idbAbre(){
@@ -1067,7 +1082,7 @@ async function iniciar(){
   if(window.__VIEWER){ await window.__VIEWER.unlock(); }
   if(window.__SNAP){
     const D=window.__SNAP; document.body.classList.add('snap');
-    if(!D.conc){ const i=TABS.findIndex(t=>t[0]==='pagamentos'); if(i>=0) TABS.splice(i,1); if(S.tab==='pagamentos') S.tab='faturamento'; }
+    if(!D.conc){ const T=TABS_LINHA.proj, i=T.findIndex(t=>t[0]==='pagamentos'); if(i>=0) T.splice(i,1); if(S.tab==='pagamentos'){ S.tab='faturamento'; S.tabL.proj='faturamento'; } }
     assume(D.base); ARQ.nome=D.base.arquivo||'CONTROLE - VENDAS.xlsx'; ARQ.estado='snap';
     if(D.est){ EST=D.est; ARQE.nome=D.est.arquivo||''; ARQE.estado='snap'; }
     if(D.conc){ CONC=D.conc; ARQC.estado='snap'; }
@@ -1415,8 +1430,35 @@ function viewSeries(){
 }
 
 /* ---------------- aba: vendas ---------------- */
+/* ---------------- literatura: estoque de livros ---------------- */
+function viewEstoqueLivros(){
+  const L = (EST&&EST.livros)||null;
+  if(!L){ $('#main').innerHTML = barraEstoque() + `<div class="card"><div class="empty">${EST? 'O estoque carregado é de uma versão anterior. Clique em <b>Atualizar estoque</b> para ler também os livros.' : 'Carregue a planilha de estoque para ver os livros.'}</div></div>`; ligaEstoqueBotoes(); return; }
+  const q = (S.lq||'').toLowerCase(), sit=S.lsit||'';
+  const f = L.filter(b=>(!q || (b.titulo+' '+b.isbn).toLowerCase().includes(q)) && (!sit || (sit==='com'? b.qtd>0 : b.qtd<=0)))
+             .sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
+  const com=L.filter(b=>b.qtd>0).length, ex=L.reduce((t,b)=>t+Math.max(0,b.qtd||0),0);
+  let h = `<div class="kpis">
+    <div class="kpi"><div class="l">Títulos no estoque</div><div class="v">${fmt(L.length)}</div><div class="d">${esc(EST.arquivo||'')}</div></div>
+    <div class="kpi"><div class="l">Com saldo</div><div class="v">${fmt(com)}</div></div>
+    <div class="kpi"><div class="l">Sem saldo</div><div class="v">${fmt(L.length-com)}</div></div>
+    <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(ex)}</div></div></div>`;
+  h += `<div class="card"><div class="row" style="margin-bottom:12px">
+      <label class="f grow"><span>Buscar</span><input type="search" id="lq" value="${esc(S.lq||'')}" placeholder="Título ou ISBN"></label>
+      <label class="f"><span>Situação</span><select id="lsit"><option value="">Todos</option><option value="com"${sit==='com'?' selected':''}>Com saldo</option><option value="sem"${sit==='sem'?' selected':''}>Sem saldo</option></select></label></div>
+    <p class="note" style="margin:-4px 0 10px">Do relatório de estoque do NetSuite (itens com ISBN). Editora, autor e preço entram com a integração do catálogo.</p>
+    ${f.length? `<div class="tw" style="max-height:640px"><table><thead><tr><th class="l">Título</th><th class="l">ISBN</th><th>Em estoque</th></tr></thead><tbody>${
+      f.map(b=>`<tr><td class="l wrap-t">${esc(b.titulo)}</td><td class="l">${esc(b.isbn)}</td><td>${b.qtd>0? fmt(b.qtd) : '<span class="tag" style="color:var(--bad)">sem saldo</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nenhum título neste filtro.</div>'}</div>`;
+  $('#main').innerHTML = barraEstoque() + h; ligaEstoqueBotoes();
+  liga('#lq','lq',true); const ls=$('#lsit'); if(ls) ls.onchange=()=>{ S.lsit=ls.value; render(); };
+}
+function viewOrcLit(){
+  $('#main').innerHTML = `<div class="card"><h2>Orçamentos de literatura</h2><p class="sub">Em construção</p>
+    <div class="empty">O gerador de orçamentos de livros (com clientes, condições comerciais da literatura e lista de preços) entra aqui na próxima etapa.</div></div>`;
+}
 function vendasFiltradas(){
-  let r = vendas().filter(v=>(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(!S.vOp||v.operacao===S.vOp));
+  const daLinha = v => S.linha==='lit'? v.projeto===ACERVO : v.projeto!==ACERVO;
+  let r = vendas().filter(v=>daLinha(v)&&(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(S.linha==='lit'||!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(!S.vOp||v.operacao===S.vOp));
   if(S.vq){const q=S.vq.toLowerCase(); r=r.filter(v=>[v.rede,v.uf,v.via,v.pedido,v.nf,v.projeto].join(' ').toLowerCase().includes(q));}
   return r.sort((a,b)=>String(b.emissao||'').localeCompare(String(a.emissao||'')));
 }
@@ -1649,7 +1691,12 @@ function janelaFutura(f, al){
 function viewVendas(){
   const r = vendasFiltradas(), mostra = r.slice(0,S.vLim);
   const anos = [...new Set(vendas().map(v=>v.ano))].filter(Boolean).sort((a,b)=>b-a);
-  let h = `<div class="kpis">
+  const LIT = S.linha==='lit';
+  let h = LIT? `<div class="kpis">
+    <div class="kpi"><div class="l">Pedidos</div><div class="v">${fmt(r.length)}</div><div class="d">no filtro atual</div></div>
+    <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsAluno||0),0))}</div></div>
+    <div class="kpi"><div class="l">Redes e clientes</div><div class="v">${fmt(new Set(r.map(v=>v.rede+'|'+v.uf)).size)}</div></div>
+    <div class="kpi"><div class="l">Faturamento</div><div class="v">${BRL(r.reduce((s,v)=>s+(v.valor||0),0))}</div></div></div>` : `<div class="kpis">
     <div class="kpi"><div class="l">Pedidos</div><div class="v">${fmt(r.length)}</div><div class="d">no filtro atual</div></div>
     <div class="kpi"><div class="l">Kits aluno</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsAluno||0),0))}</div></div>
     <div class="kpi"><div class="l">Alunos</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsAluno||0)*multDe(v.projeto),0))}</div><div class="d">kits × unidades por kit</div></div>
@@ -1658,15 +1705,15 @@ function viewVendas(){
   h += `<div class="card"><div class="row" style="margin-bottom:12px">
       <label class="f grow"><span>Buscar</span><input type="search" id="vq" value="${esc(S.vq)}" placeholder="Rede, UF, pedido, NF ou projeto"></label>
       ${multi('ms-ano','Ano',anos.map(a=>[String(a),String(a)]),S.vAno,'Todos','anos',4)}
-      ${multi('ms-proj','Projeto',projetos().map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)}
+      ${S.linha==='lit'? '' : multi('ms-proj','Projeto',projetos().filter(p=>p!==ACERVO).map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)}
       ${multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)}
       <label class="f"><span>Operação</span><select id="vop"><option value="">Todas</option>${BASE.operacoes.map(o=>`<option${S.vOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>
       <button class="btn" id="csv" type="button">Baixar CSV</button></div>`;
-  h += r.length? `<div class="tw" style="max-height:640px"><table><thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th class="l">Operação</th><th>Kits aluno</th><th>Kits prof.</th><th>Valor</th><th class="l">NF</th><th></th></tr></thead><tbody>`+
+  h += r.length? `<div class="tw" style="max-height:640px"><table><thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th></th></tr></thead><tbody>`+
     mostra.map(v=>`<tr><td class="l">${brD(v.emissao)||'<span class="tag">sem data</span>'}</td><td class="l">${esc(v.pedido)}</td>
       <td class="l wrap-t">${esc(v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(v.via)}</td>
-      <td class="l"><span class="sw" style="background:${corDe(v.projeto)}"></span>${esc(short(v.projeto))}</td>
-      <td class="l">${esc(v.operacao)}</td><td>${fmt(v.kitsAluno)}</td><td>${fmt(v.kitsProf)}</td><td>${BRLf(v.valor)}</td><td class="l">${esc(v.nf)}</td>
+      ${LIT?'':`<td class="l"><span class="sw" style="background:${corDe(v.projeto)}"></span>${esc(short(v.projeto))}</td>`}
+      <td class="l">${esc(v.operacao)}</td>${LIT?`<td>${fmt(v.kitsAluno)}</td>`:`<td>${fmt(v.kitsAluno)}</td><td>${fmt(v.kitsProf)}</td>`}<td>${BRLf(v.valor)}</td><td class="l">${esc(v.nf)}</td>
       <td><button class="btn sm" data-det="${v.id}" type="button">Detalhes</button></td></tr>`).join('')+
     `</tbody></table></div>${r.length>mostra.length?`<p style="margin-top:12px"><button class="btn" id="mais" type="button">Mostrar mais 100 (${fmt(r.length-mostra.length)} restantes)</button></p>`:''}`
     : '<div class="empty">Nenhuma venda neste filtro.</div>';
@@ -2207,7 +2254,7 @@ function painelAcoes(aberto,naoId,extratos){
 }
 
 /* ---------------- render ---------------- */
-const VIEWS={orc:()=>{},pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
+const VIEWS={orc:()=>{}, lvendas:()=>viewVendas(), lestoque:()=>viewEstoqueLivros(), lorc:()=>viewOrcLit(),pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
 /* ---------------- aba: orçamentos (gerador embutido numa moldura) ----------------
    A moldura é criada uma vez e fica viva enquanto o app estiver aberto: trocar de aba
    ou de tema não perde o orçamento em andamento. Histórico fica no navegador de cada um. */
@@ -2234,9 +2281,16 @@ async function montaOrc(host){
 function orcAltura(){ if(!ORC_FR) return; try{ const r=ORC_FR.contentDocument&&ORC_FR.contentDocument.documentElement; if(r) r.setAttribute('data-theme', escuro()?'dark':'light'); }catch(e){} const h=$('header.top'); ORC_FR.style.height=Math.max(420, innerHeight-(h?h.offsetHeight:0)-14)+'px'; }
 addEventListener('resize',orcAltura);
 function abas(){
-  $('#tabs').innerHTML = TABS.map(([k,l])=>`<button role="tab" type="button" data-t="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('');
-  $$('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;
-    try{history.replaceState(null,'','#'+S.tab);}catch(e){} render(); window.scrollTo(0,0);});
+  if(!tabsAtuais().some(t=>t[0]===S.tab)) S.tab=tabsAtuais()[0][0];
+  const lb=$('#linhas'); if(lb){
+    lb.innerHTML = LINHAS.map(([k,l])=>`<button type="button" data-linha="${k}" aria-pressed="${S.linha===k}">${l}</button>`).join('');
+    $$('#linhas button').forEach(b=>b.onclick=()=>{ if(S.linha===b.dataset.linha) return; S.linha=b.dataset.linha; S.tab=S.tabL[S.linha]; guardaNav(); render(); window.scrollTo(0,0); }); }
+  $('#tabs').innerHTML = tabsAtuais().map(([k,l])=>`<button role="tab" type="button" data-t="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('');
+  $$('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t; S.tabL[S.linha]=S.tab; guardaNav(); render(); window.scrollTo(0,0);});
+}
+function guardaNav(){
+  try{ localStorage.setItem('mvt-linha',S.linha); localStorage.setItem('mvt-tabs',JSON.stringify(S.tabL)); }catch(e){}
+  try{ history.replaceState(null,'','#'+S.linha+'/'+S.tab); }catch(e){}
 }
 function cabecalho(){
   $('#meta').textContent = pronto
@@ -2254,7 +2308,8 @@ function render(){
   }
   (VIEWS[S.tab]||viewFaturamento)();
 }
-const hsh=(location.hash||'').slice(1); if(VIEWS[hsh] && TABS.some(t=>t[0]===hsh)) S.tab=hsh;
+{ const h=(location.hash||'').slice(1).split('/'); const [l,t]= h.length>1? h : [Object.keys(TABS_LINHA).find(k=>TABS_LINHA[k].some(x=>x[0]===h[0])), h[0]];
+  if(TABS_LINHA[l] && TABS_LINHA[l].some(x=>x[0]===t)){ S.linha=l; S.tab=t; S.tabL[l]=t; } }
 render();
 const rr=()=>render();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',rr);
