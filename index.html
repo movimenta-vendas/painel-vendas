@@ -33,7 +33,30 @@
   --field:#1F181D; --field-line:#4D3C47; --ok:#6CC59B; --ok-forte:#8FE0B8; --warn:#F09A70; --bad:#F08A80;
   --grid:#352A31; --axis:#4A3542; --wash:rgba(208,122,170,.12); --plate:#F5EFF2; color-scheme:dark}
 *{box-sizing:border-box}
-#orc-host{padding-top:4px}
+.pizza{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.pizza svg{width:190px;height:190px;flex:none}
+.pz-t{font-family:var(--disp);font-weight:600;font-size:15px;fill:var(--ink)}.pz-s{font-size:10px;fill:var(--muted)}
+.pz-leg{list-style:none;margin:0;padding:0;flex:1;min-width:200px;display:grid;gap:5px}
+.pz-leg li{display:grid;grid-template-columns:12px 1fr auto 52px;gap:8px;align-items:center;font-size:13px}
+.pz-leg b{font-variant-numeric:tabular-nums;font-weight:600}.pz-p{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.pz-h{font-size:14px;margin:0 0 6px;color:var(--muted);font-weight:600}
+.ed-cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.ed-card{text-align:left;font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--ed);border-radius:12px;padding:12px 14px;cursor:pointer}
+.ed-card:hover{background:var(--wash)}.ed-card.on{box-shadow:0 0 0 2px var(--ed) inset}
+.ed-top{display:flex;align-items:center;gap:8px;font-family:var(--disp)}.ed-top .ed-n{margin-left:auto;color:var(--muted);font-size:12px}
+.ed-dot{width:9px;height:9px;border-radius:50%;background:var(--ed)}
+.ed-v{font-family:var(--disp);font-size:22px;font-weight:600;margin:6px 0 8px}.ed-v small{font-size:12px;color:var(--muted);font-weight:400}
+.ed-barra{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--grid)}
+.ed-barra i,.ed-leg i{display:block}.ed-barra .ok,.ed-leg .ok,.est-pill.ok{background:var(--ok)}.ed-barra .bx,.ed-leg .bx{background:var(--sun)}.ed-barra .sm,.ed-leg .sm{background:var(--bad)}
+.ed-leg{display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--muted)}.ed-leg span{display:flex;align-items:center;gap:5px}.ed-leg i{width:8px;height:8px;border-radius:2px}
+.est-pill{display:inline-block;min-width:54px;text-align:center;padding:3px 10px;border-radius:99px;font-weight:600;font-size:12.5px;color:#fff}
+.est-pill.baixo{background:var(--sun);color:#3a2a00}.est-pill.sem{background:transparent;color:var(--bad);border:1px solid var(--bad);font-weight:500}
+.ed-chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px}.ed-chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ed)}
+table.est-lit .sub-a{display:block;font-size:12px;color:var(--muted);font-weight:400}
+table.est-lit tr.s-sem td{background:color-mix(in srgb,var(--bad) 5%,transparent)}
+.mono{font-variant-numeric:tabular-nums;letter-spacing:.01em}
+details.fora{margin-top:14px}details.fora summary{cursor:pointer;color:var(--muted);font-size:13px}
+#orc-host,#lit-host{padding-top:4px}
 .orc-fr{display:block;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .ms{position:relative;min-width:120px}
 .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:7px 9px;font:inherit;font-family:var(--body);color:var(--ink);background:var(--field);border:1px solid var(--field-line);border-radius:7px;cursor:pointer;text-align:left}
@@ -355,6 +378,7 @@ window.__VIEWER={
 <div class="wrap"><div class="basebar" id="basebar" hidden></div></div>
 <main id="main" class="wrap"><div class="empty">Carregando…</div></main>
 <div id="orc-host" class="wrap" hidden></div>
+<div id="lit-host" class="wrap" hidden></div>
 <footer class="credito">Desenvolvido por Dhug™</footer>
 </div>
 
@@ -411,13 +435,13 @@ const S = {tab:'faturamento',
   aAno:0, aUF:'', aReg:'', aVia:'', aOp:'VENDA', aMed:'kits', aEsc:'linear',
   sAno:0, sProj:'', sUF:'', sReg:'', sOp:'VENDA', sPub:'aluno', sEixo:'projeto',
   vq:'', vAno:[], vProj:[], vUF:[], vOp:'VENDA', vLim:60, vDet:'',
-  fq:'', fProj:'', fUF:'', fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
+  fq:'', fProj:[], fUF:'', fMes:[], fRede:[], fVia:[], fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
   eProj:'', eSoltos:false};
 /* duas linhas de negócio, cada uma com as suas abas */
 const LINHAS = [['proj','Projetos'],['lit','Literatura']];
 const TABS_LINHA = {
   proj:[['faturamento','Faturamento'],['vendas','Vendas'],['futuras','Vendas futuras'],['pagamentos','Pagamentos'],['estoque','Estoque'],['orc','Orçamentos'],['tabelas','Tabelas']],
-  lit:[['acervo','Faturamento'],['lvendas','Vendas'],['lestoque','Estoque'],['lorc','Orçamentos']] };
+  lit:[['acervo','Faturamento'],['lvendas','Vendas'],['lestoque','Estoque'],['lprecos','Lista de preços'],['lorc','Orçamentos']] };
 const tabsAtuais = () => TABS_LINHA[S.linha] || TABS_LINHA.proj;
 S.linha='proj'; S.tabL={proj:'faturamento', lit:'acervo'};
 try{ const l=localStorage.getItem('mvt-linha'); if(TABS_LINHA[l]) S.linha=l; const t=JSON.parse(localStorage.getItem('mvt-tabs')||'null'); if(t) Object.assign(S.tabL,t); }catch(e){}
@@ -943,6 +967,7 @@ async function carregaVendasDaPasta(){
     const h=(await arquivosDaPasta()).find(x=>ehArqVendas(x.name));
     if(!h){ ARQ.erro='Não encontrei a planilha VENDAS - Controle.xlsx em '+PASTA.nome+(PASTA.nome==='CLAUDE'?'\\1 - FONTES':'')+'. Escolha a pasta CLAUDE.'; render(); return; }
     ARQ.handle=h; ARQ.nome=h.name; await leArquivo(await h.getFile());
+    await carregaLitDaPasta();
   }catch(e){ ARQ.erro='Não consegui ler a pasta '+PASTA.nome+'.'; render(); }
 }
 async function carregaEstoqueDaPasta(){
@@ -956,7 +981,7 @@ async function carregaEstoqueDaPasta(){
       try{
         EST = await interpretaEstoque(f);
         ARQE.handle=h; ARQE.nome=h.name; ARQE.estado='ok'; ARQE.lendo=false;
-        kv('put','estoque',EST).catch(()=>{}); render(); return;
+        kv('put','estoque',EST).catch(()=>{}); litInvalida(); render(); return;
       }catch(e){ /* não é a planilha de estoque: tenta a próxima */ }
     }
     ARQE.erro='Não encontrei a planilha de estoque (com a coluna "Em estoque") na pasta '+PASTA.nome+'.';
@@ -1050,12 +1075,13 @@ async function publicarBase(){
   try{
     const em=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',',' às');
     const orc = (()=>{ const f=orcFonte(); return f&&f.gz? {gz:f.gz, fixo:orcConfig()} : null; })();
-    const completa={em, base:BASE, est:EST||null, conc:CONC||null, orc};
-    const geral={em, base:BASE, est:EST||null, conc:null, orc};
+    const lit = (()=>{ const e=document.getElementById('lit-src'); return e&&LIT? {gz:e.textContent.trim(), fonte:{catalogo:LIT.catalogo, catMeta:LIT.catMeta, distribuidores:LIT.distribuidores, config:litConfig()}} : null; })();
+    const completa={em, base:BASE, est:EST||null, conc:CONC||null, orc, lit};
+    const geral={em, base:BASE, est:EST||null, conc:null, orc, lit};
     // 1) cópia aberta na pasta-fonte
     if(PASTA.handle){
       let p=await PASTA.handle.queryPermission({mode:'readwrite'}); if(p!=='granted') p=await PASTA.handle.requestPermission({mode:'readwrite'});
-      if(p==='granted'){ const dA=await dirApp(); const fh=await dA.getFileHandle('base_vendas.json',{create:true}); const w=await fh.createWritable(); await w.write(JSON.stringify(Object.assign({},completa,{orc:undefined}))); await w.close(); passo('base_vendas.json gravado em '+PASTA.nome+(PASTA.nome==='CLAUDE'?'\\3 - APP':'')+'.','ok'); }
+      if(p==='granted'){ const dA=await dirApp(); const fh=await dA.getFileHandle('base_vendas.json',{create:true}); const w=await fh.createWritable(); await w.write(JSON.stringify(Object.assign({},completa,{orc:undefined,lit:undefined}))); await w.close(); passo('base_vendas.json gravado em '+PASTA.nome+(PASTA.nome==='CLAUDE'?'\\3 - APP':'')+'.','ok'); }
       else passo('Sem permissão de escrita na pasta '+PASTA.nome+': a cópia local não foi gravada.','warn');
     } else passo('Pasta-fonte não escolhida: a cópia local não foi gravada.','warn');
     // 2) página de visualização
@@ -1093,6 +1119,7 @@ async function iniciar(){
   const cc = await kv('get','conc'); if(cc && cc.itens){ CONC = cc; ARQC.estado='cache'; }
   const est = await kv('get','estoque');
   if(est && est.itens){ EST = est; ARQE.nome = est.arquivo||''; ARQE.estado='cache'; }
+  const lc = await kv('get','lit'); if(lc && lc.catalogo) LIT = lc;
   render();
   const usaPasta = temPasta && await religaPasta();
   if(temFS && !usaPasta){ await religaArquivo(); await religaEstoque(); }
@@ -1430,32 +1457,73 @@ function viewSeries(){
 }
 
 /* ---------------- aba: vendas ---------------- */
-/* ---------------- literatura: estoque de livros ---------------- */
+/* ---------------- literatura: estoque de livros ----------------
+   Cruza o relatório do NetSuite (itens com ISBN) com o catálogo (LITERATURA - Catalogo):
+   pelo ISBN e, quando o NetSuite usa outro ISBN, pelo título. Obra do catálogo que não aparece
+   no relatório conta como sem saldo. */
+const ED_COR = {'Movimenta':'var(--mag)','Prefácio':'var(--sky)','Rovelle':'var(--clay)'};
+const ED_NOME = {'Movimenta':'Movimenta e MVT','Prefácio':'Prefácio','Rovelle':'Rovelle'};
+const chaveTitL = t => { let x=normT(t).replace(/[^a-z0-9 ,]/g,' ').replace(/\s+/g,' ').trim(); const m=x.match(/^(.*),\s*(o|a|os|as|um|uma)$/); if(m) x=m[2]+' '+m[1]; return x.replace(/,/g,' ').replace(/\s+/g,' ').trim(); };
+const BAIXO = 20;   // abaixo disto, "estoque baixo"
+function catalogoLit(){ if(window.__SNAP) return (window.__SNAP.lit&&window.__SNAP.lit.fonte&&window.__SNAP.lit.fonte.catalogo)||[]; return (LIT&&LIT.catalogo)||[]; }
+function estoqueLivros(){
+  const L=(EST&&EST.livros)||[], cat=catalogoLit();
+  const porIsbn=new Map(); L.forEach(b=>porIsbn.set(b.isbn,(porIsbn.get(b.isbn)||0)+(+b.qtd||0)));
+  const usados=new Set(), linhas=[];
+  const porTit=new Map(); L.forEach(b=>{ const k=chaveTitL(b.titulo); if(!porTit.has(k)) porTit.set(k,b); });
+  cat.forEach(c=>{
+    let q=null, via='isbn', nsIsbn=c.i;
+    if(porIsbn.has(c.i)){ q=porIsbn.get(c.i); usados.add(c.i); }
+    else { const b=porTit.get(chaveTitL(c.t)); if(b && !usados.has(b.isbn)){ q=+b.qtd||0; usados.add(b.isbn); via='titulo'; nsIsbn=b.isbn; } }
+    linhas.push({t:c.t, e:c.e, a:c.a, p:c.p, isbn:c.i, ns:nsIsbn, qtd:q==null?0:Math.max(0,q), noRel:q==null, via, cat:true});
+  });
+  L.forEach(b=>{ if(!usados.has(b.isbn)) linhas.push({t:b.titulo, e:'', a:'', p:null, isbn:b.isbn, ns:b.isbn, qtd:Math.max(0,+b.qtd||0), noRel:false, via:'isbn', cat:false}); });
+  return linhas;
+}
+const sitLivro = x => x.qtd<=0? 'sem' : x.qtd<BAIXO? 'baixo' : 'ok';
 function viewEstoqueLivros(){
-  const L = (EST&&EST.livros)||null;
-  if(!L){ $('#main').innerHTML = barraEstoque() + `<div class="card"><div class="empty">${EST? 'O estoque carregado é de uma versão anterior. Clique em <b>Atualizar estoque</b> para ler também os livros.' : 'Carregue a planilha de estoque para ver os livros.'}</div></div>`; ligaEstoqueBotoes(); return; }
-  const q = (S.lq||'').toLowerCase(), sit=S.lsit||'';
-  const f = L.filter(b=>(!q || (b.titulo+' '+b.isbn).toLowerCase().includes(q)) && (!sit || (sit==='com'? b.qtd>0 : b.qtd<=0)))
-             .sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
-  const com=L.filter(b=>b.qtd>0).length, ex=L.reduce((t,b)=>t+Math.max(0,b.qtd||0),0);
+  if(!(EST&&EST.livros)){ $('#main').innerHTML = barraEstoque() + `<div class="card"><div class="empty">${EST? 'O estoque carregado é de uma versão anterior. Clique em <b>Atualizar estoque</b> para ler também os livros.' : 'Carregue a planilha de estoque para ver os livros.'}</div></div>`; ligaEstoqueBotoes(); return; }
+  const cat=estoqueLivros().filter(x=>x.cat);   // só as obras do catálogo (LITERATURA - Catalogo)
+  if(!cat.length){ $('#main').innerHTML = barraEstoque() + `<div class="card"><div class="empty">Catálogo da literatura não carregado. Clique em <b>Atualizar fonte</b> para ler a LITERATURA - Catalogo.</div></div>`; ligaEstoqueBotoes(); return; }
+  const eds=['Movimenta','Prefácio','Rovelle'].filter(e=>cat.some(x=>x.e===e));
+  const q=normT(S.lq||''), sit=S.lsit||'', fe=S.lEd||[];
+  const f=cat.filter(x=>(!fe.length||fe.includes(x.e)) && (!sit||sitLivro(x)===sit) && (!q||normT(x.t+' '+x.isbn+' '+x.a).includes(q)))
+             .sort((a,b)=>(S.lOrd==='qtd'? a.qtd-b.qtd : 0) || a.t.localeCompare(b.t,'pt-BR'));
+  const n=k=>cat.filter(x=>sitLivro(x)===k).length;
+  const ex=cat.reduce((t,x)=>t+x.qtd,0), val=cat.reduce((t,x)=>t+x.qtd*(x.p||0),0);
+  const card=e=>{ const g=cat.filter(x=>x.e===e), ok=g.filter(x=>sitLivro(x)==='ok').length, bx=g.filter(x=>sitLivro(x)==='baixo').length, sm=g.filter(x=>sitLivro(x)==='sem').length, tot=g.length||1;
+    return `<button type="button" class="ed-card${fe.length===1&&fe[0]===e?' on':''}" data-ed="${esc(e)}" style="--ed:${ED_COR[e]}">
+      <div class="ed-top"><span class="ed-dot"></span><b>${esc(ED_NOME[e]||e)}</b><span class="ed-n">${fmt(g.length)} títulos</span></div>
+      <div class="ed-v">${fmt(g.reduce((t,x)=>t+x.qtd,0))} <small>exemplares</small></div>
+      <div class="ed-barra" title="${ok} com estoque · ${bx} baixo · ${sm} sem saldo"><i class="ok" style="width:${ok/tot*100}%"></i><i class="bx" style="width:${bx/tot*100}%"></i><i class="sm" style="width:${sm/tot*100}%"></i></div>
+      <div class="ed-leg"><span><i class="ok"></i>${ok}</span><span><i class="bx"></i>${bx}</span><span><i class="sm"></i>${sm}</span></div></button>`; };
+  const pill=x=>{ const k=sitLivro(x); return `<span class="est-pill ${k}">${k==='sem'? (x.noRel?'Fora do relatório':'Sem saldo') : fmt(x.qtd)}</span>`; };
   let h = `<div class="kpis">
-    <div class="kpi"><div class="l">Títulos no estoque</div><div class="v">${fmt(L.length)}</div><div class="d">${esc(EST.arquivo||'')}</div></div>
-    <div class="kpi"><div class="l">Com saldo</div><div class="v">${fmt(com)}</div></div>
-    <div class="kpi"><div class="l">Sem saldo</div><div class="v">${fmt(L.length-com)}</div></div>
-    <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(ex)}</div></div></div>`;
+    <div class="kpi"><div class="l">Títulos do catálogo</div><div class="v">${fmt(cat.length)}</div><div class="d">${esc(catalogoLit().length? 'LITERATURA - Catalogo' : '')}</div></div>
+    <div class="kpi"><div class="l">Com estoque</div><div class="v" style="color:var(--ok)">${fmt(n('ok'))}</div><div class="d">${BAIXO} ou mais exemplares</div></div>
+    <div class="kpi"><div class="l">Estoque baixo</div><div class="v" style="color:var(--warn)">${fmt(n('baixo'))}</div><div class="d">de 1 a ${BAIXO-1} exemplares</div></div>
+    <div class="kpi"><div class="l">Sem saldo</div><div class="v" style="color:var(--bad)">${fmt(n('sem'))}</div><div class="d">inclui obras fora do relatório</div></div>
+    <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(ex)}</div><div class="d">${BRL(val)} a preço de capa</div></div></div>`;
+  h += `<div class="ed-cards">${eds.map(card).join('')}</div>`;
   h += `<div class="card"><div class="row" style="margin-bottom:12px">
-      <label class="f grow"><span>Buscar</span><input type="search" id="lq" value="${esc(S.lq||'')}" placeholder="Título ou ISBN"></label>
-      <label class="f"><span>Situação</span><select id="lsit"><option value="">Todos</option><option value="com"${sit==='com'?' selected':''}>Com saldo</option><option value="sem"${sit==='sem'?' selected':''}>Sem saldo</option></select></label></div>
-    <p class="note" style="margin:-4px 0 10px">Do relatório de estoque do NetSuite (itens com ISBN). Editora, autor e preço entram com a integração do catálogo.</p>
-    ${f.length? `<div class="tw" style="max-height:640px"><table><thead><tr><th class="l">Título</th><th class="l">ISBN</th><th>Em estoque</th></tr></thead><tbody>${
-      f.map(b=>`<tr><td class="l wrap-t">${esc(b.titulo)}</td><td class="l">${esc(b.isbn)}</td><td>${b.qtd>0? fmt(b.qtd) : '<span class="tag" style="color:var(--bad)">sem saldo</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nenhum título neste filtro.</div>'}</div>`;
+      <label class="f grow"><span>Título, autor ou ISBN</span><input type="search" id="lq" value="${esc(S.lq||'')}" placeholder="Digite para procurar"></label>
+      ${multi('ms-led','Editora',eds.map(e=>[e,ED_NOME[e]||e]),fe,'Todas','editoras',3)}
+      <label class="f"><span>Situação</span><select id="lsit"><option value="">Todas</option><option value="ok"${sit==='ok'?' selected':''}>Com estoque</option><option value="baixo"${sit==='baixo'?' selected':''}>Estoque baixo</option><option value="sem"${sit==='sem'?' selected':''}>Sem saldo</option></select></label>
+      <label class="f"><span>Ordem</span><select id="lord"><option value="tit">Título</option><option value="qtd"${S.lOrd==='qtd'?' selected':''}>Menor estoque primeiro</option></select></label></div>
+    <p class="note" style="margin:-4px 0 10px">Estoque do relatório <b>${esc(EST.arquivo||'')}</b>. Obras marcadas com ◆ foram encontradas pelo título, porque o ISBN no NetSuite é diferente do catálogo.</p>
+    ${f.length? `<div class="tw" style="max-height:640px"><table class="est-lit"><thead><tr><th class="l">Obra</th><th class="l">Editora</th><th class="l">ISBN</th><th>Preço de capa</th><th>Em estoque</th></tr></thead><tbody>${
+      f.map(x=>`<tr class="s-${sitLivro(x)}"><td class="l wrap-t"><b>${esc(x.t)}</b>${x.a?`<span class="sub-a">${esc(x.a)}</span>`:''}</td>
+        <td class="l"><span class="ed-chip" style="--ed:${ED_COR[x.e]||'var(--muted)'}">${esc(ED_NOME[x.e]||x.e||'—')}</span></td>
+        <td class="l mono">${esc(x.isbn)}${x.via==='titulo'?` <span class="tag" title="ISBN no NetSuite: ${esc(x.ns)}">◆</span>`:''}</td>
+        <td>${x.p!=null? BRLf(x.p) : '<span class="tag">sem preço</span>'}</td><td>${pill(x)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nenhuma obra neste filtro.</div>'}
+</div>`;
   $('#main').innerHTML = barraEstoque() + h; ligaEstoqueBotoes();
-  liga('#lq','lq',true); const ls=$('#lsit'); if(ls) ls.onchange=()=>{ S.lsit=ls.value; render(); };
+  liga('#lq','lq',true); ligaMulti('ms-led','lEd');
+  const ls=$('#lsit'); if(ls) ls.onchange=()=>{ S.lsit=ls.value; render(); };
+  const lo=$('#lord'); if(lo) lo.onchange=()=>{ S.lOrd=lo.value; render(); };
+  $$('[data-ed]').forEach(b=>b.onclick=()=>{ const e=b.dataset.ed; S.lEd = (fe.length===1&&fe[0]===e)? [] : [e]; render(); });
 }
-function viewOrcLit(){
-  $('#main').innerHTML = `<div class="card"><h2>Orçamentos de literatura</h2><p class="sub">Em construção</p>
-    <div class="empty">O gerador de orçamentos de livros (com clientes, condições comerciais da literatura e lista de preços) entra aqui na próxima etapa.</div></div>`;
-}
+function viewOrcLit(){}
 function vendasFiltradas(){
   const daLinha = v => S.linha==='lit'? v.projeto===ACERVO : v.projeto!==ACERVO;
   let r = vendas().filter(v=>daLinha(v)&&(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(S.linha==='lit'||!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(!S.vOp||v.operacao===S.vOp));
@@ -1677,7 +1745,7 @@ function janelaFutura(f, al){
   const tabela = L.length? tabelaFutura(L, comEst) + `<p class="note" style="margin-top:8px">Faturamento = kits × preço de tabela × ${dec((1-DESC_TABELA)*100,1)}% (desconto de ${dec(DESC_TABELA*100,1)}%).${comEst? ' '+(S.fModo==='ind'
       ? 'Estoque comparado cheio, sem descontar as outras negociações'
       : 'Atendimento na ordem do mês previsto, já descontado o que as negociações anteriores reservaram')+`, com o estoque de ${esc(EST&&EST.arquivo||'')}.` : ''}</p>` : tabelaSeriesJanela(f);
-  abreJanela(`<h2>${esc(f.rede)} <span class="tag">${esc(f.uf)}</span></h2>
+  abreJanela(`<h2>${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></h2>
     <p class="sub">${mesTxt? 'Previsão de venda: '+mesTxt.toLowerCase().replace(/^./,c=>c.toUpperCase()) : 'Venda futura sem mês previsto'}</p>
     <div class="caixas">
       <section class="caixa"><h3>Negociação</h3><div class="ficha tres">
@@ -1740,8 +1808,9 @@ function viewFuturas(){
     : sit==='par'? (cobre(f)>0 && cobre(f)<0.999)
     : sit==='sem'? cobre(f)<=0
     : /* 'falta' */ cobre(f)<0.999);
-  const semSit = todas.filter(f=>(!S.fProj||f.projeto===S.fProj)&&(!S.fUF||f.uf===S.fUF)
-    &&(!S.fq||[f.rede,f.uf,f.via,f.projeto].join(' ').toLowerCase().includes(S.fq.toLowerCase())));
+  const chRede = f => f.rede+' | '+f.uf;
+  const semSit = todas.filter(f=>(!S.fMes.length||S.fMes.includes(f.mesPrevisto))&&(!S.fRede.length||S.fRede.includes(chRede(f)))
+    &&(!S.fVia.length||S.fVia.includes(f.via))&&(!S.fProj.length||S.fProj.includes(f.projeto)));
   const lista = semSit.filter(passaSit)
     .sort((a,b)=>(a.mesPrevisto||'9').localeCompare(b.mesPrevisto||'9')||b.valor-a.valor);
   const mostra = lista.slice(0,S.fLim);
@@ -1759,9 +1828,10 @@ function viewFuturas(){
   h += `<div class="grid"><div class="c7">${caixa('g-fut','','Previsão por mês','Faturamento por projeto, no mês previsto')}</div>
         <div class="c5">${caixa('g-futp','','Previsão por projeto','Total previsto')}</div></div>`;
   h += `<div class="card"><div class="row" style="margin-bottom:12px">
-      <label class="f grow"><span>Buscar</span><input type="search" id="fq" value="${esc(S.fq)}" placeholder="Rede, UF, distribuidor ou projeto"></label>
-      <label class="f"><span>Projeto</span><select id="fproj"><option value="">Todos</option>${projetos().map(p=>`<option value="${esc(p)}"${S.fProj===p?' selected':''}>${esc(short(p))}</option>`).join('')}</select></label>
-      <label class="f"><span>UF</span><select id="fuf"><option value="">Todas</option>${UFS().map(u=>`<option${S.fUF===u?' selected':''}>${u}</option>`).join('')}</select></label>
+      ${multi('ms-fmes','Mês',[...new Set(todas.map(f=>f.mesPrevisto))].sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)}
+      ${multi('ms-frede','Rede',[...new Set(todas.map(chRede))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)}
+      ${multi('ms-fvia','Distribuidor',[...new Set(todas.map(f=>f.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)}
+      ${multi('ms-fproj','Projeto',[...new Set(todas.map(f=>f.projeto).filter(Boolean))].sort().map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)}
       ${al? `<label class="f"><span>Situação no estoque</span><select id="fsit">${
         [['','Todas',semSit.length],['int','Atende integral',semSit.filter(f=>cobre(f)>=0.999).length],
          ['par','Atende parcial',semSit.filter(f=>cobre(f)>0&&cobre(f)<0.999).length],
@@ -1777,7 +1847,7 @@ function viewFuturas(){
       : 'Fila: o estoque é consumido na ordem do mês previsto (empate, a maior primeiro). Mostra até onde o estoque de hoje chega se o calendário for cumprido.'}</p>`;
   h += lista.length? `<div class="tw" style="max-height:600px"><table class="miuda"><thead><tr><th class="l">Mês previsto</th><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th>Kits aluno</th><th>Kits prof.</th><th>Faturamento</th>${al?'<th class="l">Estoque</th>':''}<th></th></tr></thead><tbody>`+
     mostra.map(f=>`<tr><td class="l">${MES[+f.mesPrevisto.slice(5,7)-1]}/${f.mesPrevisto.slice(2,4)}</td>
-      <td class="l wrap-t">${esc(f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td>
+      <td class="l wrap-t">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td>
       <td class="l"><span class="sw" style="background:${corDe(f.projeto)}"></span>${esc(short(f.projeto))}</td>
       <td>${fmt(f.kitsAluno)}</td><td>${fmt(f.kitsProf)}</td><td>${BRLf(f.valor)}</td>
       ${al? `<td class="l">${selo((al.get(f.id)||{}).cobertura||0)}</td>`:''}
@@ -1787,7 +1857,7 @@ function viewFuturas(){
   if(semMes) h += `<p class="note" style="margin-top:10px">${fmt(semMes)} negociaç${semMes===1?'ão':'ões'} da planilha sem mês previsto fica${semMes===1?'':'m'} de fora desta tela, inclusive dos totais e dos gráficos.</p>`;
   h += '</div>';
   $('#main').innerHTML = h;
-  liga('#fq','fq',true); liga('#fproj','fProj'); liga('#fuf','fUF');
+  ligaMulti('ms-fmes','fMes'); ligaMulti('ms-frede','fRede'); ligaMulti('ms-fvia','fVia'); ligaMulti('ms-fproj','fProj');
   const fs=$('#fsit'); if(fs) fs.onchange=()=>{ S.fSit=fs.value; S.fLim=60; viewFuturas(); };
   $$('[data-fmodo]').forEach(b=>b.onclick=()=>{ S.fModo = b.dataset.fmodo; viewFuturas(); });
   $$('[data-fdet]').forEach(b=>b.onclick=()=>{ const f=lista.find(x=>x.id===b.dataset.fdet); if(f) janelaFutura(f, al&&al.get(f.id)); });
@@ -1897,6 +1967,22 @@ function tabelaEstoque(pub, itens, projs){
   return `<div class="tw"><table class="compacta"><colgroup><col style="width:18%">${usadas.map(()=>`<col style="width:${larg.toFixed(2)}%">`).join('')}<col style="width:10%"></colgroup>
     <thead><tr><th class="l">Projeto</th>${usadas.map(c=>`<th title="${ROT[c]}">${ROTC[c]||ROT[c]}</th>`).join('')}<th>Total</th></tr></thead><tbody>${corpo}</tbody></table></div>`;
 }
+/* pizza (rosca) em SVG: fatias [{rot, v, cor}] */
+function pizza(fatias, money){
+  const tot=fatias.reduce((t,f)=>t+f.v,0); if(!tot) return '<div class="empty">Sem estoque.</div>';
+  const R=80, r=48, cx=90, cy=90; let a0=-Math.PI/2, arcs='';
+  const pt=(a,rr)=>[cx+rr*Math.cos(a), cy+rr*Math.sin(a)];
+  fatias.forEach(f=>{ const frac=f.v/tot; if(frac<=0) return; const a1=a0+frac*2*Math.PI;
+    const g=frac>0.5?1:0, [x0,y0]=pt(a0,R), [x1,y1]=pt(a1,R), [x2,y2]=pt(a1,r), [x3,y3]=pt(a0,r);
+    const d = frac>=0.9999 ? `M${cx-R},${cy}a${R},${R} 0 1,0 ${2*R},0a${R},${R} 0 1,0 ${-2*R},0M${cx-r},${cy}a${r},${r} 0 1,1 ${2*r},0a${r},${r} 0 1,1 ${-2*r},0`
+      : `M${x0},${y0}A${R},${R} 0 ${g},1 ${x1},${y1}L${x2},${y2}A${r},${r} 0 ${g},0 ${x3},${y3}Z`;
+    arcs += `<path d="${d}" fill="${f.cor}" fill-rule="evenodd" stroke="var(--panel)" stroke-width="1.5"><title>${esc(f.rot)}: ${money?BRLf(f.v):fmt(f.v)+' kits'} (${dec(frac*100,1)}%)</title></path>`;
+    a0=a1; });
+  const ord=fatias.filter(f=>f.v>0).sort((a,b)=>b.v-a.v);
+  return `<div class="pizza"><svg viewBox="0 0 180 180" role="img" aria-label="Distribuição">${arcs}
+      <text x="90" y="86" text-anchor="middle" class="pz-t">${money? BRL(tot) : fmt(tot)}</text><text x="90" y="104" text-anchor="middle" class="pz-s">${money?'valor líquido':'kits'}</text></svg>
+    <ul class="pz-leg">${ord.map(f=>`<li><span class="sw" style="background:${f.cor}"></span><span class="pz-n">${esc(f.rot)}</span><b>${money? BRL(f.v) : fmt(f.v)}</b><span class="pz-p">${dec(f.v/tot*100,1)}%</span></li>`).join('')}</ul></div>`;
+}
 function viewEstoque(){
   let h = barraEstoque();
   if(!EST){
@@ -1914,6 +2000,17 @@ function viewEstoque(){
     <div class="kpi"><div class="l">Kits de professor</div><div class="v">${fmt(soma(itens,'professor'))}</div><div class="d">em estoque</div></div>
     <div class="kpi"><div class="l">Projetos</div><div class="v">${fmt(projs.length)}</div><div class="d">com kits classificados</div></div>
     <div class="kpi"><div class="l">Fora das tabelas</div><div class="v">${fmt(qSoltos)}</div><div class="d">${fmt(soltos.length)} itens sem projeto, série ou público</div></div></div>`;
+  const val = i => i.qtd*precoLiq(precoDe(i.projeto, segDe(i.serie), i.publico));
+  const EXTRA=['#C0392B','#16A085','#8E44AD','#D4AC0D','#2E86C1','#CA6F1E','#7F8C8D','#1ABC9C','#E84393','#34495E'];
+  const corPz={}, usadas=new Set(); let ix=0;
+  projs.forEach(p=>{ let c=corDe(p); if(!c || usadas.has(c) || c===css('--muted')) c=EXTRA[ix++%EXTRA.length]; usadas.add(c); corPz[p]=c; });
+  const porProj = pub => projs.map(p=>{ const l=todos.filter(i=>i.projeto===p && i.publico===pub); return {rot:short(p), cor:corPz[p], v: S.ePie==='valor'? l.reduce((t,i)=>t+val(i),0) : l.reduce((t,i)=>t+i.qtd,0)}; });
+  const money = S.ePie==='valor';
+  h += `<div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div><h2 style="margin:0">Distribuição do estoque por projeto</h2><p class="sub" style="margin:2px 0 0">${money? `Valor líquido: kits × preço de tabela com ${dec(DESC_TABELA*100,1)}% de desconto` : 'Quantidade de kits em estoque'}</p></div>
+      <div class="seg" role="group" aria-label="Medida"><button type="button" data-epie="kits" aria-pressed="${!money}">Kits</button><button type="button" data-epie="valor" aria-pressed="${money}">Valor</button></div></div>
+    <div class="grid" style="margin-top:8px"><div class="c6"><h3 class="pz-h">Kits de aluno</h3>${pizza(porProj('aluno'),money)}</div>
+      <div class="c6"><h3 class="pz-h">Kits de professor</h3>${pizza(porProj('professor'),money)}</div></div></div>`;
   h += `<div class="card"><div class="filters">
       <label class="f"><span>Projeto</span><select id="eproj"><option value="">Todos</option>${projs.map(p=>`<option value="${esc(p)}"${S.eProj===p?' selected':''}>${esc(short(p))}</option>`).join('')}</select></label>
     </div>
@@ -1933,6 +2030,7 @@ function viewEstoque(){
   ligaEstoqueBotoes();
   liga('#eproj','eProj');
   const b=$('#e-soltos'); if(b) b.onclick=()=>{ S.eSoltos=!S.eSoltos; viewEstoque(); };
+  $$('[data-epie]').forEach(x=>x.onclick=()=>{ S.ePie=x.dataset.epie; viewEstoque(); });
 }
 
 /* ---------------- aba: tabelas ---------------- */
@@ -1971,15 +2069,16 @@ function multi(id, rotulo, opcoes, sel, todosTxt, plural, juntaAte){
     <div class="ms-pop"${aberto?'':' hidden'}><div class="ms-acoes"><button type="button" data-ms-todos>Ver ${todosTxt.toLowerCase()}</button><button type="button" data-ms-fecha>Fechar</button></div>
     <div class="ms-lista">${opcoes.map(([v,t])=>`<label><input type="checkbox" value="${esc(v)}"${sel.includes(v)?' checked':''}><span>${esc(t)}</span></label>`).join('')}</div></div></div>`;
 }
+function ajustaPop(pop){ pop.style.left=''; pop.style.right=''; const r=pop.getBoundingClientRect(); if(r.right>document.documentElement.clientWidth-8){ pop.style.left='auto'; pop.style.right='0'; } }
 function ligaMulti(id, chave){
   const cx = $('#'+id); if(!cx) return;
-  const pop = $('.ms-pop',cx), btn = $('.ms-btn',cx);
+  const pop = $('.ms-pop',cx), btn = $('.ms-btn',cx); if(!pop.hidden) ajustaPop(pop);
   const fecha = ()=>{ S._msAberto=''; pop.hidden=true; btn.setAttribute('aria-expanded','false'); };
   btn.onclick = e=>{ e.stopPropagation(); const abrir = pop.hidden;
     $$('.ms-pop').forEach(p=>p.hidden=true); $$('.ms-btn').forEach(b=>b.setAttribute('aria-expanded','false'));
-    if(abrir){ S._msAberto=id; pop.hidden=false; btn.setAttribute('aria-expanded','true'); } else S._msAberto=''; };
+    if(abrir){ S._msAberto=id; pop.hidden=false; btn.setAttribute('aria-expanded','true'); ajustaPop(pop); } else S._msAberto=''; };
   pop.onclick = e=>e.stopPropagation();
-  const aplica = ()=>{ S[chave] = $$('input[type=checkbox]:checked',pop).map(i=>i.value); S.vLim=60; S._msAberto=id;
+  const aplica = ()=>{ S[chave] = $$('input[type=checkbox]:checked',pop).map(i=>i.value); S.vLim=60; S.fLim=60; S._msAberto=id;
     const sc = $('.ms-lista',pop).scrollTop; render(); const l=$('#'+id+' .ms-lista'); if(l) l.scrollTop=sc; };
   $$('input[type=checkbox]',pop).forEach(i=>i.onchange=aplica);
   $('[data-ms-todos]',pop).onclick = ()=>{ $$('input[type=checkbox]',pop).forEach(i=>i.checked=false); aplica(); };
@@ -2254,7 +2353,85 @@ function painelAcoes(aberto,naoId,extratos){
 }
 
 /* ---------------- render ---------------- */
-const VIEWS={orc:()=>{}, lvendas:()=>viewVendas(), lestoque:()=>viewEstoqueLivros(), lorc:()=>viewOrcLit(),pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
+const VIEWS={orc:()=>{}, lprecos:()=>{}, lvendas:()=>viewVendas(), lestoque:()=>viewEstoqueLivros(), lorc:()=>viewOrcLit(),pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
+/* ---------------- literatura: catálogo e clientes (1 - FONTES) ---------------- */
+let LIT = null;   // {catalogo, catMeta, distribuidores}
+const LIT_KEY = 'movimenta-lit-app-v1';
+const normT = s => String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+const titleCaseL = t => String(t).replace(/\s+/g,' ').trim().toLowerCase().replace(/(^|[\s\-–(/"“‘'.:])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase());
+async function primeiraAba(file){
+  const z = await abreZip(await file.arrayBuffer()); leSST(z);
+  const nome = [...xml(z['xl/workbook.xml']).getElementsByTagName('sheet')].map(x=>x.getAttribute('name'))[0];
+  const L = lePlanilha(z, nome); SST=[]; return L||[];
+}
+async function interpretaCatalogo(file){
+  const L = await primeiraAba(file); const hi = L.findIndex(r=>r&&r.some(c=>/isbn/i.test(String(c))));
+  if(hi<0) throw new Error('catalogo');
+  const cab = L[hi].map(c=>normT(c));
+  const col = (...al)=>{ let i=cab.findIndex(k=>al.includes(k)); if(i<0) i=cab.findIndex(k=>al.some(a=>k.includes(a))); return i; };
+  const cI=col('isbn - impresso','isbn impresso'), cT=col('titulo'), cS=col('subtitulo'), cE=col('editora'), cA=col('autor'), cIl=col('ilustrador'), cP=col('preco');
+  if(cI<0||cT<0||cP<0) throw new Error('catalogo');
+  const ed = e => { const n=normT(e); return /prefacio/.test(n)?'Prefácio' : /rovelle/.test(n)?'Rovelle' : /movimenta|mvt/.test(n)?'Movimenta' : titleCaseL(e); };
+  const itens=[];
+  L.slice(hi+1).forEach(r=>{ if(!r) return;
+    const isbn=String(r[cI]==null?'':r[cI]).replace(/\.0+$/,'').replace(/\D/g,''); if(!isbn) return;
+    let t=limpa(r[cT]); const sb=cS>=0?limpa(r[cS]):''; if(sb&&!normT(t).includes(normT(sb))) t=t+': '+sb;
+    const pr=r[cP]; const pn=typeof pr==='number'?pr:parseFloat(String(pr==null?'':pr).replace(/[^\d,.-]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.'));
+    itens.push({i:isbn,t:titleCaseL(t),e:ed(cE>=0?r[cE]:''),a:limpa(cA>=0?r[cA]:'').replace(/\s+/g,' '),il:limpa(cIl>=0?r[cIl]:'').replace(/\s+/g,' '),p:isFinite(pn)&&pn>0?Math.round(pn*100)/100:null});
+  });
+  return {itens, origem:file.name, atualizadoEm:new Date(file.lastModified).toISOString()};
+}
+async function interpretaClientes(file){
+  const L = await primeiraAba(file); const hi = L.findIndex(r=>r&&r.some(c=>/raz[aã]o|cliente|nome/i.test(String(c))));
+  if(hi<0) return [];
+  const cab = L[hi].map(c=>normT(c));
+  const col = (...al)=>cab.findIndex(k=>al.some(a=>k.includes(a)));
+  const m={razao:col('razao','cliente','nome'),fantasia:col('fantasia'),tipo:col('tipo'),cnpj:col('cnpj'),contato:col('contato'),email:col('e-mail','email'),telefone:col('telefone','fone'),endereco:col('endereco'),cidade:col('cidade'),uf:col('uf')};
+  if(m.fantasia===m.razao) m.razao=cab.findIndex(k=>k.includes('razao'));
+  const hash = t => { let h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))|0; return (h>>>0).toString(36); };
+  return L.slice(hi+1).filter(r=>r&&limpa(r[m.razao])).map(r=>{ const o={}; for(const k in m) o[k]=m[k]>=0?limpa(r[m[k]]):''; o.uf=o.uf.toUpperCase(); o.id='f_'+hash(normT(o.razao)+'|'+o.cnpj.replace(/\D/g,'')); return o; });
+}
+async function carregaLitDaPasta(){
+  try{
+    const hs=await arquivosDaPasta();
+    const hc=hs.find(h=>/^LITERATURA\s*-\s*CATALOGO/i.test(normT(h.name).toUpperCase())), hl=hs.find(h=>/^LITERATURA\s*-\s*CLIENTES/i.test(normT(h.name).toUpperCase()));
+    if(!hc && !hl) return;
+    const novo = {catalogo:LIT&&LIT.catalogo||[], catMeta:LIT&&LIT.catMeta||null, distribuidores:LIT&&LIT.distribuidores||[]};
+    if(hc){ const c=await interpretaCatalogo(await hc.getFile()); novo.catalogo=c.itens; novo.catMeta={origem:c.origem, atualizadoEm:c.atualizadoEm}; }
+    if(hl){ novo.distribuidores=await interpretaClientes(await hl.getFile()); }
+    LIT=novo; kv('put','lit',LIT).catch(()=>{}); litInvalida();
+  }catch(e){ console.warn('literatura',e); }
+}
+/* módulo de orçamentos de literatura (moldura própria, como o de projetos) */
+let LIT_FR=null;
+function litFonte(){
+  if(window.__SNAP){ const L=window.__SNAP.lit; if(!L) return null; const f={...L.fonte}; const E=window.__SNAP.est;
+    if(E&&E.livros){ f.livros=E.livros; f.estoqueEm=new Date(E.lidoEm||Date.now()).toISOString(); f.estoqueArq=E.arquivo||''; } return {gz:L.gz, fonte:f, modo:'viewer'}; }
+  const e=document.getElementById('lit-src'); if(!e) return null;
+  const f={...(LIT||{})}; if(EST&&EST.livros){ f.livros=EST.livros; f.estoqueEm=new Date(EST.lidoEm||Date.now()).toISOString(); f.estoqueArq=EST.arquivo||''; }
+  return {gz:e.textContent.trim(), fonte:f, modo:'admin'};
+}
+function litConfig(){ try{ const x=JSON.parse(localStorage.getItem(LIT_KEY)||'null'); return x&&x.config||null; }catch(e){ return null; } }
+async function montaLit(host){
+  const src=litFonte();
+  if(!src||!src.gz){ host.innerHTML='<div class="card"><div class="empty">Os orçamentos de literatura chegam junto com a próxima publicação da base.</div></div>'; return; }
+  if(src.modo==='admin' && !(LIT&&LIT.catalogo&&LIT.catalogo.length)){ host.innerHTML='<div class="card"><div class="empty">Não encontrei a planilha <b>LITERATURA - Catalogo.xlsx</b> em 1 - FONTES. Clique em <b>Atualizar fonte</b>.</div></div>'; return; }
+  host.innerHTML='<div class="card"><div class="empty">Carregando orçamentos de literatura…</div></div>';
+  try{
+    let html=await gunzipB64(src.gz);
+    const inj='<script>document.documentElement.setAttribute("data-theme",'+JSON.stringify(escuro()?'dark':'light')+');window.LIT_MODO='+JSON.stringify(src.modo)+';window.LIT_FONTE='+JSON.stringify(src.fonte).replace(/</g,'\\u003c')+';<\/script>';
+    html=html.replace(/<head[^>]*>/i, m=>m+inj);
+    const fr=document.createElement('iframe'); fr.className='orc-fr'; fr.title='Orçamentos de literatura'; fr.setAttribute('allow','clipboard-write; web-share');
+    fr.onload=()=>litModo();
+    fr.srcdoc=html; host.innerHTML=''; host.appendChild(fr); LIT_FR=fr; litAltura();
+  }catch(e){ host.innerHTML='<div class="card"><div class="empty">Não foi possível abrir os orçamentos de literatura ('+esc(e.message)+').</div></div>'; }
+}
+function litModo(){ try{ const w=LIT_FR&&LIT_FR.contentWindow; if(w&&w.modoApp) w.modoApp(S.tab==='lprecos'?'precos':'orc'); }catch(e){} }
+function litAltura(){ if(!LIT_FR) return; try{ const r=LIT_FR.contentDocument&&LIT_FR.contentDocument.documentElement; if(r) r.setAttribute('data-theme', escuro()?'dark':'light'); }catch(e){}
+  const h=$('header.top'); LIT_FR.style.height=Math.max(420, innerHeight-(h?h.offsetHeight:0)-14)+'px'; }
+addEventListener('resize',litAltura);
+/* catálogo, clientes ou estoque mudaram: refaz o módulo (se a pessoa não estiver nele agora) */
+function litInvalida(){ if(!LIT_FR) return; if(S.tab==='lorc'||S.tab==='lprecos'){ litInvalida.pend=true; return; } LIT_FR.remove(); LIT_FR=null; }
 /* ---------------- aba: orçamentos (gerador embutido numa moldura) ----------------
    A moldura é criada uma vez e fica viva enquanto o app estiver aberto: trocar de aba
    ou de tema não perde o orçamento em andamento. Histórico fica no navegador de cada um. */
@@ -2286,7 +2463,7 @@ function abas(){
     lb.innerHTML = LINHAS.map(([k,l])=>`<button type="button" data-linha="${k}" aria-pressed="${S.linha===k}">${l}</button>`).join('');
     $$('#linhas button').forEach(b=>b.onclick=()=>{ if(S.linha===b.dataset.linha) return; S.linha=b.dataset.linha; S.tab=S.tabL[S.linha]; guardaNav(); render(); window.scrollTo(0,0); }); }
   $('#tabs').innerHTML = tabsAtuais().map(([k,l])=>`<button role="tab" type="button" data-t="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('');
-  $$('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t; S.tabL[S.linha]=S.tab; guardaNav(); render(); window.scrollTo(0,0);});
+  $$('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t; S.tabL[S.linha]=S.tab; if(litInvalida.pend && S.tab!=='lorc' && S.tab!=='lprecos'){ litInvalida.pend=false; litInvalida(); } guardaNav(); render(); window.scrollTo(0,0);});
 }
 function guardaNav(){
   try{ localStorage.setItem('mvt-linha',S.linha); localStorage.setItem('mvt-tabs',JSON.stringify(S.tabL)); }catch(e){}
@@ -2299,7 +2476,8 @@ function cabecalho(){
 }
 function render(){
   matar(); abas(); cabecalho(); barraBase();
-  const naOrc = S.tab==='orc'; $('#orc-host').hidden=!naOrc; $('#main').hidden=naOrc;
+  const naOrc = S.tab==='orc', naLit = S.tab==='lorc'||S.tab==='lprecos'; $('#orc-host').hidden=!naOrc; $('#lit-host').hidden=!naLit; $('#main').hidden=naOrc||naLit;
+  if(naLit){ if(!LIT_FR){ if(!montaLit.rodando){ montaLit.rodando=true; montaLit($('#lit-host')).finally(()=>{montaLit.rodando=false;}); } } else { litAltura(); litModo(); } return; }
   if(naOrc){ if(!ORC_FR){ if(!montaOrc.rodando){ montaOrc.rodando=true; montaOrc($('#orc-host')).finally(()=>{montaOrc.rodando=false;}); } } else orcAltura(); return; }
   if(!pronto){
     $('#main').innerHTML = `<div class="card"><div class="empty">${ARQ.lendo? 'Lendo a planilha…' :
