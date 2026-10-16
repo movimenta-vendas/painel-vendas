@@ -879,8 +879,10 @@ async function interpretaEstoque(file){
     if(!desc) continue;
     const u = SEMACENTO(desc);
     const isbn = iItem>=0? limpa(L[iItem]).replace(/[^0-9X]/gi,'') : '';
-    if(/^97[89]\d{10}$/.test(isbn) && u.indexOf('KIT')<0){ livros.push({isbn, titulo:desc, qtd:numero(L[iQtd])}); continue; }
-    const kitSemNome = (u.indexOf('BANCO MAIS')>=0 || u.indexOf('A VOZ E A VEZ')>=0) && u.indexOf('PROJETO DO')>=0;   // Banco Mais e VV vêm como "PROJETO DO ALUNO/PROFESSOR", sem a palavra KIT
+    // Banco Mais e VV vêm como "PROJETO DO ALUNO/PROFESSOR", sem a palavra KIT — e com código ISBN,
+    // por isso são reconhecidos antes de separar os livros avulsos
+    const kitSemNome = (u.indexOf('BANCO MAIS')>=0 || u.indexOf('A VOZ E A VEZ')>=0) && u.indexOf('PROJETO DO')>=0;
+    if(/^97[89]\d{10}$/.test(isbn) && u.indexOf('KIT')<0 && !kitSemNome){ livros.push({isbn, titulo:desc, qtd:numero(L[iQtd])}); continue; }
     if(u.indexOf('KIT') < 0 && !kitSemNome) continue;          // só kits de projeto
     const qtd = numero(L[iQtd]);
     const cont = iCont>=0 && L[iCont]!=='' && L[iCont]!=null ? numero(L[iCont]) : null;
