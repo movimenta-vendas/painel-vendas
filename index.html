@@ -447,7 +447,7 @@ const S = {tab:'faturamento',
   mAnoCom:0, mUF:'', mReg:'', mRede:'', mProj:'', mMed:'valor',
   aAno:0, aUF:'', aReg:'', aVia:'', aOp:'VENDA', aMed:'kits', aEsc:'linear',
   sAno:0, sProj:'', sUF:'', sReg:'', sOp:'VENDA', sPub:'aluno', sEixo:'projeto',
-  vq:'', vAno:[], vProj:[], vUF:[], vVia:[], vOp:'VENDA', pRede:[], pProj:[], pCred:[], vLim:60, vDet:'',
+  vq:'', vAno:[], vProj:[], vUF:[], vVia:[], vPag:[], vOp:'VENDA', pRede:[], pProj:[], pCred:[], pSit:[], vLim:60, vDet:'',
   fq:'', fProj:[], fUF:'', fMes:[], fRede:[], fVia:[], fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
   eProj:'', eSoltos:false};
 /* duas linhas de negócio, cada uma com as suas abas */
@@ -1584,9 +1584,15 @@ function viewEstoqueLivros(){
   $$('[data-ed]').forEach(b=>b.onclick=()=>{ const e=b.dataset.ed; S.lEd = (fe.length===1&&fe[0]===e)? [] : [e]; render(); });
 }
 function viewOrcLit(){}
+/* situação do pagamento a partir da coluna PAGAMENTO: data ou SIM = pago; vazia = em aberto;
+   outro texto (consignação, bonificação, doação…) aparece como está */
+function sitPag(v){ const t=String(v.pagamento==null?'':v.pagamento).trim();
+  if(!t) return 'Em aberto'; if(/^\d{4}-\d{2}-\d{2}$/.test(t) || /^SIM$/i.test(t)) return 'Pago';
+  return t.charAt(0).toUpperCase()+t.slice(1).toLowerCase(); }
+const corPag = k => k==='Pago'? 'var(--ok)' : k==='Em aberto'? 'var(--warn)' : 'var(--muted)';
 function vendasFiltradas(){
   const daLinha = v => S.linha==='lit'? v.projeto===ACERVO : v.projeto!==ACERVO;
-  let r = vendas().filter(v=>daLinha(v)&&(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(S.linha==='lit'||!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(!S.vVia.length||S.vVia.includes(v.via))&&(!S.vOp||v.operacao===S.vOp));
+  let r = vendas().filter(v=>daLinha(v)&&(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(S.linha==='lit'||!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(!S.vVia.length||S.vVia.includes(v.via))&&(!S.vPag.length||S.vPag.includes(sitPag(v)))&&(!S.vOp||v.operacao===S.vOp));
   if(S.vq){const q=S.vq.toLowerCase(); r=r.filter(v=>[v.rede,v.uf,v.via,v.pedido,v.nf,v.projeto].join(' ').toLowerCase().includes(q));}
   return r.sort((a,b)=>String(b.emissao||'').localeCompare(String(a.emissao||'')));
 }
@@ -1830,7 +1836,8 @@ function viewVendas(){
     <div class="kpi"><div class="l">Alunos</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsAluno||0)*multDe(v.projeto),0))}</div><div class="d">kits × unidades por kit</div></div>
     <div class="kpi"><div class="l">Kits professor</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsProf||0),0))}</div></div>
     <div class="kpi"><div class="l">Faturamento</div><div class="v">${BRL(r.reduce((s,v)=>s+(v.valor||0),0))}</div></div></div>`;
-  const COLS = LIT? [9,9,21,16,10,9,11,7,8] : [8,7,16,12,9,9,7,7,10,6,9];
+  const COLS = LIT? [9,7,17,13,9,8,11,6,11,9] : [8,6,13,10,8,9,7.5,6,9.5,5,10,8];
+  const pags = [...new Set(vendas().filter(v=>LIT? v.projeto===ACERVO : v.projeto!==ACERVO).map(sitPag))].sort((a,b)=>(a==='Pago'?0:a==='Em aberto'?1:2)-(b==='Pago'?0:b==='Em aberto'?1:2)||a.localeCompare(b,'pt-BR'));
   const fOp = `<label class="f"><span>Operação</span><select id="vop"><option value="">Todas</option>${BASE.operacoes.map(o=>`<option${S.vOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
   h += `<div class="card"><div class="fbusca">
       <label class="f grow"><span>Buscar</span><input type="search" id="vq" value="${esc(S.vq)}" placeholder="Rede, UF, pedido, NF ou projeto"></label>
@@ -1840,18 +1847,20 @@ function viewVendas(){
       [3,1,multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)],
       [4,1,multi('ms-vvia','Distribuidor',[...new Set(vendas().filter(v=>LIT? v.projeto===ACERVO : v.projeto!==ACERVO).map(v=>v.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.vVia,'Todos','distribuidores',1)],
       LIT? null : [5,1,multi('ms-proj','Projeto',projetos().filter(p=>p!==ACERVO).map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)],
-      [LIT?5:6,1,fOp]])}`;
-  h += r.length? `<div class="tw" style="max-height:640px"><table class="alinhada">${colg(COLS)}<thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th></th></tr></thead><tbody>`+
+      [LIT?5:6,1,fOp],
+      [LIT?9:11,1,multi('ms-vpag','Pagamento',pags.map(x=>[x,x]),S.vPag,'Todos','situações',2)]])}`;
+  h += r.length? `<div class="tw" style="max-height:640px"><table class="alinhada">${colg(COLS)}<thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th class="l">Pagamento</th><th></th></tr></thead><tbody>`+
     mostra.map(v=>`<tr><td class="l">${brD(v.emissao)||'<span class="tag">sem data</span>'}</td><td class="l">${esc(v.pedido)}</td>
       <td class="l wrap-t">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(v.via)}</td>
       ${LIT?'':`<td class="l"><span class="sw" style="background:${corDe(v.projeto)}"></span>${esc(short(v.projeto))}</td>`}
       <td class="l">${esc(v.operacao)}</td>${LIT?`<td>${fmt(v.kitsAluno)}</td>`:`<td>${fmt(v.kitsAluno)}</td><td>${fmt(v.kitsProf)}</td>`}<td>${BRLf(v.valor)}</td><td class="l">${esc(v.nf)}</td>
+      <td class="l">${(k=>`<span class="pill" style="color:${corPag(k)}" title="${esc(k)}">${esc(k)}</span>`)(sitPag(v))}</td>
       <td><button class="btn sm" data-det="${v.id}" type="button">Detalhes</button></td></tr>`).join('')+
     `</tbody></table></div>${r.length>mostra.length?`<p style="margin-top:12px"><button class="btn" id="mais" type="button">Mostrar mais 100 (${fmt(r.length-mostra.length)} restantes)</button></p>`:''}`
     : '<div class="empty">Nenhuma venda neste filtro.</div>';
   h += '</div>';
   $('#main').innerHTML = h;
-  liga('#vq','vq',true); ligaMulti('ms-ano','vAno'); ligaMulti('ms-proj','vProj'); ligaMulti('ms-uf','vUF'); ligaMulti('ms-vvia','vVia'); liga('#vop','vOp');
+  liga('#vq','vq',true); ligaMulti('ms-ano','vAno'); ligaMulti('ms-proj','vProj'); ligaMulti('ms-uf','vUF'); ligaMulti('ms-vvia','vVia'); ligaMulti('ms-vpag','vPag'); liga('#vop','vOp');
   $$('[data-det]').forEach(b=>b.onclick=()=>{ const v=r.find(x=>x.id===b.dataset.det); if(v) janelaVenda(v); });
   const m=$('#mais'); if(m) m.onclick=()=>{S.vLim+=100; viewVendas();};
   $('#csv').onclick=()=>baixarCsv(r);
@@ -2133,7 +2142,7 @@ function viewTabelas(){
 /* seleção múltipla: lista vazia = todos */
 /* filtros de tabela: cada filtro fica em cima da coluna a que se refere (mesma grade de larguras) */
 const colg = C => `<colgroup>${C.map(c=>`<col style="width:${c}%">`).join('')}</colgroup>`;
-const fcols = (C, itens) => `<div class="fcols" style="grid-template-columns:${C.map(c=>c+'%').join(' ')}">${itens.filter(Boolean).map(([i,n,h])=>`<div style="grid-column:${i} / span ${n}">${h}</div>`).join('')}</div>`;
+const fcols = (C, itens) => `<div class="fcols" style="grid-template-columns:${C.map(c=>c+'%').join(' ')}">${itens.filter(Boolean).sort((x,y)=>x[0]-y[0]).map(([i,n,h])=>`<div style="grid-column:${i} / span ${n};grid-row:1">${h}</div>`).join('')}</div>`;
 function ajustaFcols(){ $$('.fcols').forEach(fc=>{ let t=fc.nextElementSibling; while(t&&!(t.classList&&t.classList.contains('tw'))) t=t.nextElementSibling;
   if(t) fc.style.paddingRight=Math.max(0,t.offsetWidth-t.clientWidth-2)+'px'; }); }
 function multi(id, rotulo, opcoes, sel, todosTxt, plural, juntaAte){
@@ -2326,7 +2335,7 @@ function viewPagamentos(){
   const sitCount = {}; SIT.forEach(s=>sitCount[s[0]]={n:0,v:0});
   todos.forEach(p=>{ const k=sitCount[p.situacao]||(sitCount[p.situacao]={n:0,v:0}); k.n++; k.v+=p.valor||0; });
   const credDe = p => (p.conc&&p.conc.credor) || '(sem credor)';
-  const lista = todos.filter(p=>(!S_P.pSit||p.situacao===S_P.pSit) && (!S.pRede.length||S.pRede.includes(nomeRede(p)))
+  const lista = todos.filter(p=>(!S.pSit.length||S.pSit.includes(p.situacao)) && (!S.pRede.length||S.pRede.includes(nomeRede(p)))
     && (!S.pProj.length||S.pProj.includes(p.projeto)) && (!S.pCred.length||S.pCred.includes(credDe(p))));
   const opc = f => [...new Set(todos.map(f))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
   const tot = todos.reduce((s,p)=>s+(p.valor||0),0);
@@ -2378,7 +2387,7 @@ function viewPagamentos(){
       [1,1,multi('ms-prede','Rede',opc(nomeRede).map(r=>[r,r]),S.pRede,'Todas','redes',1)],
       [5,1,multi('ms-pproj','Projeto',opc(p=>p.projeto).map(x=>[x,short(x)]),S.pProj,'Todos','projetos',1)],
       [8,1,multi('ms-pcred','Credor',opc(credDe).map(c=>[c,c]),S.pCred,'Todos','credores',1)],
-      [7,1,`<label class="f"><span>Situação</span><select id="psit"><option value="">Todas</option>${SIT.map(([s])=>`<option${S_P.pSit===s?' selected':''}>${s}</option>`).join('')}</select></label>`]])}
+      [7,1,multi('ms-psit','Situação',SIT.map(([s])=>[s,s]),S.pSit,'Todas','situações',1)]])}
     <div class="tw" style="max-height:620px"><table class="alinhada">${colg(PCOLS)}<thead><tr><th class="l">Rede</th><th class="l">NF</th><th class="l">Emissão</th><th>Dias</th><th class="l">Projeto</th><th>Nosso valor</th><th class="l">Situação</th><th class="l">Credor</th><th class="l">Empenhos</th><th class="l">Próximo passo</th><th class="l">Portal</th></tr></thead><tbody>
     ${lista.sort((a,b)=>SIT.findIndex(s=>s[0]===a.situacao)-SIT.findIndex(s=>s[0]===b.situacao)||b.valor-a.valor).map(p=>{const c=p.conc||{};
       const gE={}; (c.empenhos||[]).forEach(e=>{ const g=gE[e.numero]||(gE[e.numero]={numero:e.numero,quitado:e.quitado,datas:[]}); g.datas.push(e.data); });
@@ -2407,7 +2416,7 @@ function viewPagamentos(){
   on('#p-abretodos', ()=>{ $$('[data-portal]').forEach(a=>window.open(a.href,'_blank','noopener')); });
   on('#p-fecha', ()=>{ S_P.painel=''; ARQC.msg=''; render(); });
   const ps=$('#psit'); if(ps) ps.onchange=()=>{ S_P.pSit=ps.value; viewPagamentos(); };
-  ligaMulti('ms-prede','pRede'); ligaMulti('ms-pproj','pProj'); ligaMulti('ms-pcred','pCred');
+  ligaMulti('ms-prede','pRede'); ligaMulti('ms-psit','pSit'); ligaMulti('ms-pproj','pProj'); ligaMulti('ms-pcred','pCred');
   const pq=$('#pq'); if(pq) pq.oninput=()=>{ S_P.pq=pq.value; clearTimeout(pq._t); pq._t=setTimeout(()=>{ viewPagamentos(); const n=$('#pq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length);} },250); };
 }
 function painelAcoes(aberto,naoId,extratos){
