@@ -243,6 +243,13 @@ table.ufdet tr.proj td.l{padding-left:22px}
 :root[data-theme="dark"] .selo.s-int,:root[data-theme="dark"] .selo.s-sem,:root[data-theme="dark"] .selo[style]{color:#14100f!important}
 :root[data-theme="dark"] .selo.s-par{color:#1a1206;background:linear-gradient(90deg,#F5B94F var(--pc),#C9A46A var(--pc))}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .selo.s-int,:root:not([data-theme="light"]) .selo.s-sem,:root:not([data-theme="light"]) .selo[style]{color:#14100f!important}:root:not([data-theme="light"]) .selo.s-par{color:#1a1206;background:linear-gradient(90deg,#F5B94F var(--pc),#C9A46A var(--pc))}}
+.mt-kit .mt-cab{display:flex;align-items:baseline;gap:12px;margin:0 0 8px;font-family:var(--disp)}
+.mt-kit .mt-cab span{color:var(--muted);font-size:12.5px}
+.mt-kit .mt-cab .mt-n{margin-left:auto;color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--mag) 80%,#fff),var(--mag));border-radius:99px;padding:3px 11px;font-weight:700;font-size:12.5px}
+table.mt tr.mt-lim td{background:color-mix(in srgb,var(--bad) 9%,transparent)}
+table.mt tr.mt-lim td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+.mt-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;background:var(--bad);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.03em}
+table.mt tr.mt-sem td{color:var(--muted)}
 .banner{background:var(--mag-soft);border:1px solid var(--line);border-radius:9px;padding:10px 14px;color:var(--ink);font-size:13px;margin-bottom:14px}
 .ac{display:flex;gap:6px;justify-content:flex-end}
 /* janela de detalhe (Séries) */
@@ -290,7 +297,8 @@ table.ufdet tr.proj td.l{padding-left:22px}
 .barra{height:10px;border-radius:6px;background:var(--wash,#eee);overflow:hidden;display:flex;margin:2px 0 4px}
 .barra i{display:block;height:100%;background:var(--ok)} .barra i+i{background:var(--bad);opacity:.35}
 .barra-leg{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
-table.atd td,table.atd th{white-space:nowrap}
+table.atd td,table.atd th{white-space:nowrap;padding:5px 7px}
+.mk span.selo{display:inline-block;font-size:12px;letter-spacing:0;text-transform:none;color:#fff}.mk span.selo.s-par{color:#4a2a00}
 table.atd td.ok{color:var(--ok)} table.atd td.bad{color:var(--bad);font-weight:600}
 table.atd tr.sub td{font-weight:600;background:var(--wash,transparent)}
 table.atd tr.sub td.bad,table.atd tr.tot td.bad{color:var(--bad)}
@@ -791,6 +799,7 @@ async function interpretaArquivo(file){
   };
   SST = [];
   if(TABP){ aplicaTabelaProjetos(base, TABP); base.tabProj = TABP; }
+  if(COMP) base.comp = COMP;
   recalculaFuturas(base);
   return base;
 }
@@ -798,7 +807,20 @@ async function interpretaArquivo(file){
    Uma aba por projeto, com blocos por segmento (título com INFANTIL / INICIAIS / FINAIS / MÉDIO)
    e linhas Público | Escolaridade | Quantidade | Preço. Vale para as vendas futuras, o valor do
    estoque e o gerador de orçamentos. Projetos fora dela (PCE, Colcha, Seu Amanhã) seguem a T_PREÇOS. */
-let TABP = null;
+let TABP = null, COMP = null;
+async function interpretaComposicao(file){
+  const z = await abreZip(await file.arrayBuffer()); leSST(z);
+  const nome = [...xml(z['xl/workbook.xml']).getElementsByTagName('sheet')].map(x=>x.getAttribute('name')).find(n=>/^composi/i.test(SEMACENTO(n)));
+  const L = nome? (lePlanilha(z,nome)||[]) : []; SST=[];
+  const hi = L.findIndex(r=>r && r.some(c=>SEMACENTO(c).trim()==='COMPONENTE'));
+  if(hi<0) throw new Error('composicao');
+  const cab = L[hi].map(c=>SEMACENTO(c).trim()), col = t=>cab.findIndex(c=>c.startsWith(t));
+  const iP=col('PROJETO'), iK=col('KIT'), iA=col('ANO'), iE=col('EAN'), iC=col('COMPONENTE'), iQ=col('QTD'), iD=col('CODIGO');
+  const linhas=[];
+  for(const r of L.slice(hi+1)){ if(!r||!limpa(r[iC])) continue;
+    linhas.push({projeto:limpa(r[iP])||'MAJOG', kit:limpa(r[iK]), ano:limpa(r[iA]), ean:limpa(r[iE]), comp:limpa(r[iC]), qtd:numero(r[iQ])||1, cod:limpa(r[iD])}); }
+  return {linhas, arquivo:file.name, modificado:file.lastModified};
+}
 const PROJ_TAB = [['ABRE','17 - ABRE PALAVRA','abre'],['MAJOG','02 - MAJOG','majog'],['SARACOTEIO','18 - SARACOTEIO','saracoteio'],
   ['BANCO','03 - BANCO+','banco'],['VIDA','06 - VIDA','vida'],['VV','05 - VV','voz'],['STP','04 - STP','stp'],['LIGA','07 - LIGA','liga'],
   ['PENSO','15 - PLE','penso'],['TESOURO','14 - TL','tesouro'],['MOTRIZ','08 - MOTRIZ','motriz']];
@@ -907,11 +929,12 @@ async function interpretaEstoque(file){
   const iItem = cab.indexOf('ITEM');
   const iQtd = cab.indexOf('EM ESTOQUE');
   const iCont = cab.indexOf('CONTAGEM FÍSICA')>=0? cab.indexOf('CONTAGEM FÍSICA') : cab.indexOf('CONTAGEM FISICA');
-  const itens = [], soltos = [], livros = [];
+  const itens = [], soltos = [], livros = [], cods = {};
   for(let r=1;r<linhas.length;r++){
     const L = linhas[r]; if(!L) continue;
     const desc = limpa(L[iDesc>=0? iDesc : iItem]);
     if(!desc) continue;
+    { const k = (iItem>=0? limpa(L[iItem]) : '') || desc; cods[k] = (cods[k]||0) + numero(L[iQtd]); }
     const u = SEMACENTO(desc);
     const isbn = iItem>=0? limpa(L[iItem]).replace(/[^0-9X]/gi,'') : '';
     // Banco Mais e VV vêm como "PROJETO DO ALUNO/PROFESSOR", sem a palavra KIT — e com código ISBN,
@@ -927,7 +950,7 @@ async function interpretaEstoque(file){
     if(projeto && serie && (publico==='aluno'||publico==='professor')) itens.push(linha);
     else soltos.push(linha);
   }
-  return {itens, soltos, livros, arquivo:file.name, modificado:file.lastModified, lidoEm:Date.now()};
+  return {itens, soltos, livros, cods, arquivo:file.name, modificado:file.lastModified, lidoEm:Date.now()};
 }
 /* ---------------- leitura da planilha ---------------- */
 function idbAbre(){
@@ -1060,8 +1083,11 @@ async function carregaVendasDaPasta(){
   try{
     const h=(await arquivosDaPasta()).find(x=>ehArqVendas(x.name));
     if(!h){ ARQ.erro='Não encontrei a planilha VENDAS - Controle.xlsx em '+PASTA.nome+(PASTA.nome==='CLAUDE'?'\\1 - FONTES':'')+'. Escolha a pasta CLAUDE.'; render(); return; }
-    const ht=(await arquivosDaPasta()).find(x=>/^PROJETOS\s*-/.test(SEMACENTO(x.name)));
+    const arqs=await arquivosDaPasta();
+    const ht=arqs.find(x=>/^PROJETOS\s*-\s*TABELA/.test(SEMACENTO(x.name)));
     if(ht){ try{ TABP = await interpretaTabelaProjetos(await ht.getFile()); kv('put','tabproj',TABP).catch(()=>{}); }catch(e){ /* fica a T_PREÇOS */ } }
+    const hc=arqs.find(x=>/^PROJETOS\s*-\s*COMPOSI/.test(SEMACENTO(x.name)));
+    if(hc){ try{ COMP = await interpretaComposicao(await hc.getFile()); kv('put','comp',COMP).catch(()=>{}); }catch(e){} }
     ARQ.handle=h; ARQ.nome=h.name; await leArquivo(await h.getFile());
     await carregaLitDaPasta();
   }catch(e){ ARQ.erro='Não consegui ler a pasta '+PASTA.nome+'.'; render(); }
@@ -1210,7 +1236,7 @@ async function iniciar(){
     if(D.conc){ CONC=D.conc; ARQC.estado='snap'; }
     render(); return;
   }
-  try{ TABP = (await kv('get','tabproj')) || null; }catch(e){}
+  try{ TABP = (await kv('get','tabproj')) || null; COMP = (await kv('get','comp')) || null; }catch(e){}
   const salvo = await kv('get','base');
   if(salvo && salvo.vendas){ assume(salvo); ARQ.nome = salvo.arquivo||''; ARQ.estado='cache'; }
   const cc = await kv('get','conc'); if(cc && cc.itens){ CONC = cc; ARQC.estado='cache'; }
@@ -1636,6 +1662,15 @@ function detalheFutura(f, al){
   if(!al) return detalheSeries(f);
   const linhas = al.det.filter(d=>d.pedido);
   if(!linhas.length) return detalheSeries(f);
+  if(linhas.some(d=>d.monta!=null)){ const mont=linhas.reduce((t,d)=>t+(d.monta||0),0), falta=al.ped-al.atd;
+    return `<div class="tw" style="max-width:780px"><table class="miuda"><thead><tr><th class="l">Ano de escolaridade</th><th class="l">Público</th><th>Previsto</th><th>Atende com kits prontos</th><th>Atende montando</th><th>Produzir</th></tr></thead><tbody>
+    ${linhas.map(d=>{ const fa=d.pedido-d.atendido, m=d.monta||0, pr=fa-m;
+      return `<tr><td class="l">${ROT[d.serie]||d.serie}</td><td class="l">${d.pub}</td><td>${fmt(d.pedido)}</td><td>${fmt(d.atendido)}</td><td>${m? `<b style="color:var(--mag)">${fmt(m)}</b>` : '—'}</td>
+        <td>${pr>0? `<span style="color:var(--bad);font-weight:700">${fmt(pr)}</span>` : '<span style="color:var(--ok)">—</span>'}</td></tr>`; }).join('')}
+    <tr class="tot"><td class="l">Total</td><td></td><td>${fmt(al.ped)}</td><td>${fmt(al.atd)}</td><td>${fmt(mont)}</td><td>${fmt(falta-mont)}</td></tr>
+    </tbody></table></div><p class="note" style="margin-top:8px">"Atende montando" usa os kits que dá para montar com livros, jogos e embalagens da 2ª edição em estoque (Estoque &gt; Montagem MAJOG). "Produzir" é o que ainda falta depois disso. ${S.fModo==='ind'
+      ? 'Comparado com o estoque cheio, sem descontar as outras negociações.'
+      : 'Na ordem do mês previsto, já descontado o que as negociações anteriores reservaram.'}</p>`; }
   return `<div class="tw" style="max-width:640px"><table class="miuda"><thead><tr><th class="l">Ano de escolaridade</th><th class="l">Público</th><th>Previsto</th><th>Atende</th><th>Falta</th></tr></thead><tbody>
     ${linhas.map(d=>`<tr><td class="l">${ROT[d.serie]||d.serie}</td><td class="l">${d.pub}</td><td>${fmt(d.pedido)}</td><td>${fmt(d.atendido)}</td>
       <td>${d.pedido-d.atendido? `<span style="color:var(--bad);font-weight:600">${fmt(d.pedido-d.atendido)}</span>${d.cadastrado?'':' <span class="tag" title="Este kit (projeto, público e ano) não aparece na planilha de estoque; conta como zero">fora do estoque</span>'}` : '<span style="color:var(--ok)">—</span>'}</td></tr>`).join('')}
@@ -1796,15 +1831,17 @@ function linhasFutura(f, al){
 }
 function tabelaFutura(L, comEst){
   if(!L.length) return '';
-  const th = comEst? '<th class="sep">Atende</th><th>Falta</th><th class="sep">Fat. atendido</th><th>Fat. faltante</th>' : '';
+  const mt = comEst && L.some(d=>d.monta!=null);   // MAJOG: kits que dá para montar com os componentes em estoque
+  const th = comEst? '<th class="sep">Atende</th><th>Falta</th>'+(mt?'<th class="sep" title="Kits que dá para montar com os componentes em estoque">Montando</th><th title="O que falta depois de montar">Produzir</th>':'')+'<th class="sep">Fat. atendido</th><th>Fat. faltante</th>' : '';
+  const mtc = (ped,at,mo)=>{ const fa=ped-at, pr=fa-(mo||0); return `<td class="sep">${mo? `<b style="color:var(--mag)">${fmt(mo)}</b>` : '—'}</td><td class="${pr>0?'bad':'ok'}">${pr>0? fmt(pr) : '—'}</td>`; };
   const soma=(arr,k)=>arr.reduce((a,x)=>a+(x[k]||0),0);
   const linha=(d)=>`<tr><td class="l">${ROT[d.serie]||d.serie}</td><td>${BRLf(d.tab)}</td><td>${BRLf(d.liq)}</td><td>${fmt(d.pedido)}</td><td>${BRLf(d.fatPrev)}</td>${comEst? `
       <td class="sep ${d.atendido>=d.pedido?'ok2':''}">${fmt(d.atendido)}</td>
-      <td class="${d.pedido-d.atendido>0?'bad':'ok'}">${d.pedido-d.atendido>0? fmt(d.pedido-d.atendido)+(d.cadastrado?'':' <span class="tag" title="Este kit (projeto, público e ano) não aparece na planilha de estoque; conta como zero">fora do estoque</span>') : '—'}</td>
+      <td class="${d.pedido-d.atendido>0?'bad':'ok'}">${d.pedido-d.atendido>0? fmt(d.pedido-d.atendido)+(d.cadastrado?'':' <span class="tag" title="Este kit (projeto, público e ano) não aparece na planilha de estoque; conta como zero">fora do estoque</span>') : '—'}</td>${mt? mtc(d.pedido,d.atendido,d.monta) : ''}
       <td class="sep ${d.atendido>=d.pedido?'ok2':''}">${BRLf(d.fatAt)}</td><td class="${d.fatFalta>0?'bad':'ok'}">${d.fatFalta>0? BRLf(d.fatFalta) : '—'}</td>` : ''}</tr>`;
   const tot=(rot,arr,cls)=>`<tr class="${cls}"><td class="l">${rot}</td><td></td><td></td><td>${fmt(soma(arr,'pedido'))}</td><td>${BRLf(soma(arr,'fatPrev'))}</td>${comEst?
-      `<td class="sep ${soma(arr,'pedido')-soma(arr,'atendido')<=0?'ok2':''}">${fmt(soma(arr,'atendido'))}</td><td class="${soma(arr,'pedido')-soma(arr,'atendido')>0?'bad':''}">${fmt(soma(arr,'pedido')-soma(arr,'atendido'))}</td><td class="sep ${soma(arr,'pedido')-soma(arr,'atendido')<=0?'ok2':''}">${BRLf(soma(arr,'fatAt'))}</td><td class="${soma(arr,'fatFalta')>0.005?'bad':''}">${BRLf(soma(arr,'fatFalta'))}</td>`:''}</tr>`;
-  const ncol = comEst? 9 : 5;
+      `<td class="sep ${soma(arr,'pedido')-soma(arr,'atendido')<=0?'ok2':''}">${fmt(soma(arr,'atendido'))}</td><td class="${soma(arr,'pedido')-soma(arr,'atendido')>0?'bad':''}">${fmt(soma(arr,'pedido')-soma(arr,'atendido'))}</td>${mt? mtc(soma(arr,'pedido'),soma(arr,'atendido'),soma(arr,'monta')) : ''}<td class="sep ${soma(arr,'pedido')-soma(arr,'atendido')<=0?'ok2':''}">${BRLf(soma(arr,'fatAt'))}</td><td class="${soma(arr,'fatFalta')>0.005?'bad':''}">${BRLf(soma(arr,'fatFalta'))}</td>`:''}</tr>`;
+  const ncol = comEst? (mt?11:9) : 5;
   let corpo='';
   [['aluno','Kits de aluno'],['professor','Kits de professor']].forEach(([pub,nome])=>{
     const g=L.filter(d=>d.pub===pub); if(!g.length) return;
@@ -2006,7 +2043,7 @@ function mapaEstoque(){
             atendimentos pode passar do estoque existente. */
 function alocaFunil(modo, conj){
   const consome = modo !== 'ind';
-  const disp = mapaEstoque();
+  const disp = mapaEstoque(), dispM = montavelMajog();
   const fila = (conj||BASE.futuras).filter(f=>f.mesPrevisto).slice()
     .sort((x,y)=> x.mesPrevisto.localeCompare(y.mesPrevisto) || (y.valor||0)-(x.valor||0));
   const saida = new Map();
@@ -2020,12 +2057,16 @@ function alocaFunil(modo, conj){
         const tem = Math.max(0, cadastrado? disp.get(k) : 0);
         const usa = Math.min(q, tem);
         if(cadastrado && consome) disp.set(k, tem - usa);
+        // MAJOG: o que falta pode sair dos kits que dá para montar com os componentes em estoque
+        const temM = dispM.has(k)? Math.max(0, dispM.get(k)) : null;
+        const monta = temM==null? null : Math.min(q-usa, temM);
+        if(monta!=null && consome) dispM.set(k, temM - monta);
         // o valor atendido sai da proporção pelo preço de tabela, aplicada sobre o
         // faturamento da própria negociação — assim o desconto dela é respeitado
         const preco = precoDe(f.projeto, segDe(s), pub==='aluno'?'aluno':'prof');
         brutoTudo += q * preco; brutoAtend += usa * preco;
         if(pub==='aluno'){ pedA+=q; atdA+=usa; } else { pedP+=q; atdP+=usa; }
-        det.push({pub, serie:s, pedido:q, atendido:usa, cadastrado});
+        det.push({pub, serie:s, pedido:q, atendido:usa, cadastrado, monta});
       });
     });
     const ped = pedA+pedP, atd = atdA+atdP;
@@ -2100,8 +2141,67 @@ function pizza(fatias, money){
       <text x="90" y="86" text-anchor="middle" class="pz-t">${money? BRL(tot) : fmt(tot)}</text><text x="90" y="104" text-anchor="middle" class="pz-s">${money?'valor líquido':'kits'}</text></svg>
     <ul class="pz-leg">${ord.map(f=>`<li><span class="sw" style="background:${f.cor}"></span><span class="pz-n">${esc(f.rot)}</span><b>${money? BRL(f.v) : fmt(f.v)}</b><span class="pz-p">${dec(f.v/tot*100,1)}%</span></li>`).join('')}</ul></div>`;
 }
+const subEst = () => `<div class="sub-tabs" style="margin:0 0 14px"><button type="button" data-evista="kits" aria-pressed="${S.eVista!=='montagem'}">Kits em estoque</button><button type="button" data-evista="montagem" aria-pressed="${S.eVista==='montagem'}">Montagem MAJOG</button></div>`;
+document.addEventListener('click', e=>{ const b=e.target.closest&&e.target.closest('[data-evista]'); if(b){ S.eVista=b.dataset.evista; render(); } });
+document.addEventListener('click', e=>{ const b=e.target.closest&&e.target.closest('[data-mprio]'); if(b){ S.mPrio=b.dataset.mprio; render(); } });
+/* ---------------- estoque: montagem de kits do MAJOG ----------------
+   Cruza a composição dos kits (PROJETOS - Composicao dos kits) com o saldo de cada item no NetSuite.
+   Em cada ano, monta primeiro o kit escolhido como prioridade e depois o outro com o que sobrou
+   (o livro do aluno entra nos dois). */
+function calcMontagem(){
+  const C = (BASE.comp||COMP), linhas = C? C.linhas.filter(l=>SEMACENTO(l.projeto)==='MAJOG') : [];
+  if(!EST || !EST.cods || !linhas.length) return null;
+  const saldo = c => Math.max(0, +(EST.cods[c]||0));
+  const anos = [...new Set(linhas.map(l=>l.ano))];
+  const prio = S.mPrio==='professor'? ['Professor','Aluno'] : ['Aluno','Professor'];
+  const res = anos.map(ano=>{
+    const disp = {}, kits = {};
+    prio.forEach(kit=>{
+      const comp = linhas.filter(l=>l.ano===ano && SEMACENTO(l.kit)===SEMACENTO(kit)); if(!comp.length) return;
+      const lim = comp.filter(l=>l.cod).map(l=>Math.floor((l.cod in disp? disp[l.cod] : saldo(l.cod))/(l.qtd||1)));
+      const n = lim.length? Math.max(0,Math.min(...lim)) : 0;
+      const itens = comp.map(l=>{ if(!l.cod) return {l, sem:true};
+        const d = (l.cod in disp? disp[l.cod] : saldo(l.cod)), cons = n*l.qtd; disp[l.cod] = d - cons;
+        return {l, d, cons, resta:d-cons, limita: Math.floor(d/(l.qtd||1))===n}; });
+      kits[kit] = {n, itens, prontos: saldo(comp[0].ean)};
+    });
+    return {ano, kits};
+  });
+  return {C, prio, res};
+}
+// "4 anos" -> EI4, "1º ano" -> AI1, "6º ano" -> AF6
+const serieDoAno = a => { const n=(String(a).match(/\d/)||[''])[0]; return /ANOS?$/.test(SEMACENTO(a).trim()) && !/º|°/.test(a)? 'EI'+n : (+n<=5?'AI':'AF')+n; };
+function montavelMajog(){ const M=calcMontagem(); const m=new Map(); if(!M) return m;
+  M.res.forEach(r=>Object.entries(r.kits).forEach(([kit,k])=>m.set(chaveEst('02 - MAJOG', kit==='Aluno'?'aluno':'professor', serieDoAno(r.ano)), k.n))); return m; }
+function viewMontagem(){
+  let h = barraEstoque() + subEst();
+  const C = (BASE.comp||COMP), linhas = C? C.linhas.filter(l=>SEMACENTO(l.projeto)==='MAJOG') : [];
+  if(!EST || !EST.cods){ $('#main').innerHTML = h+`<div class="card"><div class="empty">${EST? 'Clique em <b>Atualizar estoque</b> para ler o saldo de cada item (livros, jogos e embalagens).' : 'Carregue a planilha de estoque.'}</div></div>`; ligaEstoqueBotoes(); return; }
+  if(!linhas.length){ $('#main').innerHTML = h+`<div class="card"><div class="empty">Coloque a planilha <b>PROJETOS - Composicao dos kits.xlsx</b> em 1 - FONTES e clique em <b>Atualizar fonte</b>.</div></div>`; ligaEstoqueBotoes(); return; }
+  const {prio, res} = calcMontagem();
+  const tot = k => res.reduce((t,r)=>t+((r.kits[k]||{}).n||0),0);
+  h += `<div class="kpis">
+    <div class="kpi"><div class="l">Kits do aluno a montar</div><div class="v">${fmt(tot('Aluno'))}</div><div class="d">com o estoque de hoje</div></div>
+    <div class="kpi"><div class="l">Kits do professor a montar</div><div class="v">${fmt(tot('Professor'))}</div><div class="d">com o estoque de hoje</div></div>
+    <div class="kpi"><div class="l">Kits do aluno já montados</div><div class="v">${fmt(res.reduce((t,r)=>t+((r.kits.Aluno||{}).prontos||0),0))}</div></div>
+    <div class="kpi"><div class="l">Kits do professor já montados</div><div class="v">${fmt(res.reduce((t,r)=>t+((r.kits.Professor||{}).prontos||0),0))}</div></div></div>`;
+  h += `<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+      <div><h2 style="margin:0">Montagem de kits do MAJOG por ano</h2><p class="sub" style="margin:2px 0 0">Composição de <b>${esc((C&&C.arquivo)||'')}</b> × saldo de <b>${esc(EST.arquivo||'')}</b>. Só itens da 2ª edição.</p></div>
+      <div class="f"><span>Montar primeiro</span><div class="seg" role="group"><button type="button" data-mprio="aluno" aria-pressed="${prio[0]==='Aluno'}">Kit do aluno</button><button type="button" data-mprio="professor" aria-pressed="${prio[0]==='Professor'}">Kit do professor</button></div></div></div>
+    <p class="note" style="margin:0 0 12px">O livro do aluno entra nos dois kits: o kit escolhido acima é montado primeiro, e o outro usa o que sobrou. O componente que limita a montagem aparece em vermelho.</p>
+    <div class="tw"><table class="mt-res"><thead><tr><th class="l">Ano</th><th>Aluno · já montados</th><th>Aluno · a montar</th><th>Aluno · total</th><th>Professor · já montados</th><th>Professor · a montar</th><th>Professor · total</th></tr></thead><tbody>${
+      res.map(r=>{ const a=r.kits.Aluno||{}, p=r.kits.Professor||{};
+        return `<tr><td class="l"><b>${esc(r.ano)}</b></td><td>${fmt(a.prontos||0)}</td><td><b>${fmt(a.n||0)}</b></td><td>${fmt((a.prontos||0)+(a.n||0))}</td><td>${fmt(p.prontos||0)}</td><td><b>${fmt(p.n||0)}</b></td><td>${fmt((p.prontos||0)+(p.n||0))}</td></tr>`; }).join('')}</tbody></table></div></div>`;
+  const tabela = (kit,k) => !k? '' : `<div class="mt-kit"><div class="mt-cab"><b>Kit do ${kit.toLowerCase()}</b><span>${fmt(k.prontos)} já montados</span><span class="mt-n">${fmt(k.n)} a montar</span></div>
+    <div class="tw"><table class="mt"><thead><tr><th class="l">Componente</th><th>Por kit</th><th>Disponível</th><th>Consumo</th><th>Restará</th></tr></thead><tbody>${
+      k.itens.map(x=> x.sem? `<tr class="mt-sem"><td class="l">${esc(x.l.comp)}</td><td>${fmt(x.l.qtd)}</td><td colspan="3" class="l"><span class="note">sem saldo no NetSuite — não limita</span></td></tr>`
+        : `<tr class="${x.limita?'mt-lim':''}"><td class="l">${esc(x.l.comp)}${x.limita?' <span class="mt-tag">limita</span>':''}</td><td>${fmt(x.l.qtd)}</td><td>${fmt(x.d)}</td><td>${fmt(x.cons)}</td><td><b>${fmt(x.resta)}</b></td></tr>`).join('')}</tbody></table></div></div>`;
+  res.forEach(r=>{ h += `<div class="card"><h2 style="margin:0 0 10px">${esc(r.ano)}</h2><div class="grid"><div class="c6">${tabela(prio[0],r.kits[prio[0]])}</div><div class="c6">${tabela(prio[1],r.kits[prio[1]])}</div></div></div>`; });
+  $('#main').innerHTML = h; ligaEstoqueBotoes();
+}
 function viewEstoque(){
-  let h = barraEstoque();
+  if(S.eVista==='montagem') return viewMontagem();
+  let h = barraEstoque() + subEst();
   if(!EST){
     h += `<div class="card"><div class="empty">Carregue a planilha de estoque físico para ver os kits por projeto e ano de escolaridade,<br>e para o funil de vendas comparar o que o estoque atende.</div></div>`;
     $('#main').innerHTML = h; ligaEstoqueBotoes(); return;
