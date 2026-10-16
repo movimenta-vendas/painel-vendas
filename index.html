@@ -59,6 +59,19 @@ details.fora{margin-top:14px}details.fora summary{cursor:pointer;color:var(--mut
 #orc-host,#lit-host{padding-top:4px}
 .orc-fr{display:block;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .ms{position:relative;min-width:120px}
+.fcols{display:grid;margin:0 0 10px;padding-left:1px}
+.fcols>div{padding:0 8px;min-width:0}.fcols>div:first-child{padding-left:8px}
+.fcols .ms{min-width:0;width:100%}.fcols .ms-btn .ms-tx{max-width:100%}.fcols select{width:100%}
+.fcols .f>input,.fcols .f>select{width:100%}
+.fbusca{display:flex;gap:10px 12px;align-items:end;margin-bottom:10px;padding:0 8px}.fbusca .grow{flex:1 1 220px}
+table.alinhada{table-layout:fixed;width:100%}
+table.alinhada td.l:not(.wrap-t){overflow:hidden;text-overflow:ellipsis}
+table.alinhada td.wrap-t{min-width:0}
+.filters.fgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px 12px}
+.filters.fgrid .f{min-width:0}.filters.fgrid .f.l2{grid-column:span 2}.filters.fgrid .f.full{grid-column:1 / -1;flex-direction:row;flex-wrap:wrap;gap:10px 16px;align-items:end}
+.filters.fgrid .f.full>.f{min-width:0}
+@media (max-width:760px){.fcols{display:flex;flex-wrap:wrap;gap:10px;padding:0!important}.fcols>div{padding:0;flex:1 1 140px}.fbusca{padding:0;flex-wrap:wrap}
+  table.alinhada{table-layout:auto;min-width:760px}.filters.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:7px 9px;font:inherit;font-family:var(--body);color:var(--ink);background:var(--field);border:1px solid var(--field-line);border-radius:7px;cursor:pointer;text-align:left}
 .ms-btn .ms-tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
 .ms-btn svg{width:12px;height:12px;flex:none;color:var(--muted)}
@@ -130,22 +143,23 @@ input[readonly]{background:var(--mag-soft);color:var(--muted)}
 
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
-th,td{padding:7px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--grid)}
+table{font-size:13px}
+th,td{padding:6px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--grid)}
 th:first-child,td:first-child,.l{text-align:left}
-th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--panel);position:sticky;top:0;z-index:1}
+th{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--panel);position:sticky;top:0;z-index:1}
 tbody tr:last-child td{border-bottom:0}
 tbody tr:hover td{background:var(--wash)}
 tr.tot td{font-weight:600;border-top:1px solid var(--axis);background:var(--mag-soft)}
 td.wrap-t{white-space:normal;min-width:150px}
 table.editavel input,table.editavel select{min-height:30px;padding:3px 6px;border-radius:5px}
-table.compacta{table-layout:fixed;font-size:11.5px;min-width:940px}
+table.compacta{table-layout:fixed;font-size:13px;min-width:940px}
 table.compacta th,table.compacta td{padding:6px 6px;overflow:hidden;text-overflow:ellipsis}
-table.compacta th{font-size:10px;letter-spacing:.04em}
-table.compacta td:first-child,table.compacta th:first-child{font-size:12.5px}
-#tcorpo table{font-size:11.5px}
-#tcorpo th{font-size:10px;letter-spacing:.04em}
+table.compacta th{font-size:10.5px;letter-spacing:.04em}
+
+#tcorpo table{font-size:13px}
+#tcorpo th{font-size:10.5px;letter-spacing:.04em}
 #tcorpo td,#tcorpo th{padding:5px 6px}
-#tcorpo input,#tcorpo select{min-height:28px;padding:3px 6px;font-size:11.5px}
+#tcorpo input,#tcorpo select{min-height:28px;padding:3px 6px;font-size:13px}
 #tcorpo .note{font-size:12px}
 table.precos{table-layout:fixed;min-width:860px}
 table.precos input{width:100%}
@@ -189,9 +203,7 @@ table.series tr.sub td{font-weight:600;border-top:1px solid var(--grid);backgrou
 table.calor td{border-bottom:1px solid var(--grid);padding:5px 10px}
 table.calor .barra{display:block;height:15px;border-radius:3px;min-width:3px}
 .chart.baixa{height:190px}
-table.miuda{font-size:12px}
-table.miuda th{font-size:10px}
-table.miuda td,table.miuda th{padding:5px 8px}
+
 .mapas2 h3.mtit{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mag);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .mapas2 h3.mtit span{color:var(--ink);text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
 .mapa svg path.clic{cursor:pointer}
@@ -508,7 +520,9 @@ function grafico(id,spec){
       if(spec.kind==='line'){
         sets.forEach(s=>{
           const pts=s.data.map((v,i)=>[m.l+band*(i+.5), Y(v||0)]);
-          g+=`<path d="${pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${s.dash?' stroke-dasharray="5 4"':''}/>`;
+          // na escala logarítmica, mês sem venda não tem ponto: a linha é interrompida ali
+          let d='', ant=false; pts.forEach((p,i)=>{ const ok=!log||(s.data[i]>0); if(ok) d+=(ant?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1); ant=ok; });
+          g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${s.dash?' stroke-dasharray="5 4"':''}/>`;
           pts.forEach((p,i)=>{ if(s.data[i]) g+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="${s.color}" stroke="${pn}" stroke-width="1.5"/>`; });
         });
         spec.labels.forEach((lab,i)=>{ g+=`<text x="${m.l+band*(i+.5)}" y="${H-7}" text-anchor="middle" fill="${ink2}" font-size="11">${esc(lab)}</text>`; });
@@ -740,8 +754,50 @@ async function interpretaArquivo(file){
     lidoEm: Date.now(), arquivo: file.name, modificado: file.lastModified
   };
   SST = [];
+  if(TABP){ aplicaTabelaProjetos(base, TABP); base.tabProj = TABP; }
   recalculaFuturas(base);
   return base;
+}
+/* ---------------- preços dos projetos: 1 - FONTES\PROJETOS - Tabela de precos.xlsx ----------------
+   Uma aba por projeto, com blocos por segmento (título com INFANTIL / INICIAIS / FINAIS / MÉDIO)
+   e linhas Público | Escolaridade | Quantidade | Preço. Vale para as vendas futuras, o valor do
+   estoque e o gerador de orçamentos. Projetos fora dela (PCE, Colcha, Seu Amanhã) seguem a T_PREÇOS. */
+let TABP = null;
+const PROJ_TAB = [['ABRE','17 - ABRE PALAVRA','abre'],['MAJOG','02 - MAJOG','majog'],['SARACOTEIO','18 - SARACOTEIO','saracoteio'],
+  ['BANCO','03 - BANCO+','banco'],['VIDA','06 - VIDA','vida'],['VV','05 - VV','voz'],['STP','04 - STP','stp'],['LIGA','07 - LIGA','liga'],
+  ['PENSO','15 - PLE','penso'],['TESOURO','14 - TL','tesouro'],['MOTRIZ','08 - MOTRIZ','motriz']];
+async function interpretaTabelaProjetos(file){
+  const z = await abreZip(await file.arrayBuffer()); leSST(z);
+  const abas = [...xml(z['xl/workbook.xml']).getElementsByTagName('sheet')].map(x=>x.getAttribute('name'));
+  const proj = {}, gerador = {};
+  for(const aba of abas){
+    const nm = SEMACENTO(aba).replace(/^[\d\s-]+/,'').trim();
+    const m = PROJ_TAB.find(x=>nm.startsWith(x[0])); if(!m) continue;
+    let seg = null; const t = {};
+    for(const r of (lePlanilha(z,aba)||[])){
+      if(!r) continue; const a = SEMACENTO(r[0]).trim(), pr = r[3];
+      if(typeof pr!=='number' || !String(r[1]==null?'':r[1]).trim()){
+        if(/INFANTIL/.test(a)) seg='EI'; else if(/INICIAIS/.test(a)) seg='AI'; else if(/FINAIS/.test(a)) seg='AF'; else if(/MEDIO/.test(a)) seg='EM';
+        continue;
+      }
+      if(!seg) continue;
+      const papel = /SALA/.test(a)?'sala' : /ESCOLA/.test(a)?null : /PROF/.test(a)?'prof' : /ALUNO/.test(a)?'aluno' : null;
+      if(papel && !(t[seg]&&t[seg][papel])) (t[seg]=t[seg]||{})[papel] = pr;
+    }
+    if(Object.keys(t).length){ proj[m[1]] = t; gerador[m[2]] = t; }
+  }
+  SST = [];
+  if(!Object.keys(proj).length) throw new Error('tabela');
+  return {proj, gerador, arquivo:file.name, modificado:file.lastModified};
+}
+/* aluno = kit/livro do aluno; professor = professor + kit sala de aula (como na T_PREÇOS) */
+function aplicaTabelaProjetos(base, tab){
+  Object.entries(tab.proj).forEach(([nome,t])=>{
+    let o = base.precos.find(p=>p.projeto===nome);
+    if(!o){ o = {projeto:nome, mult: MULT[nome]||1}; base.precos.push(o); }
+    Object.entries(t).forEach(([seg,v])=>{ o[seg+'_aluno'] = v.aluno||0; o[seg+'_prof'] = (v.prof||0)+(v.sala||0); });
+    o.fonte = 'tabela';
+  });
 }
 /* Faturamento das vendas futuras calculado no app: kits × preço de tabela × (1 − 77,5%).
    É a mesma conta da planilha, mas feita aqui — assim o valor aparece mesmo quando o Excel
@@ -966,6 +1022,8 @@ async function carregaVendasDaPasta(){
   try{
     const h=(await arquivosDaPasta()).find(x=>ehArqVendas(x.name));
     if(!h){ ARQ.erro='Não encontrei a planilha VENDAS - Controle.xlsx em '+PASTA.nome+(PASTA.nome==='CLAUDE'?'\\1 - FONTES':'')+'. Escolha a pasta CLAUDE.'; render(); return; }
+    const ht=(await arquivosDaPasta()).find(x=>/^PROJETOS\s*-/.test(SEMACENTO(x.name)));
+    if(ht){ try{ TABP = await interpretaTabelaProjetos(await ht.getFile()); kv('put','tabproj',TABP).catch(()=>{}); }catch(e){ /* fica a T_PREÇOS */ } }
     ARQ.handle=h; ARQ.nome=h.name; await leArquivo(await h.getFile());
     await carregaLitDaPasta();
   }catch(e){ ARQ.erro='Não consegui ler a pasta '+PASTA.nome+'.'; render(); }
@@ -1074,7 +1132,7 @@ async function publicarBase(){
   await kv('put','pub-cfg',cfg); bt.disabled=true;
   try{
     const em=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',',' às');
-    const orc = (()=>{ const f=orcFonte(); return f&&f.gz? {gz:f.gz, fixo:orcConfig()} : null; })();
+    const orc = (()=>{ const f=orcFonte(); return f&&f.gz? {gz:f.gz, fixo:Object.assign(orcConfig(),{tabela:(BASE.tabProj&&BASE.tabProj.gerador)||null})} : null; })();
     const lit = (()=>{ const e=document.getElementById('lit-src'); return e&&LIT? {gz:e.textContent.trim(), fonte:{catalogo:LIT.catalogo, catMeta:LIT.catMeta, distribuidores:LIT.distribuidores, config:litConfig()}} : null; })();
     const completa={em, base:BASE, est:EST||null, conc:CONC||null, orc, lit};
     const geral={em, base:BASE, est:EST||null, conc:null, orc, lit};
@@ -1114,6 +1172,7 @@ async function iniciar(){
     if(D.conc){ CONC=D.conc; ARQC.estado='snap'; }
     render(); return;
   }
+  try{ TABP = (await kv('get','tabproj')) || null; }catch(e){}
   const salvo = await kv('get','base');
   if(salvo && salvo.vendas){ assume(salvo); ARQ.nome = salvo.arquivo||''; ARQ.estado='cache'; }
   const cc = await kv('get','conc'); if(cc && cc.itens){ CONC = cc; ARQC.estado='cache'; }
@@ -1205,13 +1264,13 @@ function viewFaturamento(){
     <div class="kpi"><div class="l">Kits de professor</div><div class="v">${fmt(f.reduce((s,v)=>s+(v.kitsProf||0),0))}</div></div>
     <div class="kpi"><div class="l">Pedidos</div><div class="v">${fmt(f.length)}</div></div>
     <div class="kpi"><div class="l">Redes atendidas</div><div class="v">${fmt(new Set(f.map(v=>v.rede+'|'+v.uf)).size)}</div></div></div>`;
-  h += `<div class="card"><div class="filters">
+  h += `<div class="card"><div class="filters fgrid">
       <label class="f"><span>Ano comercial</span><select id="mano"><option value="todos"${TODOS?' selected':''}>Todos os anos</option>${anosCom.slice().reverse().map(a=>`<option value="${a}"${+S.mAnoCom===a?' selected':''}>${rotCom(a)}</option>`).join('')}</select></label>
       <label class="f"><span>Região</span><select id="mreg"><option value="">Todas</option>${REGIOES().map(r=>`<option value="${esc(r)}"${S.mReg===r?' selected':''}>${esc(short(r))}</option>`).join('')}</select></label>
       <label class="f"><span>UF</span><select id="muf"><option value="">Todas</option>${UFS().map(u=>`<option${S.mUF===u?' selected':''}>${u}</option>`).join('')}</select></label>
-      <label class="f" style="min-width:200px"><span>Rede de ensino</span><select id="mrede"><option value="">Todas</option>${redes.map(r=>`<option value="${esc(r)}"${S.mRede===r?' selected':''}>${esc(r)}</option>`).join('')}</select></label>
+      <label class="f l2"><span>Rede de ensino</span><select id="mrede"><option value="">Todas</option>${redes.map(r=>`<option value="${esc(r)}"${S.mRede===r?' selected':''}>${esc(r)}</option>`).join('')}</select></label>
       <label class="f"><span>Projeto</span><select id="mproj"><option value="">Todos</option>${projetos().map(p=>`<option value="${esc(p)}"${S.mProj===p?' selected':''}>${esc(short(p))}</option>`).join('')}</select></label>
-      <div class="f"><span>Medida</span><div class="seg" role="group"><button type="button" data-mmed="valor" aria-pressed="${money}">Valores</button><button type="button" data-mmed="kits" aria-pressed="${S.mMed==='kits'}">Kits</button><button type="button" data-mmed="pessoas" aria-pressed="${pessoas}">Alunos/prof.</button></div></div>
+      <div class="f full"><div class="f"><span>Medida</span><div class="seg" role="group"><button type="button" data-mmed="valor" aria-pressed="${money}">Valores</button><button type="button" data-mmed="kits" aria-pressed="${S.mMed==='kits'}">Kits</button><button type="button" data-mmed="pessoas" aria-pressed="${pessoas}">Alunos/prof.</button></div></div></div>
     </div>
     <div class="tw"><table class="compacta"><colgroup><col style="width:14%">${rot.map(()=>'<col style="width:6%">').join('')}<col style="width:14%"></colgroup>
       <thead><tr><th class="l">Projeto</th>${rot.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':pessoas?'pessoas':'kits'}</span></th></tr></thead>
@@ -1371,25 +1430,24 @@ function viewAcervo(){
     <div class="kpi"><div class="l">Receita</div><div class="v">${BRL(sel.reduce((s,v)=>s+(v.valor||0),0))}</div></div>
     <div class="kpi"><div class="l">Pedidos</div><div class="v">${fmt(sel.length)}</div></div>
     <div class="kpi"><div class="l">Canais</div><div class="v">${fmt(new Set(sel.map(v=>v.via)).size)}</div><div class="d">distribuidores e marketplaces</div></div></div>`;
-  h += `<div class="card"><div class="filters">
+  h += `<div class="card"><div class="filters fgrid">
       <label class="f"><span>Ano</span><select id="aano"><option value="todos"${S.aAno==='todos'?' selected':''}>Todos</option>${anos.slice().reverse().map(a=>`<option${+S.aAno===a?' selected':''}>${a}</option>`).join('')}</select></label>
       <label class="f"><span>Região</span><select id="areg"><option value="">Todas</option>${REGIOES().map(r=>`<option value="${esc(r)}"${S.aReg===r?' selected':''}>${esc(short(r))}</option>`).join('')}</select></label>
       <label class="f"><span>UF</span><select id="auf"><option value="">Todas</option>${UFS().map(u=>`<option${S.aUF===u?' selected':''}>${u}</option>`).join('')}</select></label>
-      <label class="f"><span>Canal</span><select id="avia"><option value="">Todos</option>${[...new Set(base.map(v=>v.via).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}"${S.aVia===x?' selected':''}>${esc(x)}</option>`).join('')}</select></label>
+      <label class="f l2"><span>Canal</span><select id="avia"><option value="">Todos</option>${[...new Set(base.map(v=>v.via).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}"${S.aVia===x?' selected':''}>${esc(x)}</option>`).join('')}</select></label>
       <label class="f"><span>Operação</span><select id="aop"><option value="">Todas</option>${BASE.operacoes.map(o=>`<option${S.aOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>
-      <div class="f"><span>Medida</span><div class="seg" role="group"><button type="button" data-amed="kits" aria-pressed="${!money}">Exemplares</button><button type="button" data-amed="valor" aria-pressed="${money}">Valores</button></div></div>
-      <div class="f"><span>Escala do gráfico</span><div class="seg" role="group"><button type="button" data-aesc="linear" aria-pressed="${S.aEsc==='linear'}">Linear</button><button type="button" data-aesc="log" aria-pressed="${S.aEsc==='log'}">Logarítmica</button></div></div>
+      <div class="f full"><div class="f"><span>Medida</span><div class="seg" role="group"><button type="button" data-amed="kits" aria-pressed="${!money}">Exemplares</button><button type="button" data-amed="valor" aria-pressed="${money}">Valores</button></div></div>
+</div>
     </div>
     <div class="tw"><table class="compacta"><colgroup><col style="width:10%">${MES.map(()=>'<col style="width:6.25%">').join('')}<col style="width:15%"></colgroup>
       <thead><tr><th class="l">Ano</th>${MES.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':'exemplares'}</span></th></tr></thead>
       <tbody>${corpo}</tbody></table></div>
     <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.':'Exemplares vendidos.'}${semData?` ${money?BRLf(semData):fmt(semData)} sem data de emissão entram no total do ano, mas não em nenhum mês.`:''}</p></div>`;
-  h += caixa('g-acv','baixa','Acervo mês a mês', money?'Receita por mês, uma linha para cada ano':'Exemplares por mês, uma linha para cada ano')+(S.aEsc==='log'?'':'');
+  h += caixa('g-acv','baixa','Acervo mês a mês', money?'Receita por mês, uma linha para cada ano · escala logarítmica':'Exemplares por mês, uma linha para cada ano · escala logarítmica');
   $('#main').innerHTML = h;
   liga('#aano','aAno'); liga('#areg','aReg'); liga('#auf','aUF'); liga('#avia','aVia'); liga('#aop','aOp');
   $$('[data-amed]').forEach(b=>b.onclick=()=>{S.aMed=b.dataset.amed; render();});
-  $$('[data-aesc]').forEach(b=>b.onclick=()=>{S.aEsc=b.dataset.aesc; render();});
-  grafico('g-acv',{kind:'line',money,log:S.aEsc==='log',labels:MES,
+  grafico('g-acv',{kind:'line',money,log:true,labels:MES,
     sets:vis.map((a,i)=>({label:String(a),data:mat[a].slice(0,12),color:pal()[i%8]}))});
 }
 
@@ -1505,13 +1563,14 @@ function viewEstoqueLivros(){
     <div class="kpi"><div class="l">Sem saldo</div><div class="v" style="color:var(--bad)">${fmt(n('sem'))}</div><div class="d">inclui obras fora do relatório</div></div>
     <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(ex)}</div><div class="d">${BRL(val)} a preço de capa</div></div></div>`;
   h += `<div class="ed-cards">${eds.map(card).join('')}</div>`;
-  h += `<div class="card"><div class="row" style="margin-bottom:12px">
-      <label class="f grow"><span>Título, autor ou ISBN</span><input type="search" id="lq" value="${esc(S.lq||'')}" placeholder="Digite para procurar"></label>
-      ${multi('ms-led','Editora',eds.map(e=>[e,ED_NOME[e]||e]),fe,'Todas','editoras',3)}
-      <label class="f"><span>Situação</span><select id="lsit"><option value="">Todas</option><option value="ok"${sit==='ok'?' selected':''}>Com estoque</option><option value="baixo"${sit==='baixo'?' selected':''}>Estoque baixo</option><option value="sem"${sit==='sem'?' selected':''}>Sem saldo</option></select></label>
-      <label class="f"><span>Ordem</span><select id="lord"><option value="tit">Título</option><option value="qtd"${S.lOrd==='qtd'?' selected':''}>Menor estoque primeiro</option></select></label></div>
-    <p class="note" style="margin:-4px 0 10px">Estoque do relatório <b>${esc(EST.arquivo||'')}</b>. Obras marcadas com ◆ foram encontradas pelo título, porque o ISBN no NetSuite é diferente do catálogo.</p>
-    ${f.length? `<div class="tw" style="max-height:640px"><table class="est-lit"><thead><tr><th class="l">Obra</th><th class="l">Editora</th><th class="l">ISBN</th><th>Preço de capa</th><th>Em estoque</th></tr></thead><tbody>${
+  const COLS=[38,16,16,14,16];
+  h += `<div class="card"><p class="note" style="margin:0 0 12px">Estoque do relatório <b>${esc(EST.arquivo||'')}</b>. Obras marcadas com ◆ foram encontradas pelo título, porque o ISBN no NetSuite é diferente do catálogo.</p>
+    ${fcols(COLS,[
+      [1,1,`<label class="f"><span>Título, autor ou ISBN</span><input type="search" id="lq" value="${esc(S.lq||'')}" placeholder="Digite para procurar"></label>`],
+      [2,1,multi('ms-led','Editora',eds.map(e=>[e,ED_NOME[e]||e]),fe,'Todas','editoras',3)],
+      [4,1,`<label class="f"><span>Ordem</span><select id="lord"><option value="tit">Título</option><option value="qtd"${S.lOrd==='qtd'?' selected':''}>Menor estoque</option></select></label>`],
+      [5,1,`<label class="f"><span>Situação</span><select id="lsit"><option value="">Todas</option><option value="ok"${sit==='ok'?' selected':''}>Com estoque</option><option value="baixo"${sit==='baixo'?' selected':''}>Estoque baixo</option><option value="sem"${sit==='sem'?' selected':''}>Sem saldo</option></select></label>`]])}
+    ${f.length? `<div class="tw" style="max-height:640px"><table class="est-lit alinhada">${colg(COLS)}<thead><tr><th class="l">Obra</th><th class="l">Editora</th><th class="l">ISBN</th><th>Preço de capa</th><th>Em estoque</th></tr></thead><tbody>${
       f.map(x=>`<tr class="s-${sitLivro(x)}"><td class="l wrap-t"><b>${esc(x.t)}</b>${x.a?`<span class="sub-a">${esc(x.a)}</span>`:''}</td>
         <td class="l"><span class="ed-chip" style="--ed:${ED_COR[x.e]||'var(--muted)'}">${esc(ED_NOME[x.e]||x.e||'—')}</span></td>
         <td class="l mono">${esc(x.isbn)}${x.via==='titulo'?` <span class="tag" title="ISBN no NetSuite: ${esc(x.ns)}">◆</span>`:''}</td>
@@ -1770,16 +1829,19 @@ function viewVendas(){
     <div class="kpi"><div class="l">Alunos</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsAluno||0)*multDe(v.projeto),0))}</div><div class="d">kits × unidades por kit</div></div>
     <div class="kpi"><div class="l">Kits professor</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsProf||0),0))}</div></div>
     <div class="kpi"><div class="l">Faturamento</div><div class="v">${BRL(r.reduce((s,v)=>s+(v.valor||0),0))}</div></div></div>`;
-  h += `<div class="card"><div class="row" style="margin-bottom:12px">
+  const COLS = LIT? [9,9,21,16,10,9,11,7,8] : [8,7,16,12,9,9,7,7,10,6,9];
+  const fOp = `<label class="f"><span>Operação</span><select id="vop"><option value="">Todas</option>${BASE.operacoes.map(o=>`<option${S.vOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+  h += `<div class="card"><div class="fbusca">
       <label class="f grow"><span>Buscar</span><input type="search" id="vq" value="${esc(S.vq)}" placeholder="Rede, UF, pedido, NF ou projeto"></label>
-      ${multi('ms-ano','Ano',anos.map(a=>[String(a),String(a)]),S.vAno,'Todos','anos',4)}
-      ${S.linha==='lit'? '' : multi('ms-proj','Projeto',projetos().filter(p=>p!==ACERVO).map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)}
-      ${multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)}
-      <label class="f"><span>Operação</span><select id="vop"><option value="">Todas</option>${BASE.operacoes.map(o=>`<option${S.vOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>
-      <button class="btn" id="csv" type="button">Baixar CSV</button></div>`;
-  h += r.length? `<div class="tw" style="max-height:640px"><table><thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th></th></tr></thead><tbody>`+
+      <button class="btn" id="csv" type="button">Baixar CSV</button></div>
+    ${fcols(COLS,[
+      [1,1,multi('ms-ano','Ano',anos.map(a=>[String(a),String(a)]),S.vAno,'Todos','anos',4)],
+      [3,1,multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)],
+      LIT? null : [5,1,multi('ms-proj','Projeto',projetos().filter(p=>p!==ACERVO).map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)],
+      [LIT?5:6,1,fOp]])}`;
+  h += r.length? `<div class="tw" style="max-height:640px"><table class="alinhada">${colg(COLS)}<thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th></th></tr></thead><tbody>`+
     mostra.map(v=>`<tr><td class="l">${brD(v.emissao)||'<span class="tag">sem data</span>'}</td><td class="l">${esc(v.pedido)}</td>
-      <td class="l wrap-t">${esc(v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(v.via)}</td>
+      <td class="l wrap-t">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(v.via)}</td>
       ${LIT?'':`<td class="l"><span class="sw" style="background:${corDe(v.projeto)}"></span>${esc(short(v.projeto))}</td>`}
       <td class="l">${esc(v.operacao)}</td>${LIT?`<td>${fmt(v.kitsAluno)}</td>`:`<td>${fmt(v.kitsAluno)}</td><td>${fmt(v.kitsProf)}</td>`}<td>${BRLf(v.valor)}</td><td class="l">${esc(v.nf)}</td>
       <td><button class="btn sm" data-det="${v.id}" type="button">Detalhes</button></td></tr>`).join('')+
@@ -1827,25 +1889,28 @@ function viewFuturas(){
   if(!EST) h += `<div class="banner">Carregue a planilha de estoque na aba <b>Estoque</b> para ver quanto de cada negociação o estoque atual atende.</div>`;
   h += `<div class="grid"><div class="c7">${caixa('g-fut','','Previsão por mês','Faturamento por projeto, no mês previsto')}</div>
         <div class="c5">${caixa('g-futp','','Previsão por projeto','Total previsto')}</div></div>`;
-  h += `<div class="card"><div class="row" style="margin-bottom:12px">
-      ${multi('ms-fmes','Mês',[...new Set(todas.map(f=>f.mesPrevisto))].sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)}
-      ${multi('ms-frede','Rede',[...new Set(todas.map(chRede))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)}
-      ${multi('ms-fvia','Distribuidor',[...new Set(todas.map(f=>f.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)}
-      ${multi('ms-fproj','Projeto',[...new Set(todas.map(f=>f.projeto).filter(Boolean))].sort().map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)}
-      ${al? `<label class="f"><span>Situação no estoque</span><select id="fsit">${
+  // filtros alinhados às colunas da tabela: mesma grade de larguras
+  const COLS = al? [8,19,15,13,7,7,11,11,9] : [9,22,19,16,9,9,12,4];
+  const gc = (i,n=1)=>`style="grid-column:${i} / span ${n}"`;
+  h += `<div class="card">${al? `<div class="row" style="margin-bottom:6px"><div class="f"><span>Leitura do estoque</span><div class="seg" role="group">
+        <button type="button" data-fmodo="fila" aria-pressed="${!ind}">Fila</button>
+        <button type="button" data-fmodo="ind" aria-pressed="${ind}">Individual</button></div></div></div>
+      <p class="note" style="margin:0 0 12px">${ind
+      ? 'Individual: cada negociação é comparada com o estoque cheio, como se fosse a única. Serve para responder "esta rede eu atendo?" — a soma dos atendimentos passa do estoque que existe.'
+      : 'Fila: o estoque é consumido na ordem do mês previsto (empate, a maior primeiro). Mostra até onde o estoque de hoje chega se o calendário for cumprido.'}</p>`:''}
+    <div class="fcols" id="fcols" style="grid-template-columns:${COLS.map(c=>c+'%').join(' ')}">
+      <div ${gc(1)}>${multi('ms-fmes','Mês',[...new Set(todas.map(f=>f.mesPrevisto))].sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)}</div>
+      <div ${gc(2)}>${multi('ms-frede','Rede',[...new Set(todas.map(chRede))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)}</div>
+      <div ${gc(3)}>${multi('ms-fvia','Distribuidor',[...new Set(todas.map(f=>f.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)}</div>
+      <div ${gc(4)}>${multi('ms-fproj','Projeto',[...new Set(todas.map(f=>f.projeto).filter(Boolean))].sort().map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)}</div>
+      ${al? `<div ${gc(8,2)}><label class="f"><span>Situação</span><select id="fsit">${
         [['','Todas',semSit.length],['int','Atende integral',semSit.filter(f=>cobre(f)>=0.999).length],
          ['par','Atende parcial',semSit.filter(f=>cobre(f)>0&&cobre(f)<0.999).length],
          ['sem','Sem estoque',semSit.filter(f=>cobre(f)<=0).length],
          ['falta','Falta algo (parcial + sem)',semSit.filter(f=>cobre(f)<0.999).length]]
         .map(([v,r,n])=>`<option value="${v}"${S.fSit===v?' selected':''}>${r} (${fmt(n)})</option>`).join('')
-      }</select></label>
-      <div class="f"><span>Leitura do estoque</span><div class="seg" role="group">
-        <button type="button" data-fmodo="fila" aria-pressed="${!ind}">Fila</button>
-        <button type="button" data-fmodo="ind" aria-pressed="${ind}">Individual</button></div></div>`:''}</div>`;
-  if(al) h += `<p class="note" style="margin:-4px 0 12px">${ind
-      ? 'Individual: cada negociação é comparada com o estoque cheio, como se fosse a única. Serve para responder "esta rede eu atendo?" — a soma dos atendimentos passa do estoque que existe.'
-      : 'Fila: o estoque é consumido na ordem do mês previsto (empate, a maior primeiro). Mostra até onde o estoque de hoje chega se o calendário for cumprido.'}</p>`;
-  h += lista.length? `<div class="tw" style="max-height:600px"><table class="miuda"><thead><tr><th class="l">Mês previsto</th><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th>Kits aluno</th><th>Kits prof.</th><th>Faturamento</th>${al?'<th class="l">Estoque</th>':''}<th></th></tr></thead><tbody>`+
+      }</select></label></div>`:''}</div>`;
+  h += lista.length? `<div class="tw tw-fut" style="max-height:600px"><table class="alinhada"><colgroup>${COLS.map(c=>`<col style="width:${c}%">`).join('')}</colgroup><thead><tr><th class="l">Mês previsto</th><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th>Kits aluno</th><th>Kits prof.</th><th>Faturamento</th>${al?'<th class="l">Estoque</th>':''}<th></th></tr></thead><tbody>`+
     mostra.map(f=>`<tr><td class="l">${MES[+f.mesPrevisto.slice(5,7)-1]}/${f.mesPrevisto.slice(2,4)}</td>
       <td class="l wrap-t">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td>
       <td class="l"><span class="sw" style="background:${corDe(f.projeto)}"></span>${esc(short(f.projeto))}</td>
@@ -2043,10 +2108,10 @@ function viewTabelas(){
   $$('[data-sub]').forEach(b=>b.onclick=()=>{S.sub=b.dataset.sub; viewTabelas();});
   const c=$('#tcorpo'); const segs=['EI','AI','AF','EM'];
   if(S.sub==='precos'){
-    c.innerHTML = `<p class="note" style="margin-bottom:10px">Preço de tabela por segmento, da aba T_PREÇOS. "Unid. por kit" é quantos alunos cada kit atende.</p>
+    c.innerHTML = `<p class="note" style="margin-bottom:10px">Preço de tabela por segmento. ${BASE.tabProj? `Os projetos marcados com • vêm de <b>${esc(BASE.tabProj.arquivo)}</b> (professor inclui o kit sala de aula); os demais, da aba T_PREÇOS.` : 'Da aba T_PREÇOS.'} "Unid. por kit" é quantos alunos cada kit atende.</p>
     <div class="tw"><table class="precos"><colgroup><col style="width:15%"><col style="width:9%">${segs.map(()=>'<col style="width:9.5%"><col style="width:9.5%">').join('')}</colgroup>
     <thead><tr><th class="l">Projeto</th><th>Unid.<span class="un">por kit</span></th>${segs.map(s=>`<th>${SEGCURTO[s]}<span class="un">aluno</span></th><th>${SEGCURTO[s]}<span class="un">professor</span></th>`).join('')}</tr></thead><tbody>
-    ${BASE.precos.map(p=>`<tr><td class="l">${esc(p.projeto)}</td><td>${fmt(p.mult)}</td>${segs.map(s=>`<td>${BRLf(p[s+'_aluno']||0)}</td><td>${BRLf(p[s+'_prof']||0)}</td>`).join('')}</tr>`).join('')}
+    ${BASE.precos.map(p=>`<tr><td class="l">${esc(p.projeto)}${p.fonte==='tabela'?' •':''}</td><td>${fmt(p.mult)}</td>${segs.map(s=>`<td>${BRLf(p[s+'_aluno']||0)}</td><td>${BRLf(p[s+'_prof']||0)}</td>`).join('')}</tr>`).join('')}
     </tbody></table></div>`;
   } else {
     const rot={projetos:'Projeto',distribuidores:'Distribuidor',operacoes:'Operação',status:'Status'}[S.sub];
@@ -2060,6 +2125,11 @@ function viewTabelas(){
 
 /* ---------------- utilidades de tela ---------------- */
 /* seleção múltipla: lista vazia = todos */
+/* filtros de tabela: cada filtro fica em cima da coluna a que se refere (mesma grade de larguras) */
+const colg = C => `<colgroup>${C.map(c=>`<col style="width:${c}%">`).join('')}</colgroup>`;
+const fcols = (C, itens) => `<div class="fcols" style="grid-template-columns:${C.map(c=>c+'%').join(' ')}">${itens.filter(Boolean).map(([i,n,h])=>`<div style="grid-column:${i} / span ${n}">${h}</div>`).join('')}</div>`;
+function ajustaFcols(){ $$('.fcols').forEach(fc=>{ let t=fc.nextElementSibling; while(t&&!(t.classList&&t.classList.contains('tw'))) t=t.nextElementSibling;
+  if(t) fc.style.paddingRight=Math.max(0,t.offsetWidth-t.clientWidth-2)+'px'; }); }
 function multi(id, rotulo, opcoes, sel, todosTxt, plural, juntaAte){
   const n = sel.length, nome = v => (opcoes.find(o=>o[0]===v)||[v,v])[1];
   const txt = !n? todosTxt : n<=juntaAte? sel.map(nome).join(', ') : `${n} ${plural}`;
@@ -2295,11 +2365,12 @@ function viewPagamentos(){
     <tr class="tot"><td class="l">Total</td><td></td><td>${BRLf(tot)}</td><td>${fmt(todos.length)}</td><td>${BRLf(fatRedes)}</td></tr></tbody></table></div></div>`;
 
   // detalhe
+  const PCOLS=[14,5,8,5,9,10,11,11,9,13,5];
   h += `<div class="card"><h2>Notas em aberto</h2><p class="sub">Vendas públicas com PAGAMENTO em branco na planilha (fora acervo e redes privadas). Ao preencher a data na planilha e salvar, a nota sai desta lista.</p>
-    <div class="filters">
-      <label class="f"><span>Situação</span><select id="psit"><option value="">Todas</option>${SIT.map(([s])=>`<option${S_P.pSit===s?' selected':''}>${s}</option>`).join('')}</select></label>
-      <label class="f grow"><span>Busca</span><input id="pq" type="search" value="${esc(S_P.pq)}" placeholder="Rede, NF, projeto ou credor"></label></div>
-    <div class="tw" style="max-height:620px"><table class="miuda"><thead><tr><th class="l">Rede</th><th class="l">NF</th><th class="l">Emissão</th><th>Dias</th><th class="l">Projeto</th><th>Nosso valor</th><th class="l">Situação</th><th class="l">Credor</th><th class="l">Empenhos</th><th class="l">Próximo passo</th><th class="l">Portal</th></tr></thead><tbody>
+    ${fcols(PCOLS,[
+      [1,3,`<label class="f"><span>Busca</span><input id="pq" type="search" value="${esc(S_P.pq)}" placeholder="Rede, NF, projeto ou credor"></label>`],
+      [7,1,`<label class="f"><span>Situação</span><select id="psit"><option value="">Todas</option>${SIT.map(([s])=>`<option${S_P.pSit===s?' selected':''}>${s}</option>`).join('')}</select></label>`]])}
+    <div class="tw" style="max-height:620px"><table class="alinhada">${colg(PCOLS)}<thead><tr><th class="l">Rede</th><th class="l">NF</th><th class="l">Emissão</th><th>Dias</th><th class="l">Projeto</th><th>Nosso valor</th><th class="l">Situação</th><th class="l">Credor</th><th class="l">Empenhos</th><th class="l">Próximo passo</th><th class="l">Portal</th></tr></thead><tbody>
     ${lista.sort((a,b)=>SIT.findIndex(s=>s[0]===a.situacao)-SIT.findIndex(s=>s[0]===b.situacao)||b.valor-a.valor).map(p=>{const c=p.conc||{};
       const gE={}; (c.empenhos||[]).forEach(e=>{ const g=gE[e.numero]||(gE[e.numero]={numero:e.numero,quitado:e.quitado,datas:[]}); g.datas.push(e.data); });
       const emp=Object.values(gE).map(g=>`${esc(g.numero)}${g.quitado?' ✔':''} <span class="note">${g.datas.length>1? g.datas.length+' pagamentos, '+esc(g.datas[0])+' a '+esc(g.datas[g.datas.length-1]) : esc(g.datas[0])}</span>`).join('<br>');
@@ -2449,7 +2520,8 @@ async function montaOrc(host){
   try{
     let html=await gunzipB64(src.gz);
     const modo=src.fixo? 'viewer' : 'admin';
-    const inj='<script>document.documentElement.setAttribute("data-theme",'+JSON.stringify(escuro()?'dark':'light')+');window.ORC_MODO='+JSON.stringify(modo)+';'+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
+    const tabG = (src.fixo&&src.fixo.tabela) || (BASE&&BASE.tabProj&&BASE.tabProj.gerador) || null;
+    const inj='<script>document.documentElement.setAttribute("data-theme",'+JSON.stringify(escuro()?'dark':'light')+');window.ORC_MODO='+JSON.stringify(modo)+';'+(tabG? 'window.ORC_TABELA='+JSON.stringify(tabG)+';' : '')+(src.fixo? 'window.ORC_FIXO='+JSON.stringify(src.fixo).replace(/</g,'\\u003c')+';' : '')+'<\/script>';
     html=html.replace(/<head[^>]*>/i, m=>m+inj);
     const fr=document.createElement('iframe'); fr.className='orc-fr'; fr.title='Orçamentos'; fr.setAttribute('allow','clipboard-write; web-share');
     fr.srcdoc=html; host.innerHTML=''; host.appendChild(fr); ORC_FR=fr; orcAltura();
@@ -2484,7 +2556,7 @@ function render(){
       'Clique em <b>Escolher planilha</b> acima e aponte o arquivo CONTROLE - VENDAS.xlsx. O app lê os números e se atualiza sempre que você salvar a planilha.'}</div></div>`;
     return;
   }
-  (VIEWS[S.tab]||viewFaturamento)();
+  (VIEWS[S.tab]||viewFaturamento)(); ajustaFcols();
 }
 { const h=(location.hash||'').slice(1).split('/'); const [l,t]= h.length>1? h : [Object.keys(TABS_LINHA).find(k=>TABS_LINHA[k].some(x=>x[0]===h[0])), h[0]];
   if(TABS_LINHA[l] && TABS_LINHA[l].some(x=>x[0]===t)){ S.linha=l; S.tab=t; S.tabL[l]=t; } }
