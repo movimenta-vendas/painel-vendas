@@ -229,6 +229,9 @@ table.calor .barra.dupla i{display:block;height:100%;background:var(--mag)} tabl
 table.calor a[data-ufdet]{color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 table.ufdet tr.rede td{background:var(--mag-soft);font-weight:600}
 table.ufdet tr.proj td.l{padding-left:22px}
+.acv2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch;margin-bottom:16px}.acv2>.card{display:flex;flex-direction:column;margin:0}
+.acv2 .chart{flex:1 1 auto;min-height:380px}.acv2 .mapa{flex:1 1 auto;display:flex;align-items:center}
+@media (max-width:900px){.acv2{grid-template-columns:1fr}.acv2 .chart{min-height:460px}}
 .mapa{position:relative}
 .mapa svg{width:100%;height:auto;display:block}
 .mapa path{transition:opacity .12s}
@@ -316,6 +319,10 @@ table.com td .tag{font-size:9.5px;padding:0 4px}table.com td .tag.inx{color:var(
 
 .mk .pill{display:inline-block;width:auto}
 .aviso{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:9px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
+.capa{display:block;border-radius:4px;object-fit:cover;background:var(--mag-soft);box-shadow:0 2px 6px rgba(42,34,48,.18);flex:none}
+.capa.vazia{background:repeating-linear-gradient(45deg,var(--mag-soft),var(--mag-soft) 4px,var(--panel) 4px,var(--panel) 8px);box-shadow:none;border:1px solid var(--line)}
+.capa.mini{width:34px;height:34px}.obra-c{display:flex;align-items:center;gap:10px;min-width:0}.obra-c>div{min-width:0}
+.jtit.com-capa{display:flex;align-items:center;gap:16px;text-align:left}.jtit.com-capa h2{justify-content:flex-start}.capa.jcapa{width:auto;height:78px;max-width:110px;object-fit:contain;background:none}
 .jcab{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin:-2px 0 16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .jlogo{justify-self:start;min-width:0}
 .jlogo img{display:block;max-height:56px;max-width:170px;width:auto;height:auto;object-fit:contain}
@@ -575,7 +582,7 @@ function grafico(id,spec){
   if(lg) lg.innerHTML = K>1? sets.map(s=>`<span><span class="sw" style="background:${s.color}${spec.kind==='line'?';height:3px;border-radius:2px;width:14px':''}"></span>${esc(s.label)}</span>`).join('') : '';
   el.style.position='relative';
   if(!n||!sets.some(s=>s.data.some(v=>v))){ el.innerHTML='<div class="empty">Sem dados neste filtro.</div>'; return; }
-  if(spec.kind==='hbar') el.style.height=(n*(K*15+14)+34)+'px';
+  if(spec.kind==='hbar' && !spec.altura) el.style.height=(n*(K*15+14)+34)+'px';
   const tip=document.createElement('div'); tip.className='tip'; tip.hidden=true;
   function pinta(){
     const W=el.clientWidth||600, H=el.clientHeight||300; if(!W) return;
@@ -850,6 +857,7 @@ async function interpretaArquivo(file){
   if(COMP) base.comp = COMP;
   if(CENSOF) base.censo = CENSOF;
   if(LITV) base.litv = LITV;
+  if(Object.keys(CAPAS).length) base.capas = CAPAS;
   recalculaFuturas(base);
   return base;
 }
@@ -858,6 +866,25 @@ async function interpretaArquivo(file){
    e linhas Público | Escolaridade | Quantidade | Preço. Vale para as vendas futuras, o valor do
    estoque e o gerador de orçamentos. Projetos fora dela (PCE, Colcha, Seu Amanhã) seguem a T_PREÇOS. */
 let TABP = null, COMP = null, CENSOF = null, LITV = null;
+/* capas das obras: 1 - FONTES\CAPAS, uma imagem por obra com o ISBN no nome (ex.: 9786583020192.jpg) */
+let CAPAS = {};
+const capaDe = isbn => (BASE&&BASE.capas&&BASE.capas[isbn]) || CAPAS[isbn] || '';
+const capaImg = (isbn, cls) => { const u=capaDe(isbn); return u? `<img class="capa ${cls||''}" src="${u}" alt="">` : `<span class="capa vazia ${cls||''}" aria-hidden="true"></span>`; };
+async function carregaCapas(){
+  try{
+    const dir = await dirFontes(); let cx=null;
+    for await (const [n,h] of dir.entries()) if(h.kind==='directory' && /^CAPAS$/i.test(n)){ cx=h; break; }
+    if(!cx) return;
+    const novo={};
+    for await (const [n,h] of cx.entries()){
+      if(h.kind!=='file' || !/\.(jpe?g|png|webp)$/i.test(n)) continue;
+      const isbn = (n.match(/\d{13}/)||[])[0]; if(!isbn) continue;
+      const f = await h.getFile();
+      novo[isbn] = await new Promise((ok,er)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=er; r.readAsDataURL(f); });
+    }
+    CAPAS = novo; kv('put','capas',CAPAS).catch(()=>{});
+  }catch(e){ console.warn('capas',e); }
+}
 /* relatório do NetSuite com a venda por obra (1 - FONTES\LITERATURA - Vendas.xlsx, aba DataBase Vendas).
    Guarda só o necessário: [isbn, título, qtd, aaaa-mm, canal, extra] — extra = 1 para ajuste de estoque
    ou venda para projeto, que não são demanda do livro */
@@ -1185,6 +1212,7 @@ async function carregaVendasDaPasta(){
     if(hz){ try{ CENSOF = await interpretaCenso(await hz.getFile()); kv('put','censo',CENSOF).catch(()=>{}); ORC_FR=null; }catch(e){} }
     const hc=arqs.find(x=>/^PROJETOS\s*-\s*COMPOSI/.test(SEMACENTO(x.name)));
     if(hc){ try{ COMP = await interpretaComposicao(await hc.getFile()); kv('put','comp',COMP).catch(()=>{}); }catch(e){} }
+    await carregaCapas();
     ARQ.handle=h; ARQ.nome=h.name; await leArquivo(await h.getFile());
     await carregaLitDaPasta();
   }catch(e){ ARQ.erro='Não consegui ler a pasta '+PASTA.nome+'.'; render(); }
@@ -1333,7 +1361,7 @@ async function iniciar(){
     if(D.conc){ CONC=D.conc; ARQC.estado='snap'; }
     render(); return;
   }
-  try{ TABP = (await kv('get','tabproj')) || null; COMP = (await kv('get','comp')) || null; CENSOF = (await kv('get','censo')) || null; LITV = (await kv('get','litv')) || null; if(LITV && LITV.v!==2) LITV=null; }catch(e){}
+  try{ TABP = (await kv('get','tabproj')) || null; COMP = (await kv('get','comp')) || null; CENSOF = (await kv('get','censo')) || null; LITV = (await kv('get','litv')) || null; CAPAS = (await kv('get','capas')) || {}; if(LITV && LITV.v!==2) LITV=null; }catch(e){}
   const salvo = await kv('get','base');
   if(salvo && salvo.vendas){ assume(salvo); ARQ.nome = salvo.arquivo||''; ARQ.estado='cache'; }
   const cc = await kv('get','conc'); if(cc && cc.itens){ CONC = cc; ARQC.estado='cache'; }
@@ -1604,11 +1632,28 @@ function viewAcervo(){
       <thead><tr><th class="l">Ano</th>${MES.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':'exemplares'}</span></th></tr></thead>
       <tbody>${corpo}</tbody></table></div>
     <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.':'Exemplares vendidos.'}${semData?` ${money?BRLf(semData):fmt(semData)} sem data de emissão entram no total do ano, mas não em nenhum mês.`:''}</p></div>`;
-  h += caixa('g-acv','baixa','Acervo mês a mês', money?'Receita por mês, uma barra para cada ano · escala logarítmica':'Exemplares por mês, uma barra para cada ano · escala logarítmica');
+  // mapa nacional por estado + meses na vertical, lado a lado e na mesma altura
+  const mUF = new Map(); sel.forEach(v=>{ if(v.uf && MAPA.ufs[v.uf]) mUF.set(v.uf,(mUF.get(v.uf)||0)+med(v)); });
+  const vU = [...mUF.values()].filter(x=>x>0);
+  const vvU = x => money? BRLf(x) : fmt(x)+' exemplares', curU = x => money? BRL(x) : fmt(x);
+  let mapaH = '<div class="empty">Sem vendas com estado neste filtro.</div>', legU = '';
+  if(vU.length){ const cortes=faixas(vU), rampa=escuro()? RAMPA.escuro : RAMPA.claro;
+    mapaH = svgMapa('mapa-lit', mUF, cortes, rampa, 'Vendas de literatura por estado');
+    const rotU = ['até '+curU(cortes[0])].concat(cortes.slice(1).map((c,i)=>curU(cortes[i])+' a '+curU(c))).concat(['acima de '+curU(cortes[cortes.length-1])]);
+    legU = rampa.map((c,i)=>`<span><span class="sw" style="background:${c}"></span>${esc(rotU[i])}</span>`).join('') + `<span><span class="sw hachura"></span>sem vendas</span>`; }
+  const periodoA = S.aAno==='todos'? 'todos os anos' : String(S.aAno);
+  h += `<div class="acv2">
+    <div class="card"><h2>Brasil por estado</h2><p class="sub">${money?'Receita':'Exemplares'} de ${periodoA}, por estado do cliente</p>${mapaH}<div class="legend">${legU}</div></div>
+    <div class="card"><h2>Mês a mês</h2><p class="sub">${money?'Receita':'Exemplares'} por mês${vis.length>1?', uma barra para cada ano':''} · escala logarítmica</p><div class="chart" id="g-acv"></div><div class="legend" id="g-acv-lg"></div></div></div>`;
   $('#main').innerHTML = h;
+  const cxU=$('#mapa-lit'); if(cxU){ const tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; cxU.appendChild(tip); const sv=cxU.querySelector('svg');
+    sv.addEventListener('pointermove',e=>{ const a=e.target.closest('path[data-uf]'); if(!a){ tip.hidden=true; return; } const r=cxU.getBoundingClientRect(), v=+a.dataset.v;
+      tip.innerHTML=`<b>${esc(nomeEstado(a.dataset.uf))}</b><div>${v? vvU(v) : 'sem vendas no período'}</div>`; tip.hidden=false;
+      tip.style.left=Math.min(Math.max(e.clientX-r.left+14,4), r.width-tip.offsetWidth-4)+'px'; tip.style.top=Math.min(Math.max(e.clientY-r.top-tip.offsetHeight-10,4), r.height-tip.offsetHeight-4)+'px'; });
+    sv.addEventListener('pointerleave',()=>{ tip.hidden=true; }); }
   liga('#aano','aAno'); liga('#areg','aReg'); liga('#auf','aUF'); liga('#avia','aVia'); liga('#aop','aOp');
   $$('[data-amed]').forEach(b=>b.onclick=()=>{S.aMed=b.dataset.amed; render();});
-  grafico('g-acv',{kind:'vbar',money,log:true,rotulos:true,labels:MES,
+  grafico('g-acv',{kind:'hbar',altura:true,money,log:true,rotulos:true,labels:MES,
     sets:vis.map((a,i)=>({label:String(a),data:mat[a].slice(0,12),color:pal()[i%8]}))});
 }
 
@@ -1731,7 +1776,7 @@ function viewEstoqueLivros(){
       [2,1,multi('ms-led','Editora',eds.map(e=>[e,ED_NOME[e]||e]),fe,'Todas','editoras',3)],
       [5,1,multi('ms-lsit','Situação',[['ok','Com estoque'],['baixo','Estoque baixo'],['sem','Sem saldo']],sit||'','Todas','situações',1,true)]])}
     ${f.length? `<div class="tw" style="max-height:640px"><table class="est-lit alinhada">${colg(COLS)}<thead><tr><th class="l">Obra</th><th class="l">Editora</th><th class="l">ISBN</th><th>Preço de capa</th><th>Em estoque</th></tr></thead><tbody>${
-      f.map(x=>`<tr class="s-${sitLivro(x)}"><td class="l wrap-t"><b>${esc(x.t)}</b>${x.a?`<span class="sub-a">${esc(x.a)}</span>`:''}</td>
+      f.map(x=>`<tr class="s-${sitLivro(x)}"><td class="l wrap-t"><div class="obra-c">${capaImg(x.isbn,'mini')}<div><b>${esc(x.t)}</b>${x.a?`<span class="sub-a">${esc(x.a)}</span>`:''}</div></div></td>
         <td class="l"><span class="ed-chip" style="--ed:${ED_COR[x.e]||'var(--muted)'}">${esc(ED_NOME[x.e]||x.e||'—')}</span></td>
         <td class="l mono">${esc(x.isbn)}${x.via==='titulo'?` <span class="tag" title="ISBN no NetSuite: ${esc(x.ns)}">◆</span>`:''}</td>
         <td>${x.p!=null? BRLf(x.p) : '<span class="tag">sem preço</span>'}</td><td>${pill(x)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nenhuma obra neste filtro.</div>'}
@@ -1814,6 +1859,7 @@ function janelaImpressao(){
     <div class="ij-sec"><h3><i>3</i>Sugestão de produção</h3>
       ${cen('c-sem','Sem intercompany','só vendas a clientes de fora do grupo',o.b)}
       ${cen('c-com','Com intercompany','soma as vendas entre empresas do grupo'+(totI? ` (${fmt(totI)} em 36 meses)` : ' — nenhuma no período'),comI)}</div>`, true);
+  if(capaDe(c.i)){ const t=$('#janela .jtit'); if(t){ t.classList.add('com-capa'); t.innerHTML = capaImg(c.i,'jcapa') + '<div>'+t.innerHTML+'</div>'; } }
   // gráfico: mês a mês, um bloco ao lado do outro, para comparar o mesmo mês em cada ano
   const ordem=[]; for(let k=11;k>=0;k--) ordem.push(k);
   grafico('g-imp',{kind:'vbar',rotulos:true,rotFmt:true,labels:ordem.map(k=>MES[+mesesAtras(R.fim,k).slice(5,7)-1]),sets:[
