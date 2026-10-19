@@ -267,6 +267,36 @@ table.mt tr.mt-sem td{color:var(--muted)}
 table.miuda.com{font-size:11.5px}table.miuda.com th{font-size:9.5px}table.com td,table.com th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:5px 6px}
 table.com td .tag{font-size:9.5px;padding:0 4px}table.com td .tag.inx{color:var(--mag);border-color:color-mix(in srgb,var(--mag) 45%,var(--line));font-weight:700}
 .com-ar{color:var(--bad);font-weight:700}
+.imp-linha{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}.imp-obra{flex:1 1 380px;min-width:0}.imp-sol{width:200px}.imp-go{height:38px;padding:0 22px}
+.ij-sec{margin:4px 0 16px}.ij-sec h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.ij-sec h3 i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--mag);color:#fff;font-size:11px;letter-spacing:0}
+.ij-eq{display:grid;grid-template-columns:1fr 28px 1fr 28px 1fr;align-items:stretch}.ij-op{display:grid;place-items:center;font-size:22px;font-weight:700;color:var(--muted)}
+.ij-hist,.ij-recs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ij-recs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ij-b{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel);border-left-width:5px;min-width:0}
+.ij-b span{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ij-b b{display:block;font-family:var(--disp);font-size:26px;font-weight:600;margin:2px 0;font-variant-numeric:tabular-nums}.ij-b small{display:block;color:var(--muted);font-size:11.5px}
+.ij-b.neu{border-left-color:color-mix(in srgb,var(--muted) 55%,var(--line))}
+.ij-b.bad{border-left-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--panel))}.ij-b.bad b{color:var(--bad)}
+.ij-b.ok{border-left-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--panel))}.ij-b.ok b{color:var(--ok)}
+.ij-b.m12{border-left-color:var(--mag);background:var(--mag-soft)}.ij-b.m12 b{color:var(--mag)}
+.ij-b.m18{border-left-color:var(--muted)}.ij-b.tot{border-left-color:var(--ink)}
+.ij-graf{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px 4px}.ij-graf .chart{height:240px}
+.ij-rec{border-radius:14px;padding:14px 18px;min-width:0}.ij-rec span{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.ij-rec b{display:flex;align-items:baseline;gap:8px;font-family:var(--disp);font-size:34px;font-weight:700;margin:2px 0 4px}.ij-rec b em{font-style:normal;font-size:13px;font-weight:600;font-family:var(--sans,inherit)}
+.ij-rec small{display:block;font-size:12px}
+.ij-rec.r12{background:linear-gradient(135deg,var(--mag),color-mix(in srgb,var(--mag) 70%,#000));color:#fff;box-shadow:0 6px 18px color-mix(in srgb,var(--mag) 30%,transparent)}.ij-rec.r12 small,.ij-rec.r12 span{color:rgba(255,255,255,.88)}
+.ij-rec.r18{background:var(--mag-soft);border:1.5px solid color-mix(in srgb,var(--mag) 45%,var(--line));color:var(--mag)}.ij-rec.r18 small{color:var(--muted)}
+.ij-com{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--muted)}
+.ij-com i{width:8px;height:8px;border-radius:2px;background:var(--sky);flex:none}.ij-com b{display:inline;font-family:var(--body);font-size:12.5px;margin:0;color:var(--ink)}.ij-com em{font-style:normal;color:#3F7891}
+.ij-cen{border-radius:14px;padding:10px 12px 12px;margin-bottom:10px}.ij-cen.c-sem{background:color-mix(in srgb,var(--mag) 5%,var(--panel));border:1px solid color-mix(in srgb,var(--mag) 22%,var(--line))}
+.ij-cen.c-com{background:color-mix(in srgb,var(--sky) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--sky) 45%,var(--line))}
+.ij-ct{display:flex;align-items:baseline;gap:10px;margin:0 2px 8px}.ij-ct b{font-size:13px;text-transform:uppercase;letter-spacing:.05em}.ij-ct small{color:var(--muted);font-size:11.5px}
+.c-sem .ij-ct b{color:var(--mag)}.c-com .ij-ct b{color:#3F7891}
+.c-com .ij-rec.r12{background:linear-gradient(135deg,#5E93AA,#3F7891);box-shadow:0 6px 18px rgba(63,120,145,.28)}
+.c-com .ij-rec.r18{background:var(--panel);border-color:color-mix(in srgb,var(--sky) 70%,var(--line));color:#3F7891}
+.ij-rec b{font-size:30px}
+@media (max-width:760px){.ij-eq{grid-template-columns:1fr}.ij-op{height:22px}.ij-hist,.ij-recs{grid-template-columns:1fr}}
+
 .banner{background:var(--mag-soft);border:1px solid var(--line);border-radius:9px;padding:10px 14px;color:var(--ink);font-size:13px;margin-bottom:14px}
 .ac{display:flex;gap:6px;justify-content:flex-end}
 /* janela de detalhe (Séries) */
@@ -502,7 +532,7 @@ const S = {tab:'faturamento',
 const LINHAS = [['proj','Projetos'],['lit','Literatura']];
 const TABS_LINHA = {
   proj:[['faturamento','Faturamento'],['vendas','Vendas'],['futuras','Vendas futuras'],['pagamentos','Pagamentos'],['estoque','Estoque'],['orc','Orçamentos'],['tabelas','Tabelas']],
-  lit:[['acervo','Faturamento'],['lvendas','Vendas'],['lestoque','Estoque'],['lprecos','Lista de preços'],['lorc','Orçamentos']] };
+  lit:[['acervo','Faturamento'],['lvendas','Vendas'],['lestoque','Estoque'],['limp','Sugestão de impressão'],['lprecos','Lista de preços'],['lorc','Orçamentos']] };
 const tabsAtuais = () => TABS_LINHA[S.linha] || TABS_LINHA.proj;
 S.linha='proj'; S.tabL={proj:'faturamento', lit:'acervo'};
 try{ const l=localStorage.getItem('mvt-linha'); if(TABS_LINHA[l]) S.linha=l; const t=JSON.parse(localStorage.getItem('mvt-tabs')||'null'); if(t) Object.assign(S.tabL,t); }catch(e){}
@@ -593,7 +623,8 @@ function grafico(id,spec){
           const x=spec.stacked? cx-bw/2 : cx-bw/2+k*sw;
           const y0=spec.stacked?Y(acc):Y(0), y1=spec.stacked?Y(acc+v):Y(v); acc+=v;
           g+=`<rect x="${x}" y="${y1}" width="${Math.max(sw-(spec.stacked?0:2),1)}" height="${Math.max(y0-y1,1)}" rx="3" fill="url(#${grad(s.color,'v')})" stroke="${pn}" stroke-width="${spec.stacked?1.5:0}" filter="url(#${id}-sh)"/>`;
-          if(spec.rotulos && !spec.stacked && sw>=22) g+=`<text x="${x+sw/2-1}" y="${y1-5}" text-anchor="middle" fill="${ink}" font-size="${K>1?10:11}" font-weight="600">${vc(v)}</text>`;});
+          if(spec.rotulos && !spec.stacked && sw>=22) g+=`<text x="${x+sw/2-1}" y="${y1-5}" text-anchor="middle" fill="${ink}" font-size="${K>1?10:11}" font-weight="600">${(spec.rotFmt?fmt:vc)(v)}</text>`;});
+        if(spec.rotulos && spec.stacked && acc) g+=`<text x="${cx}" y="${Y(acc)-6}" text-anchor="middle" fill="${ink}" font-size="11" font-weight="700">${(spec.rotFmt?fmt:vc)(acc)}</text>`;
         g+=`<text x="${cx}" y="${H-7}" text-anchor="middle" fill="${ink2}" font-size="11">${esc(lab)}</text>`;});
       }
     } else {
@@ -818,6 +849,7 @@ async function interpretaArquivo(file){
   if(TABP){ aplicaTabelaProjetos(base, TABP); base.tabProj = TABP; }
   if(COMP) base.comp = COMP;
   if(CENSOF) base.censo = CENSOF;
+  if(LITV) base.litv = LITV;
   recalculaFuturas(base);
   return base;
 }
@@ -825,7 +857,31 @@ async function interpretaArquivo(file){
    Uma aba por projeto, com blocos por segmento (título com INFANTIL / INICIAIS / FINAIS / MÉDIO)
    e linhas Público | Escolaridade | Quantidade | Preço. Vale para as vendas futuras, o valor do
    estoque e o gerador de orçamentos. Projetos fora dela (PCE, Colcha, Seu Amanhã) seguem a T_PREÇOS. */
-let TABP = null, COMP = null, CENSOF = null;
+let TABP = null, COMP = null, CENSOF = null, LITV = null;
+/* relatório do NetSuite com a venda por obra (1 - FONTES\LITERATURA - Vendas.xlsx, aba DataBase Vendas).
+   Guarda só o necessário: [isbn, título, qtd, aaaa-mm, canal, extra] — extra = 1 para ajuste de estoque
+   ou venda para projeto, que não são demanda do livro */
+async function interpretaVendasLit(file){
+  const z = await abreZip(await file.arrayBuffer()); leSST(z);
+  const nomes = [...xml(z['xl/workbook.xml']).getElementsByTagName('sheet')].map(x=>x.getAttribute('name'));
+  const nome = nomes.find(n=>/DATABASE\s*VENDAS/.test(SEMACENTO(n))) || nomes[0];
+  const L = lePlanilha(z,nome)||[]; SST=[];
+  const hi = L.findIndex(r=>r && r.some(c=>/^ISBN/.test(SEMACENTO(c).trim())));
+  if(hi<0) throw new Error('vendaslit');
+  const cab = Array.from(L[hi], c=>SEMACENTO(c).trim()), col = t=>cab.findIndex(c=>c.startsWith(t));
+  const iI=col('ISBN'), iT=col('PRODUTO'), iQ=col('QTD'), iP=col('PORTAL'), iM=col('MEMORANDO'), iF=col('DATA DO FATURAMENTO'), iD=col('DATA DO PEDIDO'), iC=col('CLIENTE');
+  const linhas=[]; let ult='';
+  for(const r of L.slice(hi+1)){ if(!r) continue; const q=numero(r[iQ]); if(!q) continue;
+    const d = dataExcel(+r[iF]) || dataExcel(+r[iD]); if(!d) continue;
+    const portal = limpa(r[iP]), memo = limpa(r[iM]);
+    const mU=SEMACENTO(memo), pU=SEMACENTO(portal), cU=SEMACENTO(limpa(r[iC]));
+    /* 2 = intercompany (venda para empresa do grupo, ajuste de estoque entre elas); 1 = fora da demanda (projetos, empenhos sem portal, gráficas) */
+    const inter = /INTERCOMPANY|AJUSTE DE ESTOQUE/.test(mU) || /\b(MOVIMENTA EDUCACAO|PREFACIO EDITORA|MVT EDUCACAO)\b/.test(cU);
+    const extra = inter? 2 : (pU==='PROJETO' || (!pU && /^(EMPENHO|ADITIVO)/.test(mU)) || /GRAFICA/.test(cU))? 1 : 0;
+    linhas.push([limpa(r[iI]).replace(/\D/g,''), limpa(r[iT]), q, d.slice(0,7), portal||'—', extra]); if(d>ult) ult=d; }
+  if(!linhas.length) throw new Error('vendaslit');
+  return {v:2, linhas, ate:ult, arquivo:file.name, modificado:file.lastModified};
+}
 /* matrículas do Censo (1 - FONTES\PROJETOS - Censo escolar.xlsx, aba Matrículas): uma linha por município e rede.
    Vira o formato do gerador: [UF, município, 14 números da rede municipal, 14 da estadual]. */
 async function interpretaCenso(file){
@@ -1123,6 +1179,8 @@ async function carregaVendasDaPasta(){
     const arqs=await arquivosDaPasta();
     const ht=arqs.find(x=>/^PROJETOS\s*-\s*TABELA/.test(SEMACENTO(x.name)));
     if(ht){ try{ TABP = await interpretaTabelaProjetos(await ht.getFile()); kv('put','tabproj',TABP).catch(()=>{}); }catch(e){ /* fica a T_PREÇOS */ } }
+    const hv=arqs.find(x=>/^LITERATURA\s*-\s*VENDAS/.test(SEMACENTO(x.name)));
+    if(hv){ try{ LITV = await interpretaVendasLit(await hv.getFile()); kv('put','litv',LITV).catch(()=>{}); }catch(e){ console.warn('vendas literatura',e); } }
     const hz=arqs.find(x=>/^PROJETOS\s*-\s*CENSO/.test(SEMACENTO(x.name)));
     if(hz){ try{ CENSOF = await interpretaCenso(await hz.getFile()); kv('put','censo',CENSOF).catch(()=>{}); ORC_FR=null; }catch(e){} }
     const hc=arqs.find(x=>/^PROJETOS\s*-\s*COMPOSI/.test(SEMACENTO(x.name)));
@@ -1275,7 +1333,7 @@ async function iniciar(){
     if(D.conc){ CONC=D.conc; ARQC.estado='snap'; }
     render(); return;
   }
-  try{ TABP = (await kv('get','tabproj')) || null; COMP = (await kv('get','comp')) || null; CENSOF = (await kv('get','censo')) || null; }catch(e){}
+  try{ TABP = (await kv('get','tabproj')) || null; COMP = (await kv('get','comp')) || null; CENSOF = (await kv('get','censo')) || null; LITV = (await kv('get','litv')) || null; if(LITV && LITV.v!==2) LITV=null; }catch(e){}
   const salvo = await kv('get','base');
   if(salvo && salvo.vendas){ assume(salvo); ARQ.nome = salvo.arquivo||''; ARQ.estado='cache'; }
   const cc = await kv('get','conc'); if(cc && cc.itens){ CONC = cc; ARQC.estado='cache'; }
@@ -1685,6 +1743,76 @@ function viewEstoqueLivros(){
   $$('[data-ed]').forEach(b=>b.onclick=()=>{ const e=b.dataset.ed; S.lEd = (fe.length===1&&fe[0]===e)? [] : [e]; render(); });
 }
 function viewOrcLit(){}
+/* ---------------- literatura: sugestão de impressão ----------------
+   Histórico de venda de cada obra (últimos 12 meses e meses 13 a 18), estoque atual e a solicitação de compra.
+   Produção sugerida = solicitação + vendas do período − estoque, arredondada para cima na centena. */
+const ate100 = n => n>0? Math.ceil(n/100)*100 : 0;
+const mesesAtras = (ym, k) => { let y=+ym.slice(0,4), m=+ym.slice(5,7)-k; while(m<=0){ m+=12; y--; } return y+'-'+String(m).padStart(2,'0'); };
+function vendasPorObra(tudo){
+  const V = [BASE.litv,LITV].find(x=>x&&x.v===2); if(!V) return null;
+  const cat = catalogoLit(), porI = new Map(cat.map(c=>[c.i,c])), porT = new Map(cat.map(c=>[chaveTitL(c.t),c]));
+  const fim = new Date().toISOString().slice(0,7), m12 = mesesAtras(fim,11), m18 = mesesAtras(fim,17);
+  const ob = new Map(); let ignorados=0, extras=0;
+  V.linhas.forEach(([isbn,tit,q,ym,canal,extra])=>{
+    if(ym<m18 || ym>fim) return;
+    if(extra===1){ extras+=q; return; }
+    const c = porI.get(isbn) || porT.get(chaveTitL(String(tit).replace(/\s*-\s*VOL\.?\s*\d+$/i,''))); if(!c){ ignorados+=q; return; }
+    const o = ob.get(c.i) || (ob.set(c.i,{meses:{}, mesesI:{}, canais:{}, v12:0, v18:0, i12:0, i18:0}), ob.get(c.i));
+    if(extra===2){ o.mesesI[ym]=(o.mesesI[ym]||0)+q; o.i18+=q; if(ym>=m12) o.i12+=q; return; }
+    o.meses[ym]=(o.meses[ym]||0)+q; o.canais[canal]=(o.canais[canal]||0)+q; o.v18+=q; if(ym>=m12) o.v12+=q; });
+  return {ob, fim, m12, m18, ignorados, extras, ate:V.ate, arquivo:V.arquivo};
+}
+function viewImpressao(){
+  const cat = catalogoLit();
+  const R = vendasPorObra(false);
+  if(!R || !cat.length || !(EST&&EST.livros)){
+    $('#main').innerHTML = `<div class="card"><div class="empty">${!R? 'Coloque o relatório do NetSuite <b>LITERATURA - Vendas.xlsx</b> (vendas e devoluções, aba DataBase Vendas) em 1 - FONTES e clique em <b>Atualizar fonte</b>.' : !cat.length? 'Catálogo da literatura não carregado.' : 'Carregue a planilha de estoque.'}</div></div>`;
+    return; }
+  const ops = cat.slice().sort((a,b)=>a.t.localeCompare(b.t,'pt-BR')).map(c=>[c.i, c.t+' · '+(ED_NOME[c.e]||c.e)]);
+  if(S.impObra && !cat.some(c=>c.i===S.impObra)) S.impObra='';
+  $('#main').innerHTML = `<div class="card imp-busca"><h2>Sugestão de impressão</h2>
+    <p class="sub">Escolha a obra, informe a solicitação de compra e clique em pesquisar.</p>
+    <div class="imp-linha">
+      <div class="imp-obra">${multi('ms-iobra','Obra',ops,S.impObra||'','Escolha a obra','obras',1,true)}</div>
+      <label class="f imp-sol"><span>Solicitação de compra</span><input id="imp-sol" type="text" inputmode="numeric" value="${S.impSolV? fmt(S.impSolV) : ''}" placeholder="exemplares"></label>
+      <button class="btn primary imp-go" id="imp-go" type="button"${S.impObra?'':' disabled'}>Pesquisar</button></div></div>`;
+  ligaMulti('ms-iobra','impObra');
+  const si=$('#imp-sol'), le=()=>{ S.impSolV=Math.max(0,parseInt(String(si.value).replace(/\D/g,''))||0); };
+  si.oninput=le; si.onkeydown=e=>{ if(e.key==='Enter'&&S.impObra){ le(); janelaImpressao(); } };
+  $('#imp-go').onclick=()=>{ le(); janelaImpressao(); };
+}
+function janelaImpressao(){
+  const R = vendasPorObra(false), c = catalogoLit().find(x=>x.i===S.impObra); if(!R||!c) return;
+  const o = R.ob.get(c.i)||{meses:{},mesesI:{},canais:{},v12:0,v18:0,i12:0,i18:0};
+  const e = (estoqueLivros().find(x=>x.cat&&x.isbn===c.i)||{qtd:0}).qtd||0;
+  const sol = S.impSolV||0, falta = Math.max(0, sol-e);
+  const meses=[]; for(let k=17;k>=0;k--) meses.push(mesesAtras(R.fim,k));
+  const rot = ym => MES[+ym.slice(5,7)-1]+'/'+ym.slice(2,4);
+  const box = (cls,rotulo,v,nota) => `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${nota}</small></div>`;
+  const hb = (cls,rotulo,v,vi,per) => `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${per}</small>
+      <div class="ij-com"><svg width="8" height="8"><rect width="8" height="8" rx="2" fill="${css('--sky')}"/></svg>com intercompany <b>${fmt(v+vi)}</b>${vi? ` <em>(+${fmt(vi)})</em>` : ''}</div></div>`;
+  const op = t => `<div class="ij-op">${t}</div>`;
+  const rec = (cls,rotulo,v,base,per) => `<div class="ij-rec ${cls}"><span>${rotulo}</span><b>${fmt(v)}<em>exemplares</em></b></div>`;
+  const cen = (cls,titulo,nota,v12,v18) => `<div class="ij-cen ${cls}"><div class="ij-ct"><b>${titulo}</b><small>${nota}</small></div>
+      <div class="ij-recs">${rec('r12','Atender e cobrir 12 meses',ate100(sol+v12-e),v12,'12 meses')}${rec('r18','Atender e cobrir 18 meses',ate100(sol+v18-e),v18,'18 meses')}</div></div>`;
+  const aut = String(c.a||'').trim(), varios = /,|\se\s|;|\//.test(aut);
+  abreJanela(`<h2>${esc(c.t)}</h2><p class="sub">${aut? `${varios?'Autores':'Autor'}: <b>${esc(aut)}</b><br>` : ''}ISBN ${esc(c.i)}</p>
+    <div class="ij-sec"><h3><i>1</i>Situação hoje</h3>
+      <div class="ij-eq">${box('neu','Solicitação de compra',sol,'informada na consulta')}${op('−')}${box('neu','Estoque atual',e,'NetSuite')}${op('=')}${
+        falta? box('bad','Falta para atender',falta,'precisa produzir') : box('ok','Falta para atender',0,'o estoque atende')}</div></div>
+    <div class="ij-sec"><h3><i>2</i>Histórico de vendas</h3>
+      <div class="ij-hist">${hb('m12','Últimos 12 meses',o.v12,o.i12,`média de ${dec(o.v12/12,1)} por mês`)}${hb('m18','Meses 13 a 18',o.v18-o.v12,o.i18-o.i12,rot(meses[0])+' a '+rot(meses[5]))}${hb('tot','Total 18 meses',o.v18,o.i18,rot(meses[0])+' a '+rot(meses[17]))}</div>
+      <div class="ij-graf"><div class="chart" id="g-imp"></div><div class="legend" id="g-imp-lg"></div></div></div>
+    <div class="ij-sec"><h3><i>3</i>Sugestão de produção</h3>
+      ${cen('c-sem','Sem intercompany','só vendas a clientes de fora do grupo',o.v12,o.v18)}
+      ${cen('c-com','Com intercompany','soma as vendas entre empresas do grupo'+(o.i18? ` (${fmt(o.i18)} em 18 meses)` : ' — nenhuma no período'),o.v12+o.i12,o.v18+o.i18)}</div>`, true);
+  grafico('g-imp',{kind:'vbar',stacked:true,rotulos:true,rotFmt:true,labels:meses.map(rot),sets:[
+    {label:'Meses 13 a 18', data:meses.map((m,i)=>i<6? (o.meses[m]||0) : 0), color:css('--muted')},
+    {label:'Últimos 12 meses', data:meses.map((m,i)=>i>=6? (o.meses[m]||0) : 0), color:css('--mag')},
+    {label:'Intercompany', data:meses.map(m=>o.mesesI[m]||0), color:css('--sky')}]});
+  // na imagem copiada, a amostra de cor vazia some: vira um quadrado desenhado
+  $$('#g-imp-lg .sw').forEach(w=>{ const c=w.style.background; w.outerHTML=`<svg width="10" height="10" style="margin-right:6px;vertical-align:-1px"><rect width="10" height="10" rx="2" fill="${c}"/></svg>`; });
+}
 /* situação do pagamento a partir da coluna PAGAMENTO: data ou SIM = pago; vazia = em aberto;
    outro texto (consignação, bonificação, doação…) aparece como está */
 function sitPag(v){ const t=String(v.pagamento==null?'':v.pagamento).trim();
@@ -2726,7 +2854,7 @@ function painelAcoes(aberto,naoId,extratos){
 }
 
 /* ---------------- render ---------------- */
-const VIEWS={orc:()=>{}, lprecos:()=>{}, lvendas:()=>viewVendas(), lestoque:()=>viewEstoqueLivros(), lorc:()=>viewOrcLit(),pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
+const VIEWS={orc:()=>{}, lprecos:()=>{}, limp:()=>viewImpressao(), lvendas:()=>viewVendas(), lestoque:()=>viewEstoqueLivros(), lorc:()=>viewOrcLit(),pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
 /* ---------------- literatura: catálogo e clientes (1 - FONTES) ---------------- */
 let LIT = null;   // {catalogo, catMeta, distribuidores}
 const LIT_KEY = 'movimenta-lit-app-v1';
