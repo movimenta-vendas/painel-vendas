@@ -1600,27 +1600,34 @@ const nomeEstado = uf => NOMEUF[uf]||uf;
 function viewAcervo(){
   const base = vendas().filter(v=>v.projeto===ACERVO);
   const f = base.filter(v=>(!S.aUF||v.uf===S.aUF)&&(!S.aReg||v.regiao===S.aReg)&&(!S.aVia||v.via===S.aVia)&&(!S.aOp||v.operacao===S.aOp));
-  const anos = [...new Set(base.map(v=>v.ano))].filter(Boolean).sort();
-  if(!S.aAno) S.aAno = anos[anos.length-1] || 'todos';
+  // ano comercial (agosto a julho), como no faturamento de projetos
+  const anos = [...new Set(base.map(v=>v.anoCom))].filter(Boolean).sort();
+  if(!S.aAno || (S.aAno!=='todos' && !anos.includes(+S.aAno))) S.aAno = anos[anos.length-1] || 'todos';
   const vis = S.aAno==='todos'? anos : [+S.aAno];
   const money = S.aMed==='valor';
   const med = v => money? (v.valor||0) : (v.kitsAluno||0);
+  const MESC = COM.map(i=>MES[i]);
   const mat = {}; anos.forEach(a=>mat[a]=Array(13).fill(0));
-  f.forEach(v=>{ if(mat[v.ano]) mat[v.ano][v.mes? v.mes-1 : 12] += med(v); });
+  f.forEach(v=>{ if(mat[v.anoCom]) mat[v.anoCom][v.mes? COM.indexOf(v.mes-1) : 12] += med(v); });
   const n = x => x? (money? 'R$ '+curto(x) : fmt(x)) : '<span style="color:var(--muted)">·</span>';
   const totMes = Array(13).fill(0); vis.forEach(a=>mat[a].forEach((x,i)=>totMes[i]+=x));
   const geral = totMes.reduce((a,b)=>a+b,0), semData = totMes[12];
   let corpo = vis.map(a=>{const t=mat[a].reduce((x,y)=>x+y,0);
-    return `<tr><td class="l"><b>${a}</b></td>${mat[a].slice(0,12).map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+' exemplares'} em ${MES[i]}">${n(x)}</td>`).join('')}<td><b>${money? BRLf(t) : fmt(t)}</b></td></tr>`;}).join('');
-  corpo += `<tr class="tot"><td class="l">Total</td>${totMes.slice(0,12).map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+' exemplares'} em ${MES[i]}">${n(x)}</td>`).join('')}<td title="${money?BRLf(geral):''}">${money? BRLf(geral) : fmt(geral)}</td></tr>`;
-  const sel = f.filter(v=>vis.includes(v.ano));
+    return `<tr><td class="l"><b>${rotCom(a)}</b></td>${mat[a].slice(0,12).map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+' exemplares'} em ${MESC[i]}">${n(x)}</td>`).join('')}<td><b>${money? BRLf(t) : fmt(t)}</b></td></tr>`;}).join('');
+  corpo += `<tr class="tot"><td class="l">Total</td>${totMes.slice(0,12).map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+' exemplares'} em ${MESC[i]}">${n(x)}</td>`).join('')}<td title="${money?BRLf(geral):''}">${money? BRLf(geral) : fmt(geral)}</td></tr>`;
+  const sel = f.filter(v=>vis.includes(v.anoCom));
+  const TODOS = S.aAno==='todos';
+  const ant = TODOS? [] : f.filter(v=>v.anoCom===+S.aAno-1);
+  const rec = sel.reduce((s,v)=>s+(v.valor||0),0), recAnt = ant.reduce((s,v)=>s+(v.valor||0),0);
+  const varia = recAnt? (rec-recAnt)/recAnt*100 : null;
   let h = `<div class="kpis">
-    <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(sel.reduce((s,v)=>s+(v.kitsAluno||0),0))}</div><div class="d">${S.aAno==='todos'?'todos os anos':'em '+S.aAno}</div></div>
-    <div class="kpi"><div class="l">Receita</div><div class="v">${BRL(sel.reduce((s,v)=>s+(v.valor||0),0))}</div></div>
+    <div class="kpi"><div class="l">Receita ${TODOS?'— todos os anos':rotCom(+S.aAno)}</div><div class="v" title="${BRLf(rec)}">${BRL(rec)}</div>
+      <div class="d">${TODOS? `${anos.length} anos comerciais, de ${rotCom(anos[0])} a ${rotCom(anos[anos.length-1])}` : varia==null?'sem base no ano anterior':`<span style="color:${varia>=0?'var(--ok)':'var(--bad)'};font-weight:600">${varia>=0?'▲':'▼'} ${dec(Math.abs(varia))}%</span> sobre ${rotCom(+S.aAno-1)}`}</div></div>
+    <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(sel.reduce((s,v)=>s+(v.kitsAluno||0),0))}</div><div class="d">${TODOS?'todos os anos':'ano comercial '+rotCom(+S.aAno)}</div></div>
     <div class="kpi"><div class="l">Pedidos</div><div class="v">${fmt(sel.length)}</div></div>
     <div class="kpi"><div class="l">Canais</div><div class="v">${fmt(new Set(sel.map(v=>v.via)).size)}</div><div class="d">distribuidores e marketplaces</div></div></div>`;
   h += `<div class="card"><div class="filters fgrid">
-      <label class="f"><span>Ano</span><select id="aano"><option value="todos"${S.aAno==='todos'?' selected':''}>Todos</option>${anos.slice().reverse().map(a=>`<option${+S.aAno===a?' selected':''}>${a}</option>`).join('')}</select></label>
+      <label class="f"><span>Ano comercial</span><select id="aano"><option value="todos"${S.aAno==='todos'?' selected':''}>Todos os anos</option>${anos.slice().reverse().map(a=>`<option value="${a}"${+S.aAno===a?' selected':''}>${rotCom(a)}</option>`).join('')}</select></label>
       <label class="f"><span>Região</span><select id="areg"><option value="">Todas</option>${REGIOES().map(r=>`<option value="${esc(r)}"${S.aReg===r?' selected':''}>${esc(short(r))}</option>`).join('')}</select></label>
       <label class="f"><span>UF</span><select id="auf"><option value="">Todas</option>${UFS().map(u=>`<option${S.aUF===u?' selected':''}>${u}</option>`).join('')}</select></label>
       <label class="f l2"><span>Canal</span><select id="avia"><option value="">Todos</option>${[...new Set(base.map(v=>v.via).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}"${S.aVia===x?' selected':''}>${esc(x)}</option>`).join('')}</select></label>
@@ -1629,9 +1636,9 @@ function viewAcervo(){
 </div>
     </div>
     <div class="tw"><table class="compacta"><colgroup><col style="width:10%">${MES.map(()=>'<col style="width:6.25%">').join('')}<col style="width:15%"></colgroup>
-      <thead><tr><th class="l">Ano</th>${MES.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':'exemplares'}</span></th></tr></thead>
+      <thead><tr><th class="l">Ano comercial</th>${MESC.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':'exemplares'}</span></th></tr></thead>
       <tbody>${corpo}</tbody></table></div>
-    <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.':'Exemplares vendidos.'}${semData?` ${money?BRLf(semData):fmt(semData)} sem data de emissão entram no total do ano, mas não em nenhum mês.`:''}</p></div>`;
+    <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.':'Exemplares vendidos.'} Ano comercial de agosto a julho.${semData?` ${money?BRLf(semData):fmt(semData)} sem data de emissão entram no total do ano, mas não em nenhum mês.`:''}</p></div>`;
   // mapa nacional por estado + meses na vertical, lado a lado e na mesma altura
   const mUF = new Map(); sel.forEach(v=>{ if(v.uf && MAPA.ufs[v.uf]) mUF.set(v.uf,(mUF.get(v.uf)||0)+med(v)); });
   const vU = [...mUF.values()].filter(x=>x>0);
@@ -1641,10 +1648,10 @@ function viewAcervo(){
     mapaH = svgMapa('mapa-lit', mUF, cortes, rampa, 'Vendas de literatura por estado');
     const rotU = ['até '+curU(cortes[0])].concat(cortes.slice(1).map((c,i)=>curU(cortes[i])+' a '+curU(c))).concat(['acima de '+curU(cortes[cortes.length-1])]);
     legU = rampa.map((c,i)=>`<span><span class="sw" style="background:${c}"></span>${esc(rotU[i])}</span>`).join('') + `<span><span class="sw hachura"></span>sem vendas</span>`; }
-  const periodoA = S.aAno==='todos'? 'todos os anos' : String(S.aAno);
+  const periodoA = S.aAno==='todos'? 'todos os anos' : 'ano comercial '+rotCom(+S.aAno);
   h += `<div class="acv2">
     <div class="card"><h2>Brasil por estado</h2><p class="sub">${money?'Receita':'Exemplares'} de ${periodoA}, por estado do cliente</p>${mapaH}<div class="legend">${legU}</div></div>
-    <div class="card"><h2>Mês a mês</h2><p class="sub">${money?'Receita':'Exemplares'} por mês${vis.length>1?', uma barra para cada ano':''} · escala logarítmica</p><div class="chart" id="g-acv"></div><div class="legend" id="g-acv-lg"></div></div></div>`;
+    <div class="card"><h2>Mês a mês</h2><p class="sub">${money?'Receita':'Exemplares'} por mês, de agosto a julho${vis.length>1?', uma barra para cada ano comercial':''} · escala logarítmica</p><div class="chart" id="g-acv"></div><div class="legend" id="g-acv-lg"></div></div></div>`;
   $('#main').innerHTML = h;
   const cxU=$('#mapa-lit'); if(cxU){ const tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; cxU.appendChild(tip); const sv=cxU.querySelector('svg');
     sv.addEventListener('pointermove',e=>{ const a=e.target.closest('path[data-uf]'); if(!a){ tip.hidden=true; return; } const r=cxU.getBoundingClientRect(), v=+a.dataset.v;
@@ -1653,8 +1660,8 @@ function viewAcervo(){
     sv.addEventListener('pointerleave',()=>{ tip.hidden=true; }); }
   liga('#aano','aAno'); liga('#areg','aReg'); liga('#auf','aUF'); liga('#avia','aVia'); liga('#aop','aOp');
   $$('[data-amed]').forEach(b=>b.onclick=()=>{S.aMed=b.dataset.amed; render();});
-  grafico('g-acv',{kind:'hbar',altura:true,money,log:true,rotulos:true,labels:MES,
-    sets:vis.map((a,i)=>({label:String(a),data:mat[a].slice(0,12),color:pal()[i%8]}))});
+  grafico('g-acv',{kind:'hbar',altura:true,money,log:true,rotulos:true,labels:MESC,
+    sets:vis.map((a,i)=>({label:rotCom(a),data:mat[a].slice(0,12),color:pal()[i%8]}))});
 }
 
 /* ---------------- aba: anos de escolaridade ---------------- */
