@@ -250,6 +250,22 @@ table.mt tr.mt-lim td{background:color-mix(in srgb,var(--bad) 9%,transparent)}
 table.mt tr.mt-lim td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
 .mt-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;background:var(--bad);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.03em}
 table.mt tr.mt-sem td{color:var(--muted)}
+.com-meses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:10px;margin-top:4px}
+@media (max-width:760px){.com-meses{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.com-mes.ant{border-style:dashed;background:color-mix(in srgb,var(--muted) 6%,var(--panel))}.com-mes.ant b{color:var(--ink);text-transform:none}
+.com-mes{display:flex;flex-direction:column;gap:3px;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}
+.com-mes b{font-family:var(--disp);font-size:15px;text-transform:capitalize;color:var(--mag)}.com-mes span{font-size:12px;color:var(--muted)}
+.com-mes:hover{border-color:var(--mag);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.com-tit{margin:18px 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase}.com-tit span{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
+.com-tit.rec{color:var(--ok)}.com-tit.arec{color:var(--bad)}
+.com-tw.rec{border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}.com-tw.arec{border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.com-tw.rec th{background:color-mix(in srgb,var(--ok) 14%,var(--panel));color:var(--ok);box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--ok) 55%,transparent)}
+.com-tw.arec th{background:color-mix(in srgb,var(--bad) 12%,var(--panel));color:var(--bad);box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--bad) 55%,transparent)}
+.com-tw.rec tbody td{background:color-mix(in srgb,var(--ok) 4%,transparent)}.com-tw.arec tbody td{background:color-mix(in srgb,var(--bad) 4%,transparent)}
+.com-tw.rec tr.tot td{background:color-mix(in srgb,var(--ok) 12%,var(--panel));color:var(--ok)}.com-tw.arec tr.tot td{background:color-mix(in srgb,var(--bad) 10%,var(--panel));color:var(--bad)}
+table.miuda.com{font-size:11.5px}table.miuda.com th{font-size:9.5px}table.com td,table.com th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:5px 6px}
+table.com td .tag{font-size:9.5px;padding:0 4px}table.com td .tag.inx{color:var(--mag);border-color:color-mix(in srgb,var(--mag) 45%,var(--line));font-weight:700}
+.com-ar{color:var(--bad);font-weight:700}
 .banner{background:var(--mag-soft);border:1px solid var(--line);border-radius:9px;padding:10px 14px;color:var(--ink);font-size:13px;margin-bottom:14px}
 .ac{display:flex;gap:6px;justify-content:flex-end}
 /* janela de detalhe (Séries) */
@@ -2521,6 +2537,77 @@ function barraConc(){
     + (!temDir? `<p class="msg" style="flex:1 1 100%;margin:0">Abra no Chrome ou no Edge do computador para ler a pasta de conciliação.</p>`:'') + '</div>';
 }
 
+/* ---------------- comissão Enzo (só no app do administrador) ----------------
+   Vendas de projeto (operação VENDA, fora o acervo) com NF emitida a partir de 01/06/2026.
+   Comissão de 0,4%. Nas vendas de inexigibilidade (feitas pela Movimenta, MVT ou Prefácio com 50% de
+   desconto), a comissão é calculada sobre 50% do valor da venda. Separadas em recebidas e a receber. */
+const COM_DESDE = '2026-06-01', COM_PCT = 0.004;
+const comInexig = v => /^(MOVIMENTA|MVT|PREFACIO)/.test(SEMACENTO(v.via).trim()) && Math.abs((+v.desconto||0)-0.5) < 0.005;
+const comBase = v => (v.valor||0) * (comInexig(v)? 0.5 : 1);
+// processos anteriores à entrada do Enzo: não entram na comissão (lista mantida aqui, por NF e rede)
+const COM_ANTERIORES = [['4000','ARARUAMA'],['4036','COLEGIO BEM ME QUER'],['642','SUZANO'],['645','SUZANO']];
+const comAnterior = v => COM_ANTERIORES.some(([nf,rede])=>String(v.nf).trim()===nf && SEMACENTO(v.rede).trim()===rede);
+function vendasComissao(anteriores){
+  return vendas().filter(v=>v.projeto!==ACERVO && v.operacao==='VENDA' && String(v.emissao||'')>=COM_DESDE && (anteriores? comAnterior(v) : !comAnterior(v)))
+    .sort((a,b)=>String(a.emissao).localeCompare(String(b.emissao))||String(a.nf).localeCompare(String(b.nf)));
+}
+const MESES_LONGOS=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const mesLongo = ym => MESES_LONGOS[+ym.slice(5,7)-1]+'/'+ym.slice(0,4);
+const mesSeg = ym => { const y=+ym.slice(0,4), m=+ym.slice(5,7); return m===12? (y+1)+'-01' : y+'-'+String(m+1).padStart(2,'0'); };
+/* primeiro passo: escolher o mês dos recebimentos; a comissão desse mês é paga no mês seguinte */
+function janelaComissao(){
+  if(window.__SNAP) return;
+  const hoje = new Date(), ate = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
+  const meses=[]; for(let ym=COM_DESDE.slice(0,7); ym<=ate; ym=mesSeg(ym)) meses.push(ym);
+  const pagos = vendasComissao().filter(v=>sitPag(v)==='Pago' && /^\d{4}-\d{2}/.test(String(v.pagamento)));
+  const n = ym => pagos.filter(v=>String(v.pagamento).slice(0,7)===ym).length;
+  const html = `<h2>Comissão Enzo</h2><p class="sub">Escolha o mês dos recebimentos — a comissão desse mês é paga no mês seguinte</p>
+    <div class="com-meses">${meses.slice().reverse().map(ym=>`<button type="button" class="com-mes" data-cmes="${ym}"><b>${esc(mesLongo(ym))}</b><span>${fmt(n(ym))} nota${n(ym)===1?'':'s'} recebida${n(ym)===1?'':'s'}</span><span>a pagar em ${esc(mesLongo(mesSeg(ym)))}</span></button>`).join('')}
+      <button type="button" class="com-mes ant" data-cant><b>Processos anteriores</b><span>${fmt(vendasComissao(true).length)} notas fora da comissão</span><span>anteriores à entrada do Enzo</span></button></div>`;
+  abreJanela(html, true);
+  $$('[data-cmes]').forEach(b=>b.onclick=()=>janelaComissaoMes(b.dataset.cmes));
+  const ba=$('[data-cant]'); if(ba) ba.onclick=janelaComissaoAnteriores;
+}
+function janelaComissaoAnteriores(){
+  const L = vendasComissao(true);
+  const pg = v => sitPag(v)==='Pago'? (/^\d{4}-\d{2}-\d{2}$/.test(String(v.pagamento))? brD(v.pagamento) : 'Sim') : '<span class="com-ar">À receber</span>';
+  const html = `<h2>Comissão Enzo · processos anteriores</h2><p class="sub">NFs de processos anteriores à entrada do Enzo — não entram na comissão</p>
+    <div data-noprint style="margin:0 0 12px"><button class="btn sm" id="com-volta" type="button">← Voltar</button></div>
+    ${L.length? `<div class="tw"><table class="miuda alinhada com">${colg([10,6,26,9,15,11,13,10])}<thead><tr><th class="l">Emissão</th><th class="l">NF</th><th class="l">Rede</th><th class="l">Projeto</th><th class="l">Distribuidor</th><th>Desc.</th><th>Valor da NF</th><th class="l">Pagamento</th></tr></thead><tbody>
+      ${L.map(v=>`<tr><td class="l">${brD(v.emissao)}</td><td class="l">${esc(v.nf)}</td><td class="l">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(short(v.projeto))}</td><td class="l">${esc(v.via)}</td><td>${dec((+v.desconto||0)*100,1)}%</td><td>${BRLf(v.valor)}</td><td class="l">${pg(v)}</td></tr>`).join('')}
+      <tr class="tot"><td class="l">Total</td><td></td><td></td><td></td><td></td><td></td><td>${BRLf(L.reduce((t,v)=>t+(v.valor||0),0))}</td><td></td></tr></tbody></table></div>` : '<div class="empty">Nenhuma NF marcada como processo anterior.</div>'}`;
+  abreJanela(html, true);
+  const vb=$('#com-volta'); if(vb) vb.onclick=janelaComissao;
+}
+function janelaComissaoMes(mes){
+  if(window.__SNAP) return;
+  const todas = vendasComissao();
+  const pagas = todas.filter(v=>sitPag(v)==='Pago');
+  const rec = pagas.filter(v=>String(v.pagamento).slice(0,7)===mes), semData = pagas.filter(v=>!/^\d{4}-\d{2}/.test(String(v.pagamento)));
+  const arec = todas.filter(v=>sitPag(v)==='Em aberto'), fora = todas.filter(v=>!['Pago','Em aberto'].includes(sitPag(v)));
+  const pg = v => /^\d{4}-\d{2}-\d{2}$/.test(String(v.pagamento))? brD(v.pagamento) : 'Sim';
+  const soma = (L,f) => L.reduce((t,v)=>t+f(v),0), com = v => comBase(v)*COM_PCT;
+  // as duas tabelas usam a mesma grade de colunas, para ficarem alinhadas uma embaixo da outra
+  const CCOL=[9,4.5,19.5,7,13,5.5,11.5,11.5,9,9.5];
+  const bloco = (titulo, L, pago) => `<h3 class="com-tit ${pago?'rec':'arec'}">${titulo} <span>· ${fmt(L.length)} nota${L.length===1?'':'s'}</span></h3>
+    ${L.length? `<div class="tw com-tw ${pago?'rec':'arec'}"><table class="miuda alinhada com">${colg(CCOL)}<thead><tr><th class="l">Emissão</th><th class="l">NF</th><th class="l">Rede</th><th class="l">Projeto</th><th class="l">Distribuidor</th><th>Desc.</th><th>Valor da NF</th><th>Base de cálculo</th><th>Comissão</th><th class="l">${pago?'Pago em':'Pagamento'}</th></tr></thead><tbody>
+      ${L.map(v=>`<tr><td class="l">${brD(v.emissao)}</td><td class="l">${esc(v.nf)}</td><td class="l" title="${esc(v.rede==='_ESTADO'?'Estado':v.rede)} (${esc(v.uf)})">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span>${comInexig(v)?' <span class="tag inx" title="Venda de inexigibilidade (Movimenta, MVT ou Prefácio com 50% de desconto): comissão sobre 50% do valor">Inexig.</span>':''}</td><td class="l">${esc(short(v.projeto))}</td><td class="l">${esc(v.via)}</td><td>${dec((+v.desconto||0)*100,1)}%</td><td>${BRLf(v.valor)}</td>
+        <td>${BRLf(comBase(v))}</td><td><b>${BRLf(com(v))}</b></td><td class="l">${pago? pg(v) : '<span class="com-ar">À receber</span>'}</td></tr>`).join('')}
+      <tr class="tot"><td class="l">Subtotal</td><td></td><td></td><td></td><td></td><td></td><td>${BRLf(soma(L,v=>v.valor||0))}</td><td>${BRLf(soma(L,comBase))}</td><td>${BRLf(soma(L,com))}</td><td></td></tr></tbody></table></div>`
+      : '<p class="note">Nenhuma nota.</p>'}`;
+  const html = `<h2>Comissão Enzo · ${esc(mesLongo(mes))}</h2><p class="sub">Recebimentos de ${esc(mesLongo(mes))}, comissão paga em ${esc(mesLongo(mesSeg(mes)))} · vendas de projeto com NF a partir de ${brD(COM_DESDE)} · ${dec(COM_PCT*100,1)}%</p>
+    <p class="note" style="margin:0 0 4px">Vendas de inexigibilidade (Movimenta, MVT ou Prefácio com 50% de desconto): a comissão é sobre 50% do valor da venda.</p>
+    <div data-noprint style="margin:8px 0 0;display:flex;gap:8px"><button class="btn sm" id="com-volta" type="button">← Trocar mês</button><button class="btn sm" id="com-csv" type="button">Baixar CSV</button></div>
+    ${bloco('Comissão a pagar em '+mesLongo(mesSeg(mes)), rec, true)}${bloco('Vendas não recebidas', arec, false)}
+    ${semData.length? `<p class="note" style="margin-top:12px">Pagas sem data na planilha (PAGAMENTO = "SIM"), fora do mês: ${semData.map(v=>`NF ${esc(v.nf)}`).join(', ')}.</p>` : ''}
+    ${fora.length? `<p class="note" style="margin-top:12px">Fora da conta: ${fora.map(v=>`NF ${esc(v.nf)} (${esc(sitPag(v))})`).join(', ')}.</p>` : ''}`;
+  abreJanela(html, true);
+  const vb=$('#com-volta'); if(vb) vb.onclick=janelaComissao;
+  const cb=$('#com-csv'); if(cb) cb.onclick=()=>{ const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"', n=x=>String((+x||0).toFixed(2)).replace('.',',');
+    const lin=[['Comissão Enzo — recebimentos de '+mesLongo(mes)+', paga em '+mesLongo(mesSeg(mes))].map(q).join(';'),['Situação','Emissão','NF','Rede','UF','Projeto','Distribuidor','Desconto','Valor da NF','Base de cálculo','Comissão (0,4%)','Pago em'].map(q).join(';')]
+      .concat([...rec.map(v=>['A pagar em '+mesLongo(mesSeg(mes)),v]),...arec.map(v=>['Não recebida',v])].map(([st,v])=>[st,brD(v.emissao),v.nf,v.rede==='_ESTADO'?'Estado':v.rede,v.uf,short(v.projeto),v.via,dec((+v.desconto||0)*100,1)+'%',n(v.valor),n(comBase(v)),n(com(v)),st.startsWith('A pagar')?pg(v):''].map(q).join(';')));
+    baixa('comissao_enzo_'+mes+'.csv','﻿'+lin.join('\r\n'),'text/csv;charset=utf-8'); };
+}
 function viewPagamentos(){
   const todos = pendentes();
   const sitCount = {}; SIT.forEach(s=>sitCount[s[0]]={n:0,v:0});
@@ -2554,6 +2641,7 @@ function viewPagamentos(){
       <button class="btn" id="p-rel" type="button" ${CONC?'':'disabled'}>Ver relatório</button>
       <label class="f inline"><select id="p-ext" aria-label="Extratos" title="Extratos" ${extratos.length?'':'disabled'}><option value="">Todos os credores</option>${extratos.map(n=>`<option value="${esc(n)}"${S_P.ext===n?' selected':''}>${esc(n)}</option>`).join('')}</select></label>
       <button class="btn" id="p-vex" type="button" ${extratos.length?'':'disabled'}>Ver extrato</button>
+      ${window.__SNAP? '' : '<button class="btn" id="p-com" type="button" title="Só no app do administrador">Comissão Enzo</button>'}
     </div>
     ${ARQC.msg? `<p class="msg ok" style="margin-top:10px">${esc(ARQC.msg)}</p>`:''}
     ${painelAcoes(aberto,naoId,extratos)}</div>`;
@@ -2596,6 +2684,7 @@ function viewPagamentos(){
   on('#p-atu', async()=>{ ARQC.msg=''; await confereMudanca(true); if(ARQC.handle&&ARQC.estado==='ok') await leConc(); ARQC.msg='Planilha relida às '+hhmm(Date.now())+'.'; render(); });
   on('#p-con', ()=>{ S_P.painel = S_P.painel==='con'?'':'con'; copia(pedidoConsulta(aberto)); });
   on('#p-pes', ()=>{ S_P.painel = S_P.painel==='pes'?'':'pes'; copia(pedidoPesquisa(naoId)); });
+  on('#p-com', janelaComissao);
   on('#p-rel', ()=>{ abrePDF(CONC.relatorio||'Relatorio_Geral_Pagamentos.pdf', 'Relatório geral de pagamentos'); });
   const sx=$('#p-ext'); if(sx) sx.onchange=()=>{ S_P.ext=sx.value; };
   on('#p-vex', ()=>{
