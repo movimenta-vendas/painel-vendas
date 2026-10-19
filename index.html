@@ -2739,8 +2739,11 @@ const COM_DESDE = '2026-06-01', COM_PCT = 0.004;
 const comInexig = v => /^(MOVIMENTA|MVT|PREFACIO)/.test(SEMACENTO(v.via).trim()) && Math.abs((+v.desconto||0)-0.5) < 0.005;
 const comBase = v => (v.valor||0) * (comInexig(v)? 0.5 : 1);
 // processos anteriores à entrada do Enzo: não entram na comissão (lista mantida aqui, por NF e rede)
-const COM_ANTERIORES = [['4000','ARARUAMA'],['4036','COLEGIO BEM ME QUER'],['642','SUZANO'],['645','SUZANO']];
-const comAnterior = v => COM_ANTERIORES.some(([nf,rede])=>String(v.nf).trim()===nf && SEMACENTO(v.rede).trim()===rede);
+/* NFs fora da comissão (processos anteriores à entrada do Enzo): [NF, rede] — rede estadual como 'ESTADO UF' */
+const COM_ANTERIORES = [['4000','ARARUAMA'],['4036','COLEGIO BEM ME QUER'],['642','SUZANO'],['645','SUZANO'],
+  ['628','SAO FRANCISCO'],['650','SAO FRANCISCO'],['4057','ESTADO PA'],['4106','ESTADO PA'],['4133','TABOAO DA SERRA'],['4070','OSASCO'],['4140','ANGRA DOS REIS']];
+const redeCom = v => v.rede==='_ESTADO'? 'ESTADO '+String(v.uf||'').toUpperCase() : SEMACENTO(v.rede).trim();
+const comAnterior = v => COM_ANTERIORES.some(([nf,rede])=>String(v.nf).trim()===nf && redeCom(v)===rede);
 function vendasComissao(anteriores){
   return vendas().filter(v=>v.projeto!==ACERVO && v.operacao==='VENDA' && String(v.emissao||'')>=COM_DESDE && (anteriores? comAnterior(v) : !comAnterior(v)))
     .sort((a,b)=>String(a.emissao).localeCompare(String(b.emissao))||String(a.nf).localeCompare(String(b.nf)));
