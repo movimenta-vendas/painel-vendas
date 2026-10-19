@@ -61,6 +61,7 @@ details.fora{margin-top:14px}details.fora summary{cursor:pointer;color:var(--mut
 .ms{position:relative;min-width:120px}
 .legend .sw,.pz-leg .sw{background-image:linear-gradient(180deg,rgba(255,255,255,.28),rgba(0,0,0,.12))}
 .fcols{display:grid;margin:0 0 10px;padding-left:1px}
+.fcols-vazio{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;margin:0 0 12px}.fcols-vazio>div{flex:0 1 200px;min-width:140px}
 th.thf{overflow:visible}
 th #csv{min-height:26px;padding:2px 8px;font-size:11.5px;letter-spacing:0;text-transform:none;white-space:nowrap}
 th.thf .ms{position:static;min-width:0;display:inline-block;gap:0}
@@ -1973,7 +1974,7 @@ function viewVendas(){
   $('#main').innerHTML = h;
   liga('#vq','vq',true); ligaMulti('ms-ano','vAno'); ligaMulti('ms-proj','vProj'); ligaMulti('ms-uf','vUF'); ligaMulti('ms-vrede','vRede'); ligaMulti('ms-vvia','vVia'); ligaMulti('ms-vpag','vPag'); ligaMulti('ms-vop','vOp'); liga('#vop','vOp');
   $$('[data-det]').forEach(b=>b.onclick=()=>{ const v=r.find(x=>x.id===b.dataset.det); if(v) janelaVenda(v); });
-  const m=$('#mais'); if(m) m.onclick=()=>{S.vLim+=100; viewVendas();};
+  const m=$('#mais'); if(m) m.onclick=()=>{S.vLim+=100; render();};
   const cb=$('#csv'); if(cb) cb.onclick=()=>baixarCsv(r);
 }
 
@@ -2044,10 +2045,10 @@ function viewFuturas(){
   h += '</div>';
   $('#main').innerHTML = h;
   ligaMulti('ms-fsit','fSit'); ligaMulti('ms-fmes','fMes'); ligaMulti('ms-frede','fRede'); ligaMulti('ms-fvia','fVia'); ligaMulti('ms-fproj','fProj');
-  const fs=$('#fsit'); if(fs) fs.onchange=()=>{ S.fSit=fs.value; S.fLim=60; viewFuturas(); };
-  $$('[data-fmodo]').forEach(b=>b.onclick=()=>{ S.fModo = b.dataset.fmodo; viewFuturas(); });
+  const fs=$('#fsit'); if(fs) fs.onchange=()=>{ S.fSit=fs.value; S.fLim=60; render(); };
+  $$('[data-fmodo]').forEach(b=>b.onclick=()=>{ S.fModo = b.dataset.fmodo; render(); });
   $$('[data-fdet]').forEach(b=>b.onclick=()=>{ const f=lista.find(x=>x.id===b.dataset.fdet); if(f) janelaFutura(f, al&&al.get(f.id)); });
-  const m=$('#fmais'); if(m) m.onclick=()=>{S.fLim+=60; viewFuturas();};
+  const m=$('#fmais'); if(m) m.onclick=()=>{S.fLim+=60; render();};
   const meses=[...new Set(lista.map(f=>f.mesPrevisto))].sort();
   const rotM = meses.map(m=>MES[+m.slice(5,7)-1]+'/'+m.slice(2,4));
   const idx = f => meses.indexOf(f.mesPrevisto);
@@ -2326,7 +2327,9 @@ const colg = C => `<colgroup>${C.map(c=>`<col style="width:${c}%">`).join('')}</
 const fcols = (C, itens) => `<div class="fcols-t" hidden>${itens.filter(Boolean).map(([i,n,h])=>`<div data-col="${i}">${h}</div>`).join('')}</div>`;
 function ajustaFcols(){
   $$('.fcols-t').forEach(fc=>{ let t=fc.nextElementSibling; while(t&&!(t.classList&&t.classList.contains('tw'))) t=t.nextElementSibling;
-    if(!t){ fc.remove(); return; }
+    // filtro sem nenhum resultado: a tabela não é desenhada, então os filtros ficam numa linha acima do aviso,
+    // para dar para desmarcar ou trocar a escolha sem recarregar a página
+    if(!t){ fc.hidden=false; fc.className='fcols-vazio'; return; }
     const ths=$$('thead tr:first-child th',t);
     [...fc.children].forEach(d=>{ const th=ths[+d.dataset.col-1], w=d.firstElementChild; if(!th||!w) return;
       const b=w.querySelector('.ms-btn'); if(b) b.insertAdjacentHTML('afterbegin',`<span class="th-nome">${esc(th.textContent.trim())}</span>`);
