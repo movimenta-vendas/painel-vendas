@@ -18,19 +18,19 @@
   --bg:#FBF8FA; --panel:#FFFFFF; --ink:#2A2230; --muted:#6E6573; --line:#E7D3DF;
   --mag:#A44C7E; --mag-2:#8C3A68; --mag-soft:#F6EAF1;
   --sun:#F2B540; --sky:#8DB6C9; --clay:#D9704A;
-  --field:#FFFFFF; --field-line:#D9CCD5; --ok:#2F7D5B; --ok-forte:#1E6A47; --warn:#B4532A; --bad:#B4322A;
+  --field:#FFFFFF; --field-line:#D9CCD5; --ok:#2F7D5B; --ok-forte:#1E6A47; --saldo:#E08A1E; --warn:#B4532A; --bad:#B4322A;
   --grid:#EFE6EC; --axis:#D9CCD5; --wash:rgba(164,76,126,.07); --plate:#FFFFFF;
   --disp:"Outfit",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#1B1519; --panel:#251D23; --ink:#F1E9EE; --muted:#B5A7B0; --line:#4A3542;
   --mag:#D07AAA; --mag-2:#E197BE; --mag-soft:#3A2432;
-  --field:#1F181D; --field-line:#4D3C47; --ok:#6CC59B; --ok-forte:#8FE0B8; --warn:#F09A70; --bad:#F08A80;
+  --field:#1F181D; --field-line:#4D3C47; --ok:#6CC59B; --ok-forte:#8FE0B8; --saldo:#F2A54A; --warn:#F09A70; --bad:#F08A80;
   --grid:#352A31; --axis:#4A3542; --wash:rgba(208,122,170,.12); --plate:#F5EFF2; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1B1519; --panel:#251D23; --ink:#F1E9EE; --muted:#B5A7B0; --line:#4A3542;
   --mag:#D07AAA; --mag-2:#E197BE; --mag-soft:#3A2432;
-  --field:#1F181D; --field-line:#4D3C47; --ok:#6CC59B; --ok-forte:#8FE0B8; --warn:#F09A70; --bad:#F08A80;
+  --field:#1F181D; --field-line:#4D3C47; --ok:#6CC59B; --ok-forte:#8FE0B8; --saldo:#F2A54A; --warn:#F09A70; --bad:#F08A80;
   --grid:#352A31; --axis:#4A3542; --wash:rgba(208,122,170,.12); --plate:#F5EFF2; color-scheme:dark}
 *{box-sizing:border-box}
 .pizza{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
@@ -238,6 +238,9 @@ table.calor .barra.dupla i{display:block;height:100%;background:var(--mag)} tabl
 table.calor a[data-ufdet]{color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 table.ufdet tr.rede td{background:var(--mag-soft);font-weight:600}
 table.ufdet tr.proj td.l{padding-left:22px}
+.grid.iguais{align-items:stretch}.grid.iguais>div>.card{height:100%;margin:0}
+.orc-neg{display:flex;flex-direction:column;gap:14px;max-width:560px}.orc-neg fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.orc-neg .on-op{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)}.orc-neg .on-op:has(input:checked){border-color:var(--mag);background:color-mix(in srgb,var(--mag) 6%,var(--panel))}.orc-neg .on-op input[type=radio]{width:16px;height:16px;min-height:0;margin:0;flex:none;accent-color:var(--mag)}.orc-neg .on-op b{font-weight:600}.orc-neg .on-op small{color:var(--muted);flex:1 1 100%;margin-left:24px;font-size:12.5px;text-transform:none;letter-spacing:0}.orc-neg .on-t{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.orc-neg .on-res{margin:0;font-size:14px}.orc-neg .on-op select{flex:1 1 220px;min-width:0}.orc-neg #on-desc{max-width:140px}
 .acv2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch;margin-bottom:16px}.acv2>.card{display:flex;flex-direction:column;margin:0}
 .acv2 .chart{flex:1 1 auto;min-height:380px}.acv2 .mapa{flex:1 1 auto;display:flex;align-items:center}
 @media (max-width:900px){.acv2{grid-template-columns:1fr}.acv2 .chart{min-height:460px}}
@@ -502,7 +505,9 @@ const BRL = n => {const a=Math.abs(n||0); return 'R$ '+(a>=1e6?dec(n/1e6)+' mi':
 const BRLf = n => (n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const moedaNum = t => {const x=String(t==null?'':t).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'); return +x||0;};
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const short = p => String(p||'').replace(/^\d+\s*-\s*/,'');
+// nome do projeto para exibir: sem o número e com o nome por extenso nas siglas
+const NOME_PROJ = {TL:'TESOURO LITERÁRIO', VV:'A VOZ E A VEZ DA CRIANÇA', STP:'SÃO TANTAS PERGUNTAS', PLE:'PENSO LOGO ESCREVO'};
+const short = p => { const s=String(p||'').replace(/^\d+\s*-\s*/,'').trim(); return NOME_PROJ[s.toUpperCase()]||s; };
 const MES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const COM = [7,8,9,10,11,0,1,2,3,4,5,6];                 // ago..jul (índice 0-11)
 const brD = s => s? s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4) : '';
@@ -588,7 +593,7 @@ function grafico(id,spec){
   const el=$('#'+id); if(!el) return;
   const lg=$('#'+id+'-lg'), sets=spec.sets, n=spec.labels.length, K=sets.length;
   const vf = spec.money? BRLf : fmt, vc = spec.money? BRL : compact;
-  if(lg) lg.innerHTML = K>1? sets.map(s=>`<span><span class="sw" style="background:${s.color}${spec.kind==='line'?';height:3px;border-radius:2px;width:14px':''}"></span>${esc(s.label)}</span>`).join('') : '';
+  if(lg) lg.innerHTML = K>1&&!spec.semLegenda? sets.map(s=>`<span><span class="sw" style="background:${s.color}${spec.kind==='line'?';height:3px;border-radius:2px;width:14px':''}"></span>${esc(s.label)}</span>`).join('') : '';
   el.style.position='relative';
   if(!n||!sets.some(s=>s.data.some(v=>v))){ el.innerHTML='<div class="empty">Sem dados neste filtro.</div>'; return; }
   if(spec.kind==='hbar' && !spec.altura) el.style.height=(n*(K*15+14)+34)+'px';
@@ -651,7 +656,7 @@ function grafico(id,spec){
       spec.labels.forEach((lab,i)=>{const cy=m.t+band*(i+.5);
         g+=`<text x="${m.l-8}" y="${cy+4}" text-anchor="end" fill="${ink2}" font-size="11.5">${esc(String(lab).length>24?String(lab).slice(0,23)+'…':lab)}</text>`;
         sets.forEach((s,k)=>{const v=s.data[i]||0, y=cy-K*bh/2+k*bh, w=Math.max(X(v)-m.l,v?2:0);
-          g+=`<rect x="${m.l}" y="${y}" width="${w}" height="${bh-1.5}" rx="3" fill="url(#${grad(s.color,'h')})" filter="url(#${id}-sh)"/>`;
+          g+=`<rect x="${m.l}" y="${y}" width="${w}" height="${bh-1.5}" rx="3" fill="url(#${grad((s.colors&&s.colors[i])||s.color,'h')})" filter="url(#${id}-sh)"/>`;
           if(v&&(K===1||bh>=9)) g+=`<text x="${m.l+w+5}" y="${y+bh/2+3.5}" fill="${K===1?ink:ink2}" font-size="${K===1?11:10}">${vc(v)}</text>`;});});
     }
     g+=`<g id="${id}-cr"></g>`;
@@ -1796,7 +1801,9 @@ function viewEstoqueLivros(){
   if(!cat.length){ $('#main').innerHTML = barraEstoque() + `<div class="card"><div class="empty">Catálogo da literatura não carregado. Clique em <b>Atualizar fonte</b> para ler a LITERATURA - Catalogo.</div></div>`; ligaEstoqueBotoes(); return; }
   const eds=['Movimenta','Prefácio','Rovelle'].filter(e=>cat.some(x=>x.e===e));
   const sit=S.lsit||'', fe=S.lEd||[], fo=S.lObra||[];
-  const f=cat.filter(x=>(!fe.length||fe.includes(x.e)) && (!sit||sitLivro(x)===sit) && (!fo.length||fo.includes(x.isbn)))
+  const critL={ ed:x=>!fe.length||fe.includes(x.e), sit:x=>!sit||sitLivro(x)===sit, obra:x=>!fo.length||fo.includes(x.isbn) };
+  const baseL=cascata(cat,critL);
+  const f=cat.filter(x=>Object.values(critL).every(c=>c(x)))
              .sort((a,b)=>a.t.localeCompare(b.t,'pt-BR'));
   const n=k=>cat.filter(x=>sitLivro(x)===k).length;
   const ex=cat.reduce((t,x)=>t+x.qtd,0), val=cat.reduce((t,x)=>t+x.qtd*(x.p||0),0);
@@ -1817,9 +1824,9 @@ function viewEstoqueLivros(){
   const COLS=[38,16,16,14,16];
   h += `<div class="card"><p class="note" style="margin:0 0 12px">Estoque do relatório <b>${esc(EST.arquivo||'')}</b>. Obras marcadas com ◆ foram encontradas pelo título, porque o ISBN no NetSuite é diferente do catálogo.</p>
     ${fcols(COLS,[
-      [1,1,multi('ms-lobra','Obra',cat.slice().sort((a,b)=>a.t.localeCompare(b.t,'pt-BR')).map(x=>[x.isbn,x.t]),fo,'Todas','obras',1)],
-      [2,1,multi('ms-led','Editora',eds.map(e=>[e,ED_NOME[e]||e]),fe,'Todas','editoras',3)],
-      [5,1,multi('ms-lsit','Situação',[['ok','Com estoque'],['baixo','Estoque baixo'],['sem','Sem saldo']],sit||'','Todas','situações',1,true)]])}
+      [1,1,multi('ms-lobra','Obra',(()=>{ const ok=new Set(comMarcados(baseL('obra').map(x=>x.isbn),fo)); return cat.filter(x=>ok.has(x.isbn)).map(x=>[x.isbn,x.t]); })(),fo,'Todas','obras',1)],
+      [2,1,multi('ms-led','Editora',(()=>{ const ok=new Set(comMarcados(baseL('ed').map(x=>x.e),fe)); return eds.filter(e=>ok.has(e)).map(e=>[e,ED_NOME[e]||e]); })(),fe,'Todas','editoras',3)],
+      [5,1,multi('ms-lsit','Situação',(()=>{ const ok=new Set(comMarcados(baseL('sit').map(sitLivro),sit?[sit]:[])); return [['ok','Com estoque'],['baixo','Estoque baixo'],['sem','Sem saldo']].filter(([k])=>ok.has(k)); })(),sit||'','Todas','situações',1,true)]])}
     ${f.length? `<div class="tw" style="max-height:640px"><table class="est-lit alinhada">${colg(COLS)}<thead><tr><th class="l">Obra</th><th class="l">Editora</th><th class="l">ISBN</th><th>Preço de capa</th><th>Em estoque</th></tr></thead><tbody>${
       f.map(x=>`<tr class="s-${sitLivro(x)}"><td class="l wrap-t"><div class="obra-c">${capaImg(x.isbn,'mini')}<div><b>${esc(x.t)}</b>${x.a?`<span class="sub-a">${esc(x.a)}</span>`:''}</div></div></td>
         <td class="l"><span class="ed-chip" style="--ed:${ED_COR[x.e]||'var(--muted)'}">${esc(ED_NOME[x.e]||x.e||'—')}</span></td>
@@ -1920,9 +1927,14 @@ function sitPag(v){ const t=String(v.pagamento==null?'':v.pagamento).trim();
   if(!t) return 'Em aberto'; if(/^\d{4}-\d{2}-\d{2}$/.test(t) || /^SIM$/i.test(t)) return 'Pago';
   return t.charAt(0).toUpperCase()+t.slice(1).toLowerCase(); }
 const corPag = k => k==='Pago'? 'var(--ok)' : k==='Em aberto'? 'var(--warn)' : 'var(--muted)';
+function critVendas(){ const lit=S.linha==='lit';
+  return { ano:v=>!S.vAno.length||S.vAno.includes(String(v.ano)), proj:v=>lit||!S.vProj.length||S.vProj.includes(v.projeto),
+    uf:v=>!S.vUF.length||S.vUF.includes(v.uf), rede:v=>lit||!S.vRede.length||S.vRede.includes(v.rede+' | '+v.uf),
+    via:v=>!S.vVia.length||S.vVia.includes(v.via), pag:v=>!S.vPag.length||S.vPag.includes(sitPag(v)), op:v=>!S.vOp||v.operacao===S.vOp }; }
 function vendasFiltradas(){
   const daLinha = v => S.linha==='lit'? v.projeto===ACERVO : v.projeto!==ACERVO;
-  let r = vendas().filter(v=>daLinha(v)&&(!S.vAno.length||S.vAno.includes(String(v.ano)))&&(S.linha==='lit'||!S.vProj.length||S.vProj.includes(v.projeto))&&(!S.vUF.length||S.vUF.includes(v.uf))&&(S.linha==='lit'||!S.vRede.length||S.vRede.includes(v.rede+' | '+v.uf))&&(!S.vVia.length||S.vVia.includes(v.via))&&(!S.vPag.length||S.vPag.includes(sitPag(v)))&&(!S.vOp||v.operacao===S.vOp));
+  const C = critVendas();
+  let r = vendas().filter(v=>daLinha(v)&&Object.values(C).every(f=>f(v)));
   if(S.vq){const q=S.vq.toLowerCase(); r=r.filter(v=>[v.rede,v.uf,v.via,v.pedido,v.nf,v.projeto].join(' ').toLowerCase().includes(q));}
   return r.sort((a,b)=>String(b.emissao||'').localeCompare(String(a.emissao||'')));
 }
@@ -2073,7 +2085,7 @@ function janelaVenda(v){
   const pagto = v.pagamento? (/^\d{4}-\d{2}-\d{2}$/.test(v.pagamento)? brD(v.pagamento) : esc(v.pagamento)) : seloCor('Em aberto','var(--warn)');
   let conc='';
   try{ if(typeof CONC!=='undefined' && CONC && CONC.itens && !v.pagamento){ const c=CONC.itens.find(i=>chaveNF(i.rede,i.nf)===chaveNF(v.rede,v.nf));
-    if(c) conc=`<section class="caixa"><h3>Conciliação do pagamento</h3><div class="ficha">${campo('Situação',`${seloCor(c.situacao, SITCOR[c.situacao]||'var(--muted)', (SITCOR[c.situacao]||'').indexOf('--sun')>=0)}`)}${campo('Credor',esc(c.credor))}${campo('Empenhos',esc([...new Set((c.empenhos||[]).map(e=>e.numero))].join(', ')))}${campo('Próximo passo',esc(c.proximo))}</div></section>`; } }catch(e){}
+    if(c) conc=`<section class="caixa"><h3>Conciliação do pagamento</h3><div class="ficha">${campo('Situação',`${seloCor(c.situacao, SITCOR[c.situacao]||'var(--muted)', /--sun|--saldo/.test(SITCOR[c.situacao]||''))}`)}${campo('Credor',esc(c.credor))}${campo('Empenhos',esc([...new Set((c.empenhos||[]).map(e=>e.numero))].join(', ')))}${campo('Próximo passo',esc(c.proximo))}</div></section>`; } }catch(e){}
   abreJanela(`<h2>${esc(v.rede)} <span class="tag">${esc(v.uf)}</span></h2>
     <p class="sub">${v.emissao? 'Venda em '+brD(v.emissao) : 'Venda sem data de emissão'}</p>
     <div class="caixas">
@@ -2162,11 +2174,48 @@ function janelaFutura(f, al){
     </div>
     ${blocoFat}
     <h3>Por ano de escolaridade</h3>${tabela}`, comEst, f.projeto);
+  // botão de gerar orçamento ao lado dos de copiar e baixar a imagem (só no app do administrador)
+  const jb=$('#janela .jbtn'); if(jb && !window.__SNAP){ const tem=!!ORC_PROJ_ID(f.projeto);
+    jb.insertAdjacentHTML('afterbegin',`<button class="btn sm ico" type="button" id="fut-orc"${tem?'':' disabled'} aria-label="Gerar orçamento" title="${tem?'Gerar orçamento com os números desta negociação':'Este projeto não está no gerador de orçamentos'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></button>`);
+    const bo=$('#fut-orc'); if(bo&&tem) bo.onclick=()=>janelaOrcFutura(f, al); }
+}
+/* ---------- orçamento a partir de uma negociação de Vendas futuras ---------- */
+const UF_NOMES = {AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
+const ORC_IDS = {'MAJOG':'majog','BANCO+':'banco','VIDA':'vida','VV':'voz','LIGA':'liga','STP':'stp','TL':'tesouro','PLE':'penso','SEU AMANHÃ':'seuamanha','MOTRIZ':'motriz','ABRE PALAVRA':'abre','SARACOTEIO':'saracoteio'};
+const ORC_PROJ_ID = p => ORC_IDS[String(p||'').replace(/^\d+\s*-\s*/,'').trim().toUpperCase()] || '';
+function janelaOrcFutura(f, al){
+  const estadual = f.rede==='_ESTADO', cidade = estadual? '' : f.rede;
+  const destRede = estadual? `À Secretaria de Estado da Educação de ${UF_NOMES[f.uf]||f.uf}` : `À Prefeitura Municipal de ${cidade.toLowerCase().replace(/(^|\s|-)(\S)/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,x=>x.toLowerCase())} – ${f.uf}`;
+  const dists = ordenaOpcoes([...new Set(vendas().map(v=>v.via).concat(BASE.futuras.map(x=>x.via)).filter(Boolean))], x=>x);
+  abreJanela(`<h2>Gerar orçamento</h2><p class="sub">${esc(short(f.projeto))} · ${esc(estadual?'Estado':f.rede)} – ${esc(f.uf)}</p>
+    <div class="orc-neg">
+      <p class="on-res">Quantidades da negociação: <b>${fmt(f.kitsAluno)}</b> kits de aluno e <b>${fmt(f.kitsProf)}</b> de professor.<br><small class="note">Em Vendas futuras ela está calculada com ${dec(DESC_TABELA*100,1)}% de desconto sobre a tabela (${BRLf(f.valor)}).</small></p>
+      <label class="f"><span>Desconto (%)</span><input id="on-desc" type="text" value="0" inputmode="decimal" autocomplete="off"></label>
+      <fieldset><span class="on-t">Cliente</span>
+        <label class="on-op"><input type="radio" name="on-cli" value="rede" checked> <b>A própria rede</b> <small>${esc(destRede.replace(/^(À|Ao)\s+/,''))}</small></label>
+        <label class="on-op"><input type="radio" name="on-cli" value="dist"> <b>Distribuidor</b>
+          <select id="on-dist">${dists.map(d=>`<option${d===f.via?' selected':''}>${esc(d)}</option>`).join('')}</select></label>
+      </fieldset>
+      <div style="display:flex;gap:8px"><button class="btn sm" id="on-volta" type="button">← Voltar</button><button class="btn primary sm" id="on-ok" type="button">Abrir no gerador de orçamentos</button></div>
+      <p class="note" style="margin:0">O orçamento abre na aba Orçamentos já preenchido. Confira os números e gere o PDF por lá.</p>
+    </div>`, false);
+  $('#on-dist').onfocus=()=>{ const r=document.querySelector('input[name=on-cli][value=dist]'); if(r) r.checked=true; };
+  $('#on-volta').onclick=()=>janelaFutura(f, al);
+  $('#on-ok').onclick=()=>{
+    const cli=(document.querySelector('input[name=on-cli]:checked')||{}).value;
+    const d={proj:ORC_PROJ_ID(f.projeto), rede:estadual?'est':'mun', uf:f.uf, cidade, serA:f.serA, serP:f.serP,
+      disc:+String($('#on-desc').value||'0').replace(',','.')||0, dest: cli==='dist'? $('#on-dist').value : destRede};
+    fechaJanela(); S.linha='proj'; S.tab='orc'; S.tabL.proj='orc'; guardaNav(); render(); window.scrollTo(0,0);
+    let n=0; const t=setInterval(()=>{ n++; let ok=false;
+      try{ const w=ORC_FR&&ORC_FR.contentWindow; if(w&&w.abrirDeNegociacao){ ok=w.abrirDeNegociacao(d)!==false; clearInterval(t); if(!ok) aviso('Não consegui montar o orçamento deste projeto.'); } }catch(e){}
+      if(!ok && n>75) clearInterval(t); },200);
+  };
 }
 function viewVendas(){
   const r = vendasFiltradas(), mostra = r.slice(0,S.vLim);
-  const anos = [...new Set(vendas().map(v=>v.ano))].filter(Boolean).sort((a,b)=>b-a);
   const LIT = S.linha==='lit';
+  const baseV = cascata(vendas().filter(v=>LIT? v.projeto===ACERVO : v.projeto!==ACERVO), critVendas());
+  const anos = comMarcados(baseV('ano').map(v=>v.ano?String(v.ano):''), S.vAno);
   let h = LIT? `<div class="kpis">
     <div class="kpi"><div class="l">Pedidos</div><div class="v">${fmt(r.length)}</div><div class="d">no filtro atual</div></div>
     <div class="kpi"><div class="l">Exemplares</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsAluno||0),0))}</div></div>
@@ -2178,16 +2227,17 @@ function viewVendas(){
     <div class="kpi"><div class="l">Kits professor</div><div class="v">${fmt(r.reduce((s,v)=>s+(v.kitsProf||0),0))}</div></div>
     <div class="kpi"><div class="l">Faturamento</div><div class="v">${BRL(r.reduce((s,v)=>s+(v.valor||0),0))}</div></div></div>`;
   const COLS = LIT? [9,7,17,13,9,8,11,6,11,9] : [8,6,13,10,8,9,7.5,6,9.5,5,10,8];
-  const pags = [...new Set(vendas().filter(v=>LIT? v.projeto===ACERVO : v.projeto!==ACERVO).map(sitPag))].sort((a,b)=>(a==='Pago'?0:a==='Em aberto'?1:2)-(b==='Pago'?0:b==='Em aberto'?1:2)||a.localeCompare(b,'pt-BR'));
-  const fOp = multi('ms-vop','Operação',BASE.operacoes.map(o=>[o,o]),S.vOp,'Todas','operações',1,true);
+  const pags = comMarcados(baseV('pag').map(sitPag), S.vPag);
+  const ops = comMarcados(baseV('op').map(v=>v.operacao), S.vOp? [S.vOp] : []);
+  const fOp = multi('ms-vop','Operação',BASE.operacoes.filter(o=>ops.includes(o)).concat(ops.filter(o=>!BASE.operacoes.includes(o))).map(o=>[o,o]),S.vOp,'Todas','operações',1,true);
   S.vq='';
   h += `<div class="card">
     ${fcols(COLS,[
       [1,1,multi('ms-ano','Ano',anos.map(a=>[String(a),String(a)]),S.vAno,'Todos','anos',4)],
-      LIT? [3,1,multi('ms-uf','UF',UFS().map(u=>[u,u]),S.vUF,'Todas','UFs',5)]
-          : [3,1,multi('ms-vrede','Rede',[...new Set(vendas().filter(v=>v.projeto!==ACERVO).map(v=>v.rede+' | '+v.uf))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.vRede,'Todas','redes',1)],
-      [4,1,multi('ms-vvia','Distribuidor',[...new Set(vendas().filter(v=>LIT? v.projeto===ACERVO : v.projeto!==ACERVO).map(v=>v.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.vVia,'Todos','distribuidores',1)],
-      LIT? null : [5,1,multi('ms-proj','Projeto',projetos().filter(p=>p!==ACERVO).map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)],
+      LIT? [3,1,multi('ms-uf','UF',comMarcados(baseV('uf').map(v=>v.uf),S.vUF).map(u=>[u,u]),S.vUF,'Todas','UFs',5)]
+          : [3,1,multi('ms-vrede','Rede',comMarcados(baseV('rede').map(v=>v.rede+' | '+v.uf),S.vRede).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.vRede,'Todas','redes',1)],
+      [4,1,multi('ms-vvia','Distribuidor',comMarcados(baseV('via').map(v=>v.via),S.vVia).map(v=>[v,v]),S.vVia,'Todos','distribuidores',1)],
+      LIT? null : [5,1,multi('ms-proj','Projeto',comMarcados(baseV('proj').map(v=>v.projeto),S.vProj).filter(p=>p!==ACERVO).map(p=>[p,short(p)]),S.vProj,'Todos','projetos',1)],
       [LIT?5:6,1,fOp],
       [LIT?9:11,1,multi('ms-vpag','Pagamento',pags.map(x=>[x,x]),S.vPag,'Todos','situações',2)]])}`;
   h += r.length? `<div class="tw" style="max-height:640px"><table class="alinhada">${colg(COLS)}<thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th class="l">Pagamento</th><th><button class="btn sm" id="csv" type="button" title="Baixar as vendas deste filtro em CSV">Baixar CSV</button></th></tr></thead><tbody>`+
@@ -2214,8 +2264,9 @@ function viewFuturas(){
   const todas = BASE.futuras.filter(f=>f.mesPrevisto);
   const ind = S.fModo==='ind';
   const chRede = f => f.rede+' | '+f.uf;
-  const semSit = todas.filter(f=>(!S.fMes.length||S.fMes.includes(f.mesPrevisto))&&(!S.fRede.length||S.fRede.includes(chRede(f)))
-    &&(!S.fVia.length||S.fVia.includes(f.via))&&(!S.fProj.length||S.fProj.includes(f.projeto)));
+  const critF = { mes:f=>!S.fMes.length||S.fMes.includes(f.mesPrevisto), rede:f=>!S.fRede.length||S.fRede.includes(chRede(f)),
+    via:f=>!S.fVia.length||S.fVia.includes(f.via), proj:f=>!S.fProj.length||S.fProj.includes(f.projeto) };
+  const semSit = todas.filter(f=>Object.values(critF).every(c=>c(f)));
   // a fila do estoque roda só sobre as negociações do filtro (mês, rede, distribuidor, projeto):
   // o estoque é consumido apenas por elas, na ordem do mês previsto
   const al = EST? alocaFunil(S.fModo, semSit) : null;
@@ -2225,6 +2276,7 @@ function viewFuturas(){
     : sit==='par'? (cobre(f)>0 && cobre(f)<0.999)
     : sit==='sem'? cobre(f)<=0
     : /* 'falta' */ cobre(f)<0.999);
+  const baseF = cascata(todas, {...critF, sit:f=>!al||passaSit(f)});
   const lista = semSit.filter(passaSit)
     .sort((a,b)=>(a.mesPrevisto||'9').localeCompare(b.mesPrevisto||'9')||b.valor-a.valor);
   const mostra = lista.slice(0,S.fLim);
@@ -2239,7 +2291,7 @@ function viewFuturas(){
         <div class="d">${prev? dec(somaAt/prev*100):'0,0'}% do previsto · ${fmt(integral)} ${integral===1?'integral':'integrais'} de ${fmt(lista.length)}</div></div>`
        : `<div class="kpi"><div class="l">Redes</div><div class="v">${fmt(new Set(lista.map(f=>f.rede+'|'+f.uf)).size)}</div></div>`}</div>`;
   if(!EST) h += `<div class="banner">Carregue a planilha de estoque na aba <b>Estoque</b> para ver quanto de cada negociação o estoque atual atende.</div>`;
-  h += `<div class="grid"><div class="c7">${caixa('g-fut','','Previsão por mês','Faturamento por projeto, no mês previsto')}</div>
+  h += `<div class="grid iguais"><div class="c7">${caixa('g-fut','','Previsão por mês','Faturamento por projeto, no mês previsto')}</div>
         <div class="c5">${caixa('g-futp','','Previsão por projeto','Total previsto')}</div></div>`;
   // filtros alinhados às colunas da tabela: mesma grade de larguras
   const COLS = al? [10,18,15,12,7,7,11,11,9] : [10,22,19,15,9,9,12,4];
@@ -2251,10 +2303,10 @@ function viewFuturas(){
       ? 'Individual: cada negociação é comparada com o estoque cheio, como se fosse a única. Serve para responder "esta rede eu atendo?" — a soma dos atendimentos passa do estoque que existe.'
       : 'Fila: o estoque é consumido na ordem do mês previsto (empate, a maior primeiro), só pelas negociações do filtro de mês, rede, distribuidor e projeto. Mostra até onde o estoque de hoje chega para elas.'}</p>`:''}
     ${fcols(COLS,[
-      [1,1,multi('ms-fmes','Mês',[...new Set(todas.map(f=>f.mesPrevisto))].sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)],
-      [2,1,multi('ms-frede','Rede',[...new Set(todas.map(chRede))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)],
-      [3,1,multi('ms-fvia','Distribuidor',[...new Set(todas.map(f=>f.via).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)],
-      [4,1,multi('ms-fproj','Projeto',[...new Set(todas.map(f=>f.projeto).filter(Boolean))].sort().map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)],
+      [1,1,multi('ms-fmes','Mês',comMarcados(baseF('mes').map(f=>f.mesPrevisto),S.fMes).sort().map(m=>[m,MES[+m.slice(5,7)-1]+'/'+m.slice(2,4)]),S.fMes,'Todos','meses',3)],
+      [2,1,multi('ms-frede','Rede',comMarcados(baseF('rede').map(chRede),S.fRede).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)],
+      [3,1,multi('ms-fvia','Distribuidor',comMarcados(baseF('via').map(f=>f.via),S.fVia).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)],
+      [4,1,multi('ms-fproj','Projeto',comMarcados(baseF('proj').map(f=>f.projeto),S.fProj).map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)],
       al? [8,1,multi('ms-fsit','Estoque',
         [['int','Atende integral',semSit.filter(f=>cobre(f)>=0.999).length],
          ['par','Atende parcial',semSit.filter(f=>cobre(f)>0&&cobre(f)<0.999).length],
@@ -2285,10 +2337,13 @@ function viewFuturas(){
   const sets=grupos.map(g=>{const d=rotM.map(()=>0);
     lista.forEach(f=>{ if(grupoDe(f.projeto)===g){const i=idx(f); if(i>=0) d[i]+=f.valor||0;} });
     return {label:short(g),data:d,color:g==='Outros'?css('--muted'):corDe(g)};}).filter(s=>s.data.some(x=>x));
-  grafico('g-fut',{kind:'vbar',stacked:true,money:true,labels:rotM,sets});
   const pg=new Map(); lista.forEach(f=>pg.set(f.projeto,(pg.get(f.projeto)||0)+(f.valor||0)));
   const pk=[...pg.keys()].sort((a,b)=>pg.get(b)-pg.get(a));
-  grafico('g-futp',{kind:'hbar',money:true,labels:pk.map(short),sets:[{label:'Faturamento',data:pk.map(k=>pg.get(k)),color:pal()[0]}]});
+  // os dois gráficos com a mesma altura: a que o de barras horizontais precisa (mínimo de 300px)
+  const altF=Math.max(300, pk.length*29+34)+'px'; ['g-fut','g-futp'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.height=altF; });
+  grafico('g-fut',{kind:'vbar',stacked:true,money:true,labels:rotM,sets,semLegenda:true});
+  grafico('g-futp',{altura:true,kind:'hbar',money:true,labels:pk.map(short),sets:[{label:'Faturamento',data:pk.map(k=>pg.get(k)),color:pal()[0],
+    colors:pk.map(k=>{ const g=grupoDe(k); return g==='Outros'? css('--muted') : corDe(g); })}]});
 }
 
 
@@ -2535,7 +2590,7 @@ function viewTabelas(){
     c.innerHTML = `<p class="note" style="margin-bottom:10px">Preço de tabela por segmento. ${BASE.tabProj? `Os projetos marcados com • vêm de <b>${esc(BASE.tabProj.arquivo)}</b> (professor inclui o kit sala de aula); os demais, da aba T_PREÇOS.` : 'Da aba T_PREÇOS.'} "Unid. por kit" é quantos alunos cada kit atende.</p>
     <div class="tw"><table class="precos"><colgroup><col style="width:15%"><col style="width:9%">${segs.map(()=>'<col style="width:9.5%"><col style="width:9.5%">').join('')}</colgroup>
     <thead><tr><th class="l">Projeto</th><th>Unid.<span class="un">por kit</span></th>${segs.map(s=>`<th>${SEGCURTO[s]}<span class="un">aluno</span></th><th>${SEGCURTO[s]}<span class="un">professor</span></th>`).join('')}</tr></thead><tbody>
-    ${BASE.precos.map(p=>`<tr><td class="l">${esc(p.projeto)}${p.fonte==='tabela'?' •':''}</td><td>${fmt(p.mult)}</td>${segs.map(s=>`<td>${BRLf(p[s+'_aluno']||0)}</td><td>${BRLf(p[s+'_prof']||0)}</td>`).join('')}</tr>`).join('')}
+    ${BASE.precos.map(p=>`<tr><td class="l">${esc(short(p.projeto))}${p.fonte==='tabela'?' •':''}</td><td>${fmt(p.mult)}</td>${segs.map(s=>`<td>${BRLf(p[s+'_aluno']||0)}</td><td>${BRLf(p[s+'_prof']||0)}</td>`).join('')}</tr>`).join('')}
     </tbody></table></div>`;
   } else {
     const rot={projetos:'Projeto',distribuidores:'Distribuidor',operacoes:'Operação',status:'Status'}[S.sub];
@@ -2570,7 +2625,34 @@ function ajustaFcols(){
 window.addEventListener('scroll', e=>{ if(e.target&&e.target.closest&&e.target.closest('.ms-pop')) return;
   $$('th.thf .ms-pop').forEach(p=>{ if(!p.hidden) ajustaPop(p); }); }, true);
 window.addEventListener('resize', ()=>$$('th.thf .ms-pop').forEach(p=>{ if(!p.hidden) ajustaPop(p); }));
+/* ordem das listas de filtro: alfabética; se todas as opções forem datas (ano, ano comercial, mês, data), cronológica */
+const MESES_CH=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function chaveData(t){ t=String(t==null?'':t).trim().toLowerCase();
+  let m;
+  if((m=t.match(/^(\d{4})(?:\s*\/\s*(\d{4}))?$/))) return +m[1]*10000;
+  if((m=t.match(/^(\d{2})\/(\d{2})\/(\d{4})$/))) return +m[3]*10000+ +m[2]*100+ +m[1];
+  if((m=t.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/))) return +m[1]*10000+ +m[2]*100+ +(m[3]||0);
+  if((m=t.match(/^([a-zç]{3})[a-zç]*\.?(?:\s*(?:\/|de)\s*(\d{2,4}))?$/))){ const i=MESES_CH.indexOf(m[1].replace('ç','c')); if(i>=0){ let y=m[2]? +m[2] : 0; if(y&&y<100) y+=2000; return y*10000+(i+1)*100; } }
+  return null; }
+function ordenaOpcoes(lista, rot){ // lista de itens; rot(item) devolve o texto mostrado
+  if(lista.length<2) return lista;
+  const ks=lista.map(o=>chaveData(rot(o)));
+  if(ks.every(k=>k!=null)) return lista.map((o,i)=>[o,ks[i]]).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+  // redes estaduais antes dos municípios
+  const est=o=>/^(_?estado\b|estado\s*[·–-])/i.test(String(rot(o)).trim())?0:1;
+  return lista.slice().sort((a,b)=>est(a)-est(b)||String(rot(a)).localeCompare(String(rot(b)),'pt-BR',{sensitivity:'base',numeric:true}));
+}
+function ordenaSelect(el){ if(!el || el.dataset.ord || el.dataset.nosort!=null) return; el.dataset.ord='1';
+  const fixo=o=>o.value===''||/^(todos|todas)\b/i.test(o.textContent.trim()); const ops=[...el.options], fixos=ops.filter(fixo), resto=ops.filter(o=>!fixo(o));
+  const sel=el.value; ordenaOpcoes(resto,o=>o.textContent).forEach(o=>el.appendChild(o)); fixos.reverse().forEach(o=>el.insertBefore(o,el.firstChild)); el.value=sel; }
+new MutationObserver(ms=>{ for(const m of ms) for(const n of m.addedNodes){ if(n.nodeType!==1) continue; if(n.tagName==='SELECT') ordenaSelect(n); else n.querySelectorAll&&n.querySelectorAll('select').forEach(ordenaSelect); } })
+  .observe(document.documentElement,{childList:true,subtree:true});
+/* filtros em cascata: as opções de cada filtro vêm só das linhas que passam pelos OUTROS filtros;
+   o que já está marcado continua na lista, para poder desmarcar */
+const cascata = (dados, crit) => k => dados.filter(x=>Object.entries(crit).every(([c,f])=>c===k||f(x)));
+const comMarcados = (vals, sel) => { const v=new Set(vals.filter(x=>x!=null&&x!=='')); [].concat(sel||[]).filter(Boolean).forEach(x=>v.add(x)); return [...v]; };
 function multi(id, rotulo, opcoes, sel, todosTxt, plural, juntaAte, unico){
+  opcoes = ordenaOpcoes(opcoes||[], o=>o[1]);
   if(unico) sel = sel? [sel] : [];
   const n = sel.length, nome = v => (opcoes.find(o=>o[0]===v)||[v,v])[1];
   const txt = !n? todosTxt : n<=juntaAte? sel.map(nome).join(', ') : `${n} ${plural}`;
@@ -2637,6 +2719,7 @@ const ARQC = {handle:null, nome:'', estado:'nenhum', erro:'', lendo:false, msg:'
 const temDir = typeof window.showDirectoryPicker === 'function';
 const SIT = [
   ['Pago ao credor',          'A rede já pagou o credor; falta o repasse',  'var(--ok)'],
+  ['Credor com saldo a receber','A rede pagou parte ao credor e ainda deve a ele no mesmo contrato','var(--saldo)'],
   ['Em aberto no portal',     'Empenho localizado, sem pagamento ao credor', 'var(--sun)'],
   ['Pagamento não verificado','Vínculo localizado, portal fora do ar',       'var(--clay)'],
   ['Não localizado',          'Sem empenho/pagamento nos portais',           'var(--bad)'],
@@ -2875,23 +2958,26 @@ function viewPagamentos(){
   const sitCount = {}; SIT.forEach(s=>sitCount[s[0]]={n:0,v:0});
   todos.forEach(p=>{ const k=sitCount[p.situacao]||(sitCount[p.situacao]={n:0,v:0}); k.n++; k.v+=p.valor||0; });
   const credDe = p => (p.conc&&p.conc.credor) || '(sem credor)';
-  const lista = todos.filter(p=>(!S.pSit.length||S.pSit.includes(p.situacao)) && (!S.pRede.length||S.pRede.includes(nomeRede(p)))
-    && (!S.pProj.length||S.pProj.includes(p.projeto)) && (!S.pCred.length||S.pCred.includes(credDe(p))));
-  const opc = f => [...new Set(todos.map(f))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const critP = { sit:p=>!S.pSit.length||S.pSit.includes(p.situacao), rede:p=>!S.pRede.length||S.pRede.includes(nomeRede(p)),
+    proj:p=>!S.pProj.length||S.pProj.includes(p.projeto), cred:p=>!S.pCred.length||S.pCred.includes(credDe(p)) };
+  const lista = todos.filter(p=>Object.values(critP).every(c=>c(p)));
+  const baseP = cascata(todos, critP), sel = {rede:S.pRede, proj:S.pProj, cred:S.pCred};
+  const opc = (f,k) => comMarcados(baseP(k).map(f), sel[k]);
   const tot = todos.reduce((s,p)=>s+(p.valor||0),0);
   const redesSet = new Set(todos.map(p=>p.rede+'|'+p.uf));
   const fatRedes = vendas().filter(v=>v.operacao==='VENDA' && redesSet.has(v.rede+'|'+v.uf)).reduce((s,v)=>s+(v.valor||0),0);
-  const aberto = todos.filter(p=>p.situacao==='Em aberto no portal');   // já pagos ao credor não são reconsultados
-  const naoId = todos.filter(p=>p.situacao!=='Em aberto no portal'&&p.situacao!=='Pago ao credor');
+  // em aberto e credor com saldo são reconsultados; os já pagos ao credor (quitado na rede) não
+  const aberto = todos.filter(p=>p.situacao==='Em aberto no portal'||p.situacao==='Credor com saldo a receber');
+  const naoId = todos.filter(p=>!['Em aberto no portal','Pago ao credor','Credor com saldo a receber'].includes(p.situacao));
   const kpi = (l,v,d,cor)=>`<div class="kpi"${cor?` style="border-top:3px solid ${cor}"`:''}><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
 
   let h = barraConc();
   // quadros fixos, sempre na mesma linha: nosso valor + as quatro situações (Não consultado só aparece se houver)
-  const fixos = ['Pago ao credor','Em aberto no portal','Pagamento não verificado','Não localizado'];
+  const fixos = ['Pago ao credor','Credor com saldo a receber','Em aberto no portal','Pagamento não verificado','Não localizado'];
   const sits = SIT.filter(([s])=>fixos.indexOf(s)>=0 || sitCount[s].n);
   h += `<div class="kpis" style="grid-template-columns:repeat(${1+sits.length},minmax(0,1fr))">
     ${kpi('Nosso valor',BRL(tot),`${fmt(todos.length)} notas · ${fmt(redesSet.size)} redes`)}
-    ${sits.map(([s,d,c])=>kpi(s==='Pagamento não verificado'?'Pagto. não verificado':s,BRL(sitCount[s].v),fmt(sitCount[s].n)+' notas · '+d,c)).join('')}</div>`;
+    ${sits.map(([s,d,c])=>kpi(s==='Pagamento não verificado'?'Pagto. não verificado':s==='Credor com saldo a receber'?'Credor com saldo':s,BRL(sitCount[s].v),fmt(sitCount[s].n)+' notas · '+d,c)).join('')}</div>`;
 
   // ações
   const extratos = CONC&&CONC.extratos? Object.keys(CONC.extratos).sort() : [];
@@ -2907,8 +2993,8 @@ function viewPagamentos(){
         <label class="f inline"><select id="p-ext" aria-label="Extratos" title="Extratos" ${extratos.length?'':'disabled'}><option value="">Todos os credores</option>${extratos.map(n=>`<option value="${esc(n)}"${S_P.ext===n?' selected':''}>${esc(n)}</option>`).join('')}</select></label>
         <button class="btn" id="p-vex" type="button" ${extratos.length?'':'disabled'}>Ver extrato</button></div></div>
       ${window.__SNAP? '' : `<div class="ag"><span class="ag-t">Comissões</span><div class="ag-b">
-        <button class="btn" id="p-com" type="button" title="Só no app do administrador">Enzo</button>
-        <button class="btn" id="p-comd" type="button" title="Só no app do administrador">Douglas</button></div></div>`}
+        <button class="btn" id="p-comd" type="button" title="Só no app do administrador">Douglas</button>
+        <button class="btn" id="p-com" type="button" title="Só no app do administrador">Enzo</button></div></div>`}
     </div>
     ${ARQC.msg? `<p class="msg ok" style="margin-top:10px">${esc(ARQC.msg)}</p>`:''}
     ${painelAcoes(aberto,naoId,extratos)}</div>`;
@@ -2930,17 +3016,17 @@ function viewPagamentos(){
   const PCOLS=[14,5,8,5,9,10,11,11,9,13,5];
   h += `<div class="card"><h2>Notas em aberto</h2><p class="sub">Vendas públicas com PAGAMENTO em branco na planilha (fora acervo e redes privadas). Ao preencher a data na planilha e salvar, a nota sai desta lista.</p>
     ${fcols(PCOLS,[
-      [1,1,multi('ms-prede','Rede',opc(nomeRede).map(r=>[r,r]),S.pRede,'Todas','redes',1)],
-      [5,1,multi('ms-pproj','Projeto',opc(p=>p.projeto).map(x=>[x,short(x)]),S.pProj,'Todos','projetos',1)],
-      [8,1,multi('ms-pcred','Credor',opc(credDe).map(c=>[c,c]),S.pCred,'Todos','credores',1)],
-      [7,1,multi('ms-psit','Situação',SIT.map(([s])=>[s,s]),S.pSit,'Todas','situações',1)]])}
+      [1,1,multi('ms-prede','Rede',opc(nomeRede,'rede').map(r=>[r,r]),S.pRede,'Todas','redes',1)],
+      [5,1,multi('ms-pproj','Projeto',opc(p=>p.projeto,'proj').map(x=>[x,short(x)]),S.pProj,'Todos','projetos',1)],
+      [8,1,multi('ms-pcred','Credor',opc(credDe,'cred').map(c=>[c,c]),S.pCred,'Todos','credores',1)],
+      [7,1,multi('ms-psit','Situação',(()=>{ const ok=new Set(comMarcados(baseP('sit').map(p=>p.situacao),S.pSit)); return SIT.map(([s])=>s).filter(s=>ok.has(s)).map(s=>[s,s]); })(),S.pSit,'Todas','situações',1)]])}
     <div class="tw" style="max-height:620px"><table class="alinhada">${colg(PCOLS)}<thead><tr><th class="l">Rede</th><th class="l">NF</th><th class="l">Emissão</th><th>Dias</th><th class="l">Projeto</th><th>Nosso valor</th><th class="l">Situação</th><th class="l">Credor</th><th class="l">Empenhos</th><th class="l">Próximo passo</th><th class="l">Portal</th></tr></thead><tbody>
     ${lista.sort((a,b)=>SIT.findIndex(s=>s[0]===a.situacao)-SIT.findIndex(s=>s[0]===b.situacao)||b.valor-a.valor).map(p=>{const c=p.conc||{};
       const gE={}; (c.empenhos||[]).forEach(e=>{ const g=gE[e.numero]||(gE[e.numero]={numero:e.numero,quitado:e.quitado,datas:[]}); g.datas.push(e.data); });
       const emp=Object.values(gE).map(g=>`${esc(g.numero)}${g.quitado?' ✔':''} <span class="note">${g.datas.length>1? g.datas.length+' pagamentos, '+esc(g.datas[0])+' a '+esc(g.datas[g.datas.length-1]) : esc(g.datas[0])}</span>`).join('<br>');
       const url=c.link||(CONC&&CONC.portais&&CONC.portais[p.rede]&&CONC.portais[p.rede].url)||'';
       return `<tr><td class="l">${esc(nomeRede(p))}</td><td class="l">${esc(p.nfn)}</td><td class="l">${brD(p.emissao)}</td><td>${p.dias==null?'':fmt(p.dias)}</td><td class="l">${esc(short(p.projeto))}</td><td>${BRLf(p.valor)}</td>
-        <td class="l">${seloCor(p.situacao, SITCOR[p.situacao]||'var(--muted)', (SITCOR[p.situacao]||'').indexOf('--sun')>=0)}</td><td class="l wrap-t">${esc(c.credor||'')}</td><td class="l">${emp||'—'}</td>
+        <td class="l">${seloCor(p.situacao, SITCOR[p.situacao]||'var(--muted)', /--sun|--saldo/.test(SITCOR[p.situacao]||''))}</td><td class="l wrap-t">${esc(c.credor||'')}</td><td class="l">${emp||'—'}</td>
         <td class="l wrap-t" style="min-width:220px" title="${esc(c.achado||'')}">${esc(c.proximo||(p.situacao==='Não consultado'?'Pesquisar empenho e pagamento':''))}</td>
         <td class="l">${url?`<a href="${esc(url)}" target="_blank" rel="noopener">abrir</a>`:'—'}</td></tr>`;}).join('') || '<tr><td colspan="11" class="l"><span class="note">Nenhuma nota neste filtro.</span></td></tr>'}
     </tbody></table></div></div>`;
