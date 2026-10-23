@@ -318,6 +318,71 @@ table.com td .tag{font-size:9.5px;padding:0 4px}table.com td .tag.inx{color:var(
 .modal-bg{position:fixed;inset:0;z-index:60;background:rgba(30,15,25,.48);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto}
 .modal{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 48px rgba(0,0,0,.28);width:min(860px,100%);padding:20px 22px 22px}
 .modal.larga{width:min(1120px,100%)}
+.ata-top{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:end;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+.ata-eb{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ata-id b{display:block;font-family:var(--disp);font-size:19px;margin:2px 0 4px}
+.ata-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);align-items:center}
+.ata-chip{display:inline-block;padding:2px 9px;border-radius:999px;font-weight:600;font-size:11.5px}
+.ata-chip.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.ata-chip.warn{background:color-mix(in srgb,var(--saldo) 18%,transparent);color:var(--saldo)}
+.ata-chip.bad{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.ata-gv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ata-gv b{font-family:var(--disp);font-size:24px;font-variant-numeric:tabular-nums}
+.ata-gv span{font-size:12px;color:var(--muted)}
+.ata-bar{height:10px;border-radius:5px;background:var(--grid);overflow:hidden;display:flex;margin-top:6px}
+.ata-bar i,.ata-mini i{display:block;height:100%}
+.ata-bar .u,.ata-mini .u,.ata-leg i.u{background:var(--mag)}
+.ata-bar .s,.ata-mini .s,.ata-leg i.s{background:var(--sun)}
+.ata-leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;color:var(--muted);margin-top:5px}
+.ata-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.ata-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.ata-kpis>div{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--bg)}
+.ata-kpis span{display:block;font-size:11px;color:var(--muted)}
+.ata-kpis b{display:block;font-family:var(--disp);font-size:17px;font-variant-numeric:tabular-nums}
+.ata-kpis small{display:block;font-size:10.5px;color:var(--muted)}
+.ata-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+.ata-tabs button{border:0;background:none;padding:8px 12px;font:inherit;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.ata-tabs button[aria-selected="true"]{color:var(--mag);border-bottom-color:var(--mag);font-weight:600}
+.ata-ctl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;margin-bottom:10px}
+.ata-ctl label,.ata-fg label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted);font-weight:600}
+.ata-ctl input,.ata-fg input,.ata-fg select,#ataf-add{font:inherit;font-size:13px;color:var(--ink);background:var(--field);border:1px solid var(--field-line);border-radius:8px;padding:7px 9px}
+.ata-lb{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.ata-ver{border-radius:10px;padding:11px 14px;margin-bottom:10px;border-left:4px solid}
+.ata-ver b{display:block;font-size:15px}
+.ata-ver p{margin:3px 0 0;font-size:12.5px;color:var(--ink)}
+.ata-ver.ok{background:color-mix(in srgb,var(--ok) 11%,transparent);border-color:var(--ok);color:var(--ok)}
+.ata-ver.par{background:color-mix(in srgb,var(--saldo) 13%,transparent);border-color:var(--saldo);color:var(--saldo)}
+.ata-ver.bad{background:color-mix(in srgb,var(--bad) 11%,transparent);border-color:var(--bad);color:var(--bad)}
+.ata-ver.idle{background:var(--grid);border-color:var(--axis);color:var(--muted)}
+.ata-tab tr.grp td{background:var(--mag-soft);font-weight:700;font-size:12px}
+.ata-tab tr.hl td{background:color-mix(in srgb,var(--sun) 14%,transparent)}
+.ata-tab tr.ata-fora td{color:var(--muted);font-style:italic}
+.ata-sub{font-size:10.5px;color:var(--muted);font-weight:400}
+.ata-q{width:78px;text-align:right;font:inherit;font-size:12.5px;padding:4px 6px;border:1px solid var(--field-line);border-radius:6px;background:var(--field);color:var(--ink)}
+.ata-pill{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px}
+.ata-pill.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.ata-pill.bad{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.ata-pill.neu{background:var(--grid);color:var(--muted)}
+.ata-mini{height:5px;border-radius:3px;background:var(--grid);overflow:hidden;display:flex;margin-top:4px;min-width:60px}
+.ata-mini.w{min-width:90px;display:inline-flex;width:90px;vertical-align:middle;margin:0 6px 0 0}
+.ata-acoes{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.ata-form{margin-top:14px;border:1px solid var(--sun);background:color-mix(in srgb,var(--sun) 8%,var(--panel));border-radius:12px;padding:14px}
+.ata-form h3{margin:0 0 10px;font-size:15px}
+.ata-fg{display:grid;grid-template-columns:150px minmax(0,1.3fr) minmax(0,1fr) 190px;gap:10px;margin-bottom:10px}
+.ata-fg label.w{grid-column:1/-1}
+.ata-hist{display:flex;flex-direction:column}
+.ata-hi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.ata-hi.est{opacity:.55}
+.ata-hi .t{font-weight:600}
+.ata-hi .d{font-size:12px;color:var(--muted)}
+.ata-hi .v{text-align:right}
+.ata-conf{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:flex-end}
+.ata-conf input{font:inherit;font-size:12px;padding:4px 7px;border:1px solid var(--field-line);border-radius:6px;background:var(--field);color:var(--ink)}
+button.lnk{background:none;border:0;color:var(--bad);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
+@media (max-width:760px){.ata-top{grid-template-columns:1fr}.ata-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.ata-ctl{grid-template-columns:1fr}.ata-fg{grid-template-columns:1fr 1fr}}
+.ata-tab td.l{white-space:normal!important;overflow:visible!important}
+.ata-tab{table-layout:auto!important}.ata-tab td:first-child{min-width:240px}.ata-hi .v .lnk{display:block;margin:4px 0 0 auto}
+
 .pdf-bg{padding:2vh 16px;align-items:center}
 .modal.pdfjan{width:min(1100px,100%);height:94vh;display:flex;flex-direction:column;padding:14px 16px 16px}
 .pdfcab{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
@@ -1953,6 +2018,242 @@ async function pdfEstoqueLit(lista, filtros){
   const blob=doc.output('blob'); const f=new File([blob],nome,{type:'application/pdf'});
   janelaPDF(f,'Relatório de estoque – Literatura');
 }
+/* ---------------- Ata de Registro de Preços (CIMAMS 012/2026) ----------------
+   Aberta pelo botão "Consultar ata" do gerador de orçamentos de projetos: recebe os kits do orçamento,
+   converte nos itens da ata e mostra saldo, consumo da simulação, se atende e o histórico.
+   O consumo efetivado fica em 1 - FONTES/ATA CIMAMS 012-2026 - Consumos.json (com cópia no navegador). */
+const ATA = {
+  id:'CIMAMS-012-2026', arquivo:'ATA CIMAMS 012-2026 - Consumos.json',
+  eyebrow:'CIMAMS · Pregão Eletrônico SRP 018/2025 · Lote 01', titulo:'Ata de Registro de Preços nº 012/2026',
+  detentora:'TBOTT Comércio Atacadista de Livros', marca:'MVT Educação / Prefácio Editora', fim:'2027-01-27',
+  itens:[
+   {n:1,p:'banco',k:'Kit do aluno',d:'1º ao 5º ano',q:3872,u:569.09},{n:2,p:'banco',k:'Kit do professor',d:'1º ao 5º ano',q:207,u:1238.13},
+   {n:3,p:'voz',k:'Kit do aluno',d:'Educação Infantil',q:2847,u:742.55},{n:4,p:'voz',k:'Kit do professor',d:'Educação Infantil',q:207,u:907.75},
+   {n:5,p:'stp',k:'Kit do estudante',d:'Pré-escola e 1º/2º ano',q:3128,u:536.06},{n:6,p:'stp',k:'Kit do professor',d:'Pré-escola e 1º/2º ano',q:207,u:783.85},
+   {n:7,p:'vida',k:'Kit do aluno (1 jogo + 6 livros)',d:'6º ao 9º ano',q:3546,u:3295.64},{n:8,p:'vida',k:'Kit do professor',d:'6º ao 9º ano',q:92,u:792.11},
+   {n:9,p:'palavra',k:'Kit do aluno',d:'Ed. Infantil e 1º ao 5º ano',q:6719,u:536.06},{n:10,p:'palavra',k:'Kit do professor',d:'Ed. Infantil e 1º ao 5º ano',q:207,u:783.85},
+   {n:11,p:'liga',k:'Kit do estudante',d:'1º ao 5º ano',q:3872,u:776.42},{n:12,p:'liga',k:'Kit do professor',d:'1º ao 5º ano',q:207,u:3716.89},
+   {n:13,p:'majogpre',k:'Kit do aluno',d:'Pré-escola',q:1619,u:2064.11},{n:14,p:'majogpre',k:'Kit do professor',d:'Pré-escola',q:207,u:371.69},
+   {n:15,p:'majogef',k:'Kit do aluno',d:'1º ao 5º ano',q:3872,u:1651.13},{n:16,p:'majogef',k:'Kit do professor',d:'1º ao 5º ano',q:207,u:371.69},
+   {n:17,p:'penso',k:'Kit do aluno',d:'6º ao 9º ano',q:3546,u:412.16},{n:18,p:'penso',k:'Kit do professor',d:'6º ao 9º ano (registrado como “Kit do aluno”)',q:92,u:412.16},
+   {n:19,p:'tesei',k:'Kit do aluno',d:'Educação Infantil',q:2847,u:412.16},{n:20,p:'tesei',k:'Kit do professor',d:'Educação Infantil',q:207,u:412.16},
+   {n:21,p:'tesei',k:'Kit sala de aula (25 livros)',d:'Educação Infantil',q:2847,u:2535.15},
+   {n:22,p:'tesef',k:'Kit do aluno',d:'1º ao 5º ano',q:3872,u:412.16},{n:23,p:'tesef',k:'Kit do professor',d:'1º ao 5º ano',q:207,u:412.16},
+   {n:24,p:'tesef',k:'Kit sala de aula (30 livros)',d:'1º ao 5º ano',q:207,u:2703.21}],
+  grupos:[['banco','BANCO+ · Práticas e lições de educação financeira'],['voz','A VOZ E A VEZ DA CRIANÇA'],['stp','SÃO TANTAS PERGUNTAS'],
+   ['vida','PROJETO VIDA · Empreendedorismo, Ed. Financeira e Fiscal'],['palavra','PALAVRA CANTADA NA ESCOLA'],['liga','LIGA · Literatura e Gamificação'],
+   ['majogpre','MAJOG · Pré-escola'],['majogef','MAJOG · 1º ao 5º ano'],['penso','PENSO LOGO ESCREVO'],['tesei','TESOURO LITERÁRIO · Educação Infantil'],['tesef','TESOURO LITERÁRIO · 1º ao 5º ano']],
+  // projeto do gerador → item da ata, por etapa (EI, AI, AF, EM) e público (aluno, prof, sala)
+  mapa:{banco:{'AI|aluno':1,'AI|prof':2}, voz:{'EI|aluno':3,'EI|prof':4}, stp:{'EI|aluno':5,'AI|aluno':5,'EI|prof':6,'AI|prof':6},
+    vida:{'AF|aluno':7,'AF|prof':8}, liga:{'AI|aluno':11,'AI|prof':12}, majog:{'EI|aluno':13,'EI|prof':14,'AI|aluno':15,'AI|prof':16},
+    penso:{'AF|aluno':17,'AF|prof':18}, tesouro:{'EI|aluno':19,'EI|prof':20,'EI|sala':21,'AI|aluno':22,'AI|prof':23,'AI|sala':24}}
+};
+ATA.byN = Object.fromEntries(ATA.itens.map(i=>[i.n,i]));
+ATA.total = ATA.itens.reduce((s,i)=>s+i.q*i.u,0);
+const ataCod = n => String(n).padStart(4,'0');
+const ataBRL = v => (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const ataInt = v => Math.round(v||0).toLocaleString('pt-BR');
+const ataChave = s => String(s||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[̀-ͯ]/g,'');
+const ataDia = iso => { const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+const ataHoje = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); };
+
+/* --- armazenamento: arquivo na pasta 1 - FONTES (fonte principal) + cópia no navegador --- */
+let ATA_DADOS = {versao:1, ata:ATA.id, consumos:[]}, ATA_ORIGEM = '';
+function ataJunta(a,b){ const m=new Map(); [...(a||[]),...(b||[])].forEach(c=>{ const o=m.get(c.id); m.set(c.id, !o? c : (c.estornado&&!o.estornado? c : o)); }); return [...m.values()]; }
+async function ataArquivo(criar){ if(!PASTA.handle) return null; try{ const d=await dirFontes(); return await d.getFileHandle(ATA.arquivo, criar?{create:true}:undefined); }catch(e){ return null; } }
+async function ataCarrega(){
+  let doArq=null, local=await kv('get','ata-'+ATA.id);
+  try{ const fh=await ataArquivo(false); if(fh){ const j=JSON.parse(await (await fh.getFile()).text()); if(j&&Array.isArray(j.consumos)) doArq=j; } }catch(e){}
+  const consumos = ataJunta(doArq&&doArq.consumos, local&&local.consumos);
+  ATA_DADOS = {versao:1, ata:ATA.id, consumos};
+  ATA_ORIGEM = doArq? 'arquivo' : (local? 'navegador' : (PASTA.handle? 'novo' : 'navegador'));
+  return ATA_DADOS;
+}
+async function ataGrava(){
+  await kv('put','ata-'+ATA.id, ATA_DADOS);
+  if(!PASTA.handle) return 'navegador';
+  try{
+    let p=await PASTA.handle.queryPermission({mode:'readwrite'}); if(p!=='granted') p=await PASTA.handle.requestPermission({mode:'readwrite'});
+    if(p!=='granted') return 'navegador';
+    // junta com o que estiver no arquivo (outra sessão pode ter registrado algo) antes de gravar
+    const fh=await ataArquivo(true);
+    try{ const j=JSON.parse(await (await fh.getFile()).text()||'{}'); if(j&&Array.isArray(j.consumos)) ATA_DADOS.consumos=ataJunta(ATA_DADOS.consumos,j.consumos); }catch(e){}
+    ATA_DADOS.atualizadoEm=new Date().toISOString();
+    const w=await fh.createWritable(); await w.write(JSON.stringify(ATA_DADOS,null,1)); await w.close();
+    await kv('put','ata-'+ATA.id, ATA_DADOS); ATA_ORIGEM='arquivo'; return 'arquivo';
+  }catch(e){ return 'navegador'; }
+}
+
+/* --- cálculo --- */
+function ataTotais(){
+  const t={}; ATA.itens.forEach(i=>t[i.n]={part:0,ades:0,adesRede:{}});
+  ATA_DADOS.consumos.filter(c=>!c.estornado).forEach(c=>(c.itens||[]).forEach(x=>{ const r=t[x.n]; if(!r) return;
+    if(c.modo==='ades'){ r.ades+=x.q; const k=ataChave(c.rede); r.adesRede[k]=(r.adesRede[k]||0)+x.q; } else r.part+=x.q; }));
+  return t;
+}
+function ataDisp(n,t,modo,rede){
+  const i=ATA.byN[n], r=t[n];
+  if(modo!=='ades') return {disp:i.q-r.part, lim:'saldo registrado do item'};
+  const porRede=Math.floor(i.q*0.5)-(r.adesRede[ataChave(rede)]||0), glob=i.q*2-r.ades;
+  return {disp:Math.min(porRede,glob), lim: porRede<=glob? 'limite de 50% do item por órgão' : 'limite global de adesões (2× o registrado)'};
+}
+// kits do orçamento → itens da ata
+function ataConverte(projs){
+  const segDe=k=>{ const s=String(k||''); return s[0]==='i'? 'EI' : s[0]==='m'? 'EM' : (s[0]==='f'&&+s.slice(1)>=6)? 'AF' : s[0]==='f'? 'AI' : ''; };
+  const pubDe=p=>/SALA/i.test(p)? 'sala' : /PROF/i.test(p)? 'prof' : 'aluno';
+  const ROT={EI:'Educação Infantil',AI:'Anos iniciais',AF:'Anos finais',EM:'Ensino Médio'};
+  return (projs||[]).map(p=>{
+    const m=ATA.mapa[p.id], porItem=new Map(), fora=new Map();
+    (p.linhas||[]).forEach(l=>{ if(!(+l.q>0)) return; const ch=segDe(l.k)+'|'+pubDe(l.pub), n=m&&m[ch];
+      if(n) porItem.set(n,(porItem.get(n)||0)+(+l.q)); else { const r=(ROT[segDe(l.k)]||'Sem etapa')+' · '+(l.pub||'').toLowerCase(); fora.set(r,(fora.get(r)||0)+(+l.q)); } });
+    return {id:p.id, nm:p.nm, naAta:!!m, itens:[...porItem].map(([n,q])=>({n,q})).sort((a,b)=>a.n-b.n), fora:[...fora].map(([r,q])=>({r,q}))};
+  });
+}
+
+/* --- janela --- */
+let ATA_UI=null;
+async function abrirAta(d){
+  d=d||{};
+  ATA_UI={rede:d.rede||'', modo:'part', aba:'sim', projs:ataConverte(d.projetos).sort((a,b)=>(b.naAta-a.naAta)), reg:null, confEst:null, ajuste:{}};
+  abreJanela(`<h2>Consulta da ata</h2><p class="sub">${esc(ATA.titulo)} · CIMAMS</p><div id="ata-corpo"><p class="note">Lendo o histórico de consumo…</p></div>`, true);
+  await ataCarrega(); ataRender();
+}
+window.abrirAta = abrirAta;
+function ataSim(){ // pedido atual (com ajustes manuais) por item
+  const q={}; ATA_UI.projs.forEach(p=>p.itens.forEach(x=>{ q[x.n]=(q[x.n]||0)+x.q; }));
+  Object.entries(ATA_UI.ajuste).forEach(([n,v])=>{ q[n]=v; }); Object.keys(q).forEach(n=>{ if(!(q[n]>0)) delete q[n]; });
+  return q;
+}
+function ataRender(){
+  const box=document.getElementById('ata-corpo'); if(!box||!ATA_UI) return;
+  const U=ATA_UI, t=ataTotais(), sim=ataSim(), modo=U.modo;
+  const usado=ATA.itens.reduce((s,i)=>s+t[i.n].part*i.u,0);
+  const linhas=Object.entries(sim).map(([n,q])=>{ n=+n; const i=ATA.byN[n], {disp,lim}=ataDisp(n,t,modo,U.rede); return {n,i,q,disp,lim,ok:q<=disp,val:q*i.u,after:disp-q}; });
+  const valSim=linhas.reduce((s,l)=>s+l.val,0), valAtende=linhas.reduce((s,l)=>s+Math.min(l.q,Math.max(0,l.disp))*l.i.u,0);
+  const simPart = modo==='part'? valSim : 0;
+  const foraAta=U.projs.filter(p=>!p.naAta), parcFora=U.projs.filter(p=>p.naAta&&p.fora.length);
+  const ok=linhas.length&&linhas.every(l=>l.ok)&&!foraAta.length&&!parcFora.length, nada=!linhas.length;
+  const dias=Math.ceil((new Date(ATA.fim+'T23:59:59')-new Date())/864e5);
+  const pct=x=>(x/ATA.total*100);
+  const bar=(a,b,c)=>`<div class="ata-bar"><i class="u" style="width:${a}%"></i><i class="s" style="width:${b}%"></i>${c?`<i class="x" style="width:${c}%"></i>`:''}</div>`;
+  const valid=ATA_DADOS.consumos.filter(c=>!c.estornado);
+  let h=`<div class="ata-top">
+    <div class="ata-id"><div class="ata-eb">${esc(ATA.eyebrow)}</div><b>${esc(ATA.titulo)}</b>
+      <div class="ata-meta"><span>Detentora: ${esc(ATA.detentora)}</span><span>Marca: ${esc(ATA.marca)}</span>
+      <span class="ata-chip ${dias<=0?'bad':dias<=90?'warn':'ok'}">${dias>0? `Vigência até ${ataDia(ATA.fim)} · ${ataInt(dias)} dias restantes` : 'Vigência original encerrada (ver prorrogação)'}</span></div></div>
+    <div class="ata-glob"><div class="ata-eb">Saldo global da ata</div>
+      <div class="ata-gv"><b>${ataBRL(ATA.total-usado-simPart)}</b><span>${pct(usado).toLocaleString('pt-BR',{maximumFractionDigits:1})}% consumido</span></div>
+      ${bar(pct(usado),pct(Math.min(simPart,ATA.total-usado)))}
+      <div class="ata-leg"><span><i class="u"></i>Consumido (efetivado)</span><span><i class="s"></i>Esta simulação</span><span>Registrado ${ataBRL(ATA.total)}</span></div></div></div>
+    <div class="ata-kpis">
+      <div><span>Registrado</span><b>${ataBRL(ATA.total)}</b></div>
+      <div><span>Consumido</span><b>${ataBRL(usado)}</b><small>${ataInt(valid.length)} consumo${valid.length===1?'':'s'} efetivado${valid.length===1?'':'s'}</small></div>
+      <div><span>Esta simulação</span><b>${ataBRL(valSim)}</b><small>a preço da ata${modo==='ades'?' · adesão (não reduz o saldo)':''}</small></div>
+      <div><span>Saldo após a simulação</span><b>${ataBRL(ATA.total-usado-simPart)}</b><small>${pct(ATA.total-usado-simPart).toLocaleString('pt-BR',{maximumFractionDigits:1})}% do registrado</small></div></div>
+    <div class="ata-tabs" role="tablist">${[['sim','Simulação do orçamento'],['saldo','Saldo por item'],['hist',`Histórico de consumo (${ataInt(ATA_DADOS.consumos.length)})`]].map(([k,r])=>`<button type="button" role="tab" data-ataba="${k}" aria-selected="${U.aba===k}">${r}</button>`).join('')}</div>`;
+  if(U.aba==='sim'){
+    h+=`<div class="ata-ctl"><label>Rede<input id="ata-rede" value="${esc(U.rede)}" placeholder="Ex.: Montes Claros/MG"></label>
+      <div><span class="ata-lb">Forma de contratação</span><div class="seg" role="group"><button type="button" data-atamodo="part" aria-pressed="${modo==='part'}">Município participante</button><button type="button" data-atamodo="ades" aria-pressed="${modo==='ades'}">Adesão (carona)</button></div></div></div>`;
+    const vk = nada? 'idle' : ok? 'ok' : valAtende>0? 'par' : 'bad';
+    const vt = nada? (U.projs.length? 'Nenhum kit deste orçamento está na ata' : 'Nenhum projeto no orçamento') : ok? `Atende integralmente · ${ataBRL(valSim)}` : valAtende>0? `Atende parcialmente · ${ataBRL(valAtende)} de ${ataBRL(valSim)}` : 'Não atende';
+    const vd = nada? 'Marque projetos com quantidades no orçamento, ou registre um consumo direto pelo botão abaixo.'
+      : [linhas.filter(l=>!l.ok).map(l=>`Item ${ataCod(l.n)}: pede ${ataInt(l.q)}, disponível ${ataInt(Math.max(l.disp,0))} (${l.lim})`).join(' · '),
+         foraAta.length? `Fora da ata: ${foraAta.map(p=>p.nm).join(', ')}` : '', parcFora.length? `Etapas sem item na ata: ${parcFora.map(p=>p.nm+' ('+p.fora.map(f=>f.r).join('; ')+')').join(', ')}` : ''].filter(Boolean).join(' · ') || `${U.rede||'Rede não informada'} · ${modo==='part'?'participante':'adesão'} · saldo de cada item após o consumo na tabela.`;
+    h+=`<div class="ata-ver ${vk}"><b>${esc(vt)}</b><p>${esc(vd)}</p></div>`;
+    if(U.projs.length){
+      h+=`<div class="tw"><table class="miuda alinhada ata-tab"><thead><tr><th class="l">Item da ata</th><th>Pedido</th><th>Disponível</th><th>Saldo após</th><th>Unit. ata</th><th>Valor ata</th><th class="l">Situação</th></tr></thead><tbody>`;
+      U.projs.forEach(p=>{
+        h+=`<tr class="grp"><td class="l" colspan="7"><span class="sw" style="background:${corDe(p.nm)}"></span>${esc(p.nm)}${p.naAta?'':' <span class="ata-pill neu">não está na ata</span>'}</td></tr>`;
+        p.itens.forEach(x=>{ const l=linhas.find(y=>y.n===x.n); if(!l) return; const uso=Math.max(0,l.i.q-(modo==='part'?l.disp:l.i.q))/l.i.q*100;
+          h+=`<tr><td class="l"><b>${ataCod(l.n)}</b> · ${esc(l.i.k)}<div class="ata-sub">${esc(l.i.d)}</div></td>
+            <td><input class="ata-q" data-ataq="${l.n}" type="number" min="0" step="1" value="${l.q}" aria-label="Quantidade item ${ataCod(l.n)}"></td>
+            <td>${ataInt(Math.max(l.disp,0))}</td><td style="${l.ok?'':'color:var(--bad);font-weight:600'}">${ataInt(l.after)}</td>
+            <td>${ataBRL(l.i.u)}</td><td><b>${ataBRL(l.val)}</b></td>
+            <td class="l">${l.ok?`<span class="ata-pill ok">Atende</span>`:`<span class="ata-pill bad" title="${esc(l.lim)}">Faltam ${ataInt(l.q-Math.max(l.disp,0))}</span>`}
+              <div class="ata-mini" title="uso do item"><i class="u" style="width:${uso}%"></i><i class="s" style="width:${Math.min(l.q,Math.max(l.disp,0))/l.i.q*100}%"></i></div></td></tr>`; });
+        p.fora.forEach(f=>{ h+=`<tr class="ata-fora"><td class="l" colspan="2">${esc(f.r)} · ${ataInt(f.q)} kits</td><td colspan="5" class="l">sem item correspondente na ata</td></tr>`; });
+      });
+      h+=`</tbody><tfoot><tr class="tot"><td class="l" colspan="5">Total pela ata</td><td><b>${ataBRL(valSim)}</b></td><td></td></tr></tfoot></table></div>
+        <p class="note" style="margin-top:6px">Quantidades convertidas do orçamento (você pode ajustar na tabela). Valores a preço registrado na ata, sem o desconto do orçamento. ${modo==='part'?'Participante: abate do quantitativo registrado do item.':'Adesão: até 50% de cada item por órgão e 2× o registrado no total; não reduz o saldo dos participantes.'}</p>`;
+    }
+    h+=`<div class="ata-acoes"><button class="btn primary" type="button" id="ata-reg">Registrar consumo efetivado</button><span class="note">O saldo só é abatido quando você registra o consumo (empenho/pedido confirmado).</span></div>`;
+    if(U.reg) h+=ataFormHtml(t);
+  } else if(U.aba==='saldo'){
+    h+=`<div class="tw" style="max-height:60vh"><table class="miuda alinhada ata-tab"><thead><tr><th class="l">Item</th><th>Unit.</th><th>Registrado</th><th>Consumido</th><th>Saldo</th><th class="l">Uso</th><th>Adesões</th></tr></thead><tbody>`;
+    ATA.grupos.forEach(([g,gn])=>{ h+=`<tr class="grp"><td class="l" colspan="7">${esc(gn)}</td></tr>`;
+      ATA.itens.filter(i=>i.p===g).forEach(i=>{ const r=t[i.n], s=modo==='part'? (sim[i.n]||0) : 0, u=r.part/i.q*100;
+        h+=`<tr class="${s?'hl':''}"><td class="l"><b>${ataCod(i.n)}</b> · ${esc(i.k)}<div class="ata-sub">${esc(i.d)}</div></td><td>${ataBRL(i.u)}</td><td>${ataInt(i.q)}</td><td>${ataInt(r.part)}</td>
+          <td><b>${ataInt(i.q-r.part-s)}</b>${s?`<div class="ata-sub">era ${ataInt(i.q-r.part)}</div>`:''}</td>
+          <td class="l"><div class="ata-mini w"><i class="u" style="width:${u}%"></i><i class="s" style="width:${Math.min(s,Math.max(0,i.q-r.part))/i.q*100}%"></i></div><span class="ata-sub">${u.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</span></td>
+          <td>${r.ades? ataInt(r.ades)+' / '+ataInt(i.q*2) : '—'}</td></tr>`; }); });
+    h+=`</tbody></table></div>`;
+  } else {
+    const L=[...ATA_DADOS.consumos].sort((a,b)=>(b.data||'').localeCompare(a.data||'')||(b.registradoEm||'').localeCompare(a.registradoEm||''));
+    h+=`<div class="ata-acoes" style="margin-top:0"><button class="btn sm" type="button" id="ata-csv"${L.length?'':' disabled'}>Baixar CSV</button><span class="note">${ATA_ORIGEM==='arquivo'?`Histórico salvo em 1 - FONTES › ${esc(ATA.arquivo)}`:'Histórico salvo só neste navegador: escolha a pasta do app para gravar o arquivo em 1 - FONTES.'}</span></div>`;
+    if(!L.length) h+=`<div class="empty">Nenhum consumo registrado ainda. Use “Registrar consumo efetivado” na simulação.</div>`;
+    else { h+=`<div class="ata-hist">`; L.forEach(c=>{ const v=(c.itens||[]).reduce((s,x)=>s+x.q*(ATA.byN[x.n]?.u||0),0);
+      h+=`<div class="ata-hi${c.estornado?' est':''}"><div><div class="t">${esc(c.rede||'—')} <span class="ata-pill ${c.modo==='ades'?'neu':'ok'}">${c.modo==='ades'?'Adesão':'Participante'}</span>${c.estornado?' <span class="ata-pill bad">Estornado</span>':''}</div>
+        <div class="d">${ataDia(c.data)}${c.doc?' · '+esc(c.doc):''}${(c.projetos||[]).length?' · '+esc(c.projetos.join(', ')):''}</div>
+        <div class="d">${(c.itens||[]).map(x=>`${ataCod(x.n)}: ${ataInt(x.q)}`).join(' · ')}</div>${c.obs?`<div class="d"><i>${esc(c.obs)}</i></div>`:''}${c.estornado?`<div class="d">Estornado em ${ataDia(c.estornado.em)}${c.estornado.motivo?' · '+esc(c.estornado.motivo):''}</div>`:''}</div>
+        <div class="v"><b>${ataBRL(v)}</b>${c.estornado?'':(U.confEst===c.id? `<div class="ata-conf"><input id="ata-mot" placeholder="Motivo (opcional)"><button class="btn sm" type="button" data-ataest="${c.id}">Confirmar estorno</button><button class="btn sm" type="button" data-atacanc>Cancelar</button></div>` : `<button class="lnk" type="button" data-ataest0="${c.id}">Estornar</button>`)}</div></div>`; });
+      h+=`</div>`; }
+  }
+  box.innerHTML=h; ataLiga();
+}
+function ataFormHtml(t){
+  const U=ATA_UI, R=U.reg;
+  const linhas=Object.entries(R.itens).map(([n,q])=>{ n=+n; const i=ATA.byN[n], {disp}=ataDisp(n,t,R.modo,R.rede); return {n,i,q,disp}; });
+  const livres=ATA.itens.filter(i=>!(i.n in R.itens));
+  const tot=linhas.reduce((s,l)=>s+l.q*l.i.u,0), exc=linhas.filter(l=>l.q>l.disp);
+  return `<div class="ata-form"><h3>Registrar consumo efetivado</h3>
+    <div class="ata-fg"><label>Data<input type="date" id="ataf-data" value="${esc(R.data)}"></label>
+      <label>Rede<input id="ataf-rede" value="${esc(R.rede)}" placeholder="Rede que contratou"></label>
+      <label>Documento<input id="ataf-doc" value="${esc(R.doc)}" placeholder="Nº do empenho, AF ou pedido"></label>
+      <label>Forma<select id="ataf-modo"><option value="part"${R.modo==='part'?' selected':''}>Município participante</option><option value="ades"${R.modo==='ades'?' selected':''}>Adesão (carona)</option></select></label>
+      <label class="w">Observação<input id="ataf-obs" value="${esc(R.obs)}" placeholder="Opcional"></label></div>
+    <table class="miuda alinhada ata-tab"><thead><tr><th class="l">Item</th><th>Quantidade</th><th>Disponível</th><th>Valor ata</th><th></th></tr></thead><tbody>
+    ${linhas.map(l=>`<tr><td class="l"><b>${ataCod(l.n)}</b> · ${esc(l.i.k)} <span class="ata-sub">${esc(l.i.d)}</span></td><td><input class="ata-q" data-ataf="${l.n}" type="number" min="0" step="1" value="${l.q}"></td>
+      <td style="${l.q>l.disp?'color:var(--bad);font-weight:600':''}">${ataInt(Math.max(l.disp,0))}</td><td>${ataBRL(l.q*l.i.u)}</td><td><button class="lnk" type="button" data-atafx="${l.n}" aria-label="Tirar item">tirar</button></td></tr>`).join('') || `<tr><td class="l" colspan="5">Nenhum item. Adicione abaixo.</td></tr>`}
+    </tbody><tfoot><tr class="tot"><td class="l" colspan="3">Total do consumo</td><td><b>${ataBRL(tot)}</b></td><td></td></tr></tfoot></table>
+    <div class="ata-acoes"><select id="ataf-add"><option value="">+ Adicionar item da ata…</option>${livres.map(i=>`<option value="${i.n}">${ataCod(i.n)} · ${esc((ATA.grupos.find(g=>g[0]===i.p)||[])[1]||'')} · ${esc(i.k)}</option>`).join('')}</select></div>
+    ${exc.length?`<p class="msg err">Acima do disponível: ${exc.map(l=>'item '+ataCod(l.n)).join(', ')}. <button class="lnk" type="button" id="ataf-cap">Ajustar ao disponível</button></p>`:''}
+    <div class="ata-acoes"><button class="btn primary" type="button" id="ataf-ok"${(!linhas.some(l=>l.q>0)||exc.length||!R.rede.trim())?' disabled':''}>Confirmar e abater do saldo</button><button class="btn" type="button" id="ataf-canc">Cancelar</button>
+      ${!R.rede.trim()?'<span class="note">Informe a rede.</span>':''}</div></div>`;
+}
+function ataLiga(){
+  const U=ATA_UI, box=document.getElementById('ata-corpo');
+  box.querySelectorAll('[data-ataba]').forEach(b=>b.onclick=()=>{ U.aba=b.dataset.ataba; ataRender(); });
+  box.querySelectorAll('[data-atamodo]').forEach(b=>b.onclick=()=>{ U.modo=b.dataset.atamodo; ataRender(); });
+  const r=document.getElementById('ata-rede'); if(r) r.onchange=()=>{ U.rede=r.value.trim(); ataRender(); };
+  box.querySelectorAll('[data-ataq]').forEach(i=>i.onchange=()=>{ U.ajuste[i.dataset.ataq]=Math.max(0,Math.floor(+i.value||0)); ataRender(); });
+  const reg=document.getElementById('ata-reg'); if(reg) reg.onclick=()=>{ const s=ataSim(); U.reg={data:ataHoje(), rede:U.rede, doc:'', obs:'', modo:U.modo, itens:{...s}, projetos:U.projs.filter(p=>p.itens.length).map(p=>p.nm)}; ataRender(); setTimeout(()=>{ const f=box.querySelector('.ata-form'); if(f) f.scrollIntoView({behavior:'smooth',block:'start'}); },30); };
+  if(U.reg){ const R=U.reg;
+    const lig=(id,k,ev)=>{ const e=document.getElementById(id); if(e) e[ev||'onchange']=()=>{ R[k]=e.value; if(k==='rede'||k==='modo') ataRender(); else ataAtualizaBotao(); }; };
+    lig('ataf-data','data'); lig('ataf-rede','rede'); lig('ataf-doc','doc','oninput'); lig('ataf-obs','obs','oninput'); lig('ataf-modo','modo');
+    box.querySelectorAll('[data-ataf]').forEach(i=>i.onchange=()=>{ R.itens[i.dataset.ataf]=Math.max(0,Math.floor(+i.value||0)); ataRender(); });
+    box.querySelectorAll('[data-atafx]').forEach(b=>b.onclick=()=>{ delete R.itens[b.dataset.atafx]; ataRender(); });
+    const ad=document.getElementById('ataf-add'); if(ad) ad.onchange=()=>{ if(ad.value){ R.itens[ad.value]=0; ataRender(); } };
+    const cap=document.getElementById('ataf-cap'); if(cap) cap.onclick=()=>{ Object.keys(R.itens).forEach(n=>{ const {disp}=ataDisp(+n,ataTotais(),R.modo,R.rede); R.itens[n]=Math.max(0,Math.min(R.itens[n],disp)); }); ataRender(); };
+    document.getElementById('ataf-canc').onclick=()=>{ U.reg=null; ataRender(); };
+    document.getElementById('ataf-ok').onclick=async e=>{ e.target.disabled=true;
+      const itens=Object.entries(R.itens).map(([n,q])=>({n:+n,q:+q})).filter(x=>x.q>0);
+      const c={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), data:R.data||ataHoje(), registradoEm:new Date().toISOString(),
+        rede:R.rede.trim(), modo:R.modo, doc:R.doc.trim(), obs:R.obs.trim(), projetos:R.projetos, itens,
+        valor:Math.round(itens.reduce((s,x)=>s+x.q*ATA.byN[x.n].u,0)*100)/100};
+      ATA_DADOS.consumos.push(c); const onde=await ataGrava();
+      U.reg=null; U.aba='hist'; U.projs=[]; U.ajuste={}; ataRender();   // a simulação virou consumo: some da conta para não contar duas vezes
+      aviso(onde==='arquivo'? 'Consumo registrado e saldo abatido (gravado em 1 - FONTES).' : 'Consumo registrado só neste navegador: sem acesso de escrita à pasta 1 - FONTES.'); };
+  }
+  box.querySelectorAll('[data-ataest0]').forEach(b=>b.onclick=()=>{ U.confEst=b.dataset.ataest0; ataRender(); });
+  box.querySelectorAll('[data-atacanc]').forEach(b=>b.onclick=()=>{ U.confEst=null; ataRender(); });
+  box.querySelectorAll('[data-ataest]').forEach(b=>b.onclick=async()=>{ const c=ATA_DADOS.consumos.find(x=>x.id===b.dataset.ataest); if(!c) return;
+    c.estornado={em:ataHoje(), motivo:(document.getElementById('ata-mot')||{}).value||''}; U.confEst=null; await ataGrava(); ataRender(); aviso('Consumo estornado: o saldo voltou para a ata.'); });
+  const csv=document.getElementById('ata-csv'); if(csv) csv.onclick=()=>{
+    const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"', L=[['Data','Rede','Forma','Documento','Projetos','Item','Kit','Quantidade','Unitário ata','Valor','Situação','Observação'].map(q).join(';')];
+    ATA_DADOS.consumos.forEach(c=>(c.itens||[]).forEach(x=>{ const i=ATA.byN[x.n]||{}; L.push([ataDia(c.data),c.rede,c.modo==='ades'?'Adesão':'Participante',c.doc,(c.projetos||[]).join(', '),ataCod(x.n),i.k,x.q,String(i.u).replace('.',','),String(Math.round(x.q*i.u*100)/100).replace('.',','),c.estornado?'Estornado':'Efetivado',c.obs].map(q).join(';')); }));
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+L.join('\r\n')],{type:'text/csv'})); a.download='Ata CIMAMS 012-2026 - consumos.csv'; document.body.appendChild(a); a.click(); a.remove(); };
+}
+function ataAtualizaBotao(){}
 function viewOrcLit(){}
 /* ---------------- literatura: sugestão de impressão ----------------
    Histórico de venda de cada obra (últimos 12 meses e meses 13 a 18), estoque atual e a solicitação de compra.
