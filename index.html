@@ -311,7 +311,7 @@ table.com td .tag{font-size:9.5px;padding:0 4px}table.com td .tag.inx{color:var(
 .com-ar{color:var(--bad);font-weight:700}
 .imp-cab{display:flex;align-items:center;gap:14px;margin-bottom:12px}.imp-cab h2{margin:0}.imp-cab .jcapa{width:54px;height:auto;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.18)}
 .ij-can{display:grid;gap:3px;margin-top:8px;font-size:12px;color:var(--muted)}.ij-can div{display:flex;align-items:center;gap:6px}.ij-b .ij-can b{display:inline;margin:0 0 0 auto;font-family:var(--body);font-size:13px;color:var(--ink)}
-.ij-can i{width:8px;height:8px;border-radius:2px;flex:none}.ij-can i.cd{background:var(--mag)}.ij-can i.cm{background:var(--sun)}
+.ij-can i{width:8px;height:8px;border-radius:2px;flex:none}.ij-can i.cd{background:var(--mag)}.ij-can i.cm{background:var(--sun)}.ij-can i.ci{background:var(--sky)}
 .ij-graf36 .chart{height:260px}
 .ij-eq.ij-eq3{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .ij-b.ij-in input{font:inherit;font-family:var(--disp);font-size:24px;font-weight:600;width:100%;padding:2px 8px;margin:2px 0;border:1px solid var(--field-line);border-radius:8px;background:var(--field);color:var(--ink)}
@@ -2448,17 +2448,18 @@ function viewImpressao(){
   const aut = String(c.a||'').trim(), varios = /,|\se\s|;|\//.test(aut);
   // 2) histórico: cada bloco separa vendas diversas e marketplace (somados) e mostra o total com intercompany
   const varia = (a,b) => !b? '' : (()=>{ const p=Math.round((a/b-1)*100); return ` <em class="${p>=0?'up':'dn'}">${p>=0?'▲':'▼'} ${p>=200? dec(a/b,1)+'x o' : Math.abs(p)+'% vs.'} bloco anterior</em>`; })();
-  const hb = (k,cls,rotulo) => { const v=o.b[k], vm=o.bm[k], vd=v-vm, vi=o.bi[k], parcial = R.prim>B[k].de;
-    return `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${rot(B[k].de)} a ${rot(B[k].ate)}${k<2&&!(R.prim>B[k+1].de)? varia(v,o.b[k+1]) : ''}</small>
+  // total do bloco = vendas diversas + marketplace + intercompany (tudo junto, sem cenários separados)
+  const tb = k => o.b[k]+o.bi[k];
+  const hb = (k,cls,rotulo) => { const vm=o.bm[k], vd=o.b[k]-vm, vi=o.bi[k], v=tb(k), parcial = R.prim>B[k].de;
+    return `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${rot(B[k].de)} a ${rot(B[k].ate)}${k<2&&!(R.prim>B[k+1].de)? varia(v,tb(k+1)) : ''}</small>
       ${parcial? `<small class="ij-parc">relatório só tem dados a partir de ${rot(R.prim)}</small>` : ''}
-      <div class="ij-can"><div><i class="cd"></i>Vendas diversas<b>${fmt(vd)}</b></div><div><i class="cm"></i>Marketplace<b>${fmt(vm)}</b></div></div>
-      <div class="ij-com"><svg width="8" height="8"><rect width="8" height="8" rx="2" fill="${css('--sky')}"/></svg>com intercompany <b>${fmt(v+vi)}</b>${vi? ` <em>(+${fmt(vi)})</em>` : ''}</div></div>`; };
+      <div class="ij-can"><div><i class="cd"></i>Vendas diversas<b>${fmt(vd)}</b></div><div><i class="cm"></i>Marketplace<b>${fmt(vm)}</b></div><div><i class="ci"></i>Intercompany<b>${fmt(vi)}</b></div></div></div>`; };
   const sol = S.impSolV||0;
   h += `<div class="card imp-obra-c">
     <div class="imp-cab">${capaDe(c.i)? capaImg(c.i,'jcapa') : ''}<div><h2>${esc(c.t)}</h2><p class="sub">${aut? `${varios?'Autores':'Autor'}: <b>${esc(aut)}</b> · ` : ''}ISBN ${esc(c.i)}</p></div></div>
     <div class="ij-sec"><h3><i>1</i>Histórico de vendas</h3>
       <div class="ij-hist">${hb(0,'m12','Últimos 12 meses')}${hb(1,'m24','Meses 13 a 24')}${hb(2,'m36','Meses 25 a 36')}</div>
-      <p class="note" style="margin:8px 0 0">Marketplace = Amazon, Magalu e Mercado Livre; vendas diversas = todos os outros canais. Os dois somados dão o total do bloco, sem intercompany.</p></div>
+      <p class="note" style="margin:8px 0 0">Marketplace = Amazon, Magalu e Mercado Livre; intercompany = vendas entre empresas do grupo; vendas diversas = todos os outros canais. Os três somados dão o total do bloco.</p></div>
     <div class="ij-sec"><h3><i>2</i>Últimos 36 meses</h3>
       <div class="ij-graf ij-graf36"><div class="chart" id="g-imp"></div><div class="legend" id="g-imp-lg"></div></div></div>
     <div class="ij-sec"><h3><i>3</i>Estoque e pedido de compra</h3>
@@ -2503,9 +2504,8 @@ function janelaImpressao(){
   // histórico concatenado: canais por bloco de 12 meses
   const lin = (rotulo, f, cls) => `<tr class="${cls||''}"><td class="l">${rotulo}</td>${[0,1,2].map(k=>`<td>${fmt(f(k))}</td>`).join('')}</tr>`;
   const tab = `<div class="tw"><table class="miuda ij-tab"><thead><tr><th class="l">Vendas (exemplares)</th>${[0,1,2].map(k=>`<th>${k? `Meses ${12*k+1} a ${12*k+12}` : 'Últimos 12 meses'}<span class="un">${rot(B[k].de)} a ${rot(B[k].ate)}</span></th>`).join('')}</tr></thead><tbody>
-    ${lin('Vendas diversas', k=>o.b[k]-o.bm[k])}${lin('Marketplace', k=>o.bm[k])}
-    ${lin('<b>Total sem intercompany</b>', k=>o.b[k], 'sub')}${lin('Intercompany', k=>o.bi[k])}
-    ${lin('<b>Total com intercompany</b>', k=>o.b[k]+o.bi[k], 'tot')}</tbody></table></div>
+    ${lin('Vendas diversas', k=>o.b[k]-o.bm[k])}${lin('Marketplace', k=>o.bm[k])}${lin('Intercompany', k=>o.bi[k])}
+    ${lin('<b>Total</b>', k=>o.b[k]+o.bi[k], 'tot')}</tbody></table></div>
     ${R.prim>B[2].de? `<p class="note" style="margin:6px 0 0">O relatório só tem dados a partir de ${rot(R.prim)}.</p>` : ''}`;
   // necessidade e sugestão: pedido + vendas dos últimos 12 meses − estoque = necessidade → arredondada para cima na centena
   const bx = (cls,rotulo,v,nota) => `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${nota}</small></div>`;
@@ -2517,8 +2517,8 @@ function janelaImpressao(){
   abreJanela(`<h2>${esc(c.t)}</h2><p class="sub">${aut? `${varios?'Autores':'Autor'}: <b>${esc(aut)}</b><br>` : ''}ISBN ${esc(c.i)}</p>
     <div class="ij-sec"><h3><i>1</i>Histórico de vendas</h3>${tab}</div>
     <div class="ij-sec"><h3><i>2</i>Necessidade e sugestão para 12 meses</h3>
-      ${conta('c-sem','Sem intercompany','só vendas a clientes de fora do grupo (diversas + marketplace)',o.b[0])}
-      ${conta('c-com','Com intercompany','soma as vendas entre empresas do grupo'+(o.bi[0]? ` (+${fmt(o.bi[0])} nos últimos 12 meses)` : ' — nenhuma nos últimos 12 meses'),o.b[0]+o.bi[0])}</div>`, true);
+      ${conta('c-sem','Sem intercompany','vendas diversas + marketplace',o.b[0])}
+      ${conta('c-com','Com intercompany','vendas diversas + marketplace + intercompany'+(o.bi[0]? ` (+${fmt(o.bi[0])} nos últimos 12 meses)` : ' — nenhuma nos últimos 12 meses'),o.b[0]+o.bi[0])}</div>`, true);
   if(capaDe(c.i)){ const t=$('#janela .jtit'); if(t){ t.classList.add('com-capa'); t.innerHTML = capaImg(c.i,'jcapa') + '<div>'+t.innerHTML+'</div>'; } }
 }
 /* situação do pagamento a partir da coluna PAGAMENTO: data ou SIM = pago; vazia = em aberto;
