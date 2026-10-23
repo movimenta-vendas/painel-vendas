@@ -180,7 +180,7 @@ input[readonly]{background:var(--mag-soft);color:var(--muted)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
-.acoes-grid.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media (max-width:760px){.acoes-grid.g3{grid-template-columns:1fr}}
+.acoes-grid.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.acoes-grid.gest{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,2fr)}.acoes-grid .ag-b{flex-wrap:wrap}@media (max-width:760px){.acoes-grid.g3{grid-template-columns:1fr}}
 .pend-lista{display:flex;flex-direction:column;gap:8px}
 details.pend{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--panel)}
 details.pend summary{cursor:pointer;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -1526,7 +1526,7 @@ function barraBase(){
     h = `<div class="st"><span class="dot"></span><span>Lendo a planilha…</span></div>`;
   } else if(ARQ.estado==='ok'){
     h = `<div class="st"><span class="dot"></span><span>${pasta}<b>${esc(ARQ.nome)}</b> lida às ${hhmm(BASE.lidoEm)} · ${fmt(BASE.vendas.length)} vendas${est}</span></div>
-      <div class="acoes">${PASTA.handle? btns : '<button class="btn primary" id="b-pasta" type="button">Escolher pasta</button>'}</div>`;
+      <div class="acoes">${PASTA.handle? (S.tab==='gestao'? '' : '<button class="btn sm" id="b-gestao" type="button" title="Atualizar fonte, estoque, pasta e publicação ficam em Gestão">Gestão ›</button>') : '<button class="btn primary" id="b-pasta" type="button">Escolher pasta</button>'}</div>`;
   } else if(ARQ.estado==='aguardando'){
     h = `<div class="st"><span class="dot off"></span><span>Clique para liberar a leitura ${PASTA.nome? 'da pasta <b>'+esc(PASTA.nome)+'</b>' : 'de <b>'+esc(ARQ.nome)+'</b>'} nesta sessão. Até lá, os números são os da última leitura.</span></div>
       <div class="acoes"><button class="btn primary" id="b-aut" type="button">${PASTA.handle?'Reconectar pasta':'Reconectar planilha'}</button><button class="btn sm" id="b-pasta" type="button">Trocar pasta</button></div>`;
@@ -1541,6 +1541,7 @@ function barraBase(){
   el.innerHTML=h;
   const on=(sel,fn)=>{const b=$(sel); if(b) b.onclick=fn;};
   on('#b-pasta',escolherPasta); on('#b-fonte',atualizaFonte); on('#b-est',atualizaEstoque); on('#b-pub',janelaPublicar);
+  on('#b-gestao',()=>{ S.tab='gestao'; S.tabL[S.linha]='gestao'; guardaNav(); render(); window.scrollTo(0,0); });
   on('#b-aut', PASTA.handle? async()=>{ if(await permissaoPasta(true)){ ARQ.estado=''; await carregaVendasDaPasta(); await carregaEstoqueDaPasta(); } } : autorizaArquivo);
   const f=$('#b-file'); if(f) f.onchange=()=>{ if(f.files[0]) leArquivo(f.files[0]); };
 }
@@ -2329,10 +2330,10 @@ function viewGestao(){
   const P=pendencias(), tot=P.reduce((s,p)=>s+p.rows.length,0);
   if(!S.gAberto) S.gAberto={};
   let h=`<div class="card"><h2>Gestão</h2><p class="sub">Só no seu app de administrador: não vai para o site.</p>
-    <div class="acoes-grid g3">
+    <div class="acoes-grid g3 gest">
       <div class="ag"><span class="ag-t">Comissões</span><div class="ag-b"><button class="btn" id="g-comd" type="button">Douglas</button><button class="btn" id="g-come" type="button">Enzo</button></div></div>
       <div class="ag"><span class="ag-t">Atas</span><div class="ag-b"><button class="btn" id="g-ata" type="button">Ata CIMAMS 012/2026</button></div></div>
-      <div class="ag"><span class="ag-t">Publicação</span><div class="ag-b"><button class="btn primary" id="g-pub" type="button">Publicar base</button></div></div>
+      <div class="ag"><span class="ag-t">Dados e publicação</span><div class="ag-b"><button class="btn" id="g-fonte" type="button" title="Relê as planilhas de 1 - FONTES">Atualizar fonte</button><button class="btn" id="g-est" type="button" title="Lê o relatório de estoque do NetSuite">Atualizar estoque</button><button class="btn" id="g-pasta" type="button" title="Escolher outra pasta">Trocar pasta</button><button class="btn primary" id="g-pub" type="button" title="Envia os dados lidos agora para o site">Publicar base</button></div></div>
     </div></div>
     <div class="card"><div class="pend-cab"><div><h2>Pendências nos dados <span class="tag">${fmt(tot)}</span></h2><p class="sub">O que precisa ser corrigido na origem. Cada lista tem um botão para copiar o texto da cobrança.</p></div></div>
     <div class="pend-lista">${P.map(p=>`<details class="pend${p.rows.length?'':' ok'}" data-pend="${p.id}"${S.gAberto[p.id]?' open':''}><summary><span class="pend-n">${fmt(p.rows.length)}</span><b>${esc(p.tit)}</b><span class="tag">${esc(p.onde)}</span></summary>
@@ -2345,7 +2346,7 @@ function viewGestao(){
   const on=(sel,fn)=>{ const e=$(sel); if(e) e.onclick=fn; };
   on('#g-comd',()=>janelaComissao('douglas')); on('#g-come',()=>janelaComissao('enzo'));
   on('#g-ata',()=>{ S.linha='proj'; S.tab='orc'; S.tabL.proj='orc'; S.orcSub='atas'; guardaNav(); render(); window.scrollTo(0,0); });
-  on('#g-pub',()=>janelaPublicar());
+  on('#g-pub',()=>janelaPublicar()); on('#g-fonte',()=>atualizaFonte()); on('#g-est',()=>atualizaEstoque()); on('#g-pasta',()=>escolherPasta());
   $$('[data-pend]').forEach(d=>d.addEventListener('toggle',()=>{ S.gAberto[d.dataset.pend]=d.open; }));
   const ach=id=>P.find(p=>p.id===id);
   $$('[data-pcopia]').forEach(b=>b.onclick=async()=>{ const p=ach(b.dataset.pcopia);
@@ -2946,8 +2947,9 @@ function barraEstoque(){
   if(ARQE.lendo) return '<p class="note">Lendo a planilha de estoque…</p>';
   const botoes = temPasta? `<button class="btn primary" id="e-troca" type="button" title="Procura na pasta a planilha de estoque mais recente e lê">Atualizar estoque</button>` : `<button class="btn" id="e-troca" type="button">${EST?'Atualizar com outra planilha':'Escolher planilha de estoque'}</button>`
     + (!temPasta&&EST&&ARQE.handle? '<button class="btn" id="e-rec" type="button">Reler agora</button>' : '');
-  const entrada = temFS? botoes
+  const entrada = (temPasta && PASTA.handle && EST && ARQE.estado!=='aguardando')? '' : temFS? botoes
     : `<label class="btn primary" style="display:inline-flex;align-items:center;cursor:pointer">Carregar planilha de estoque<input type="file" id="e-file" accept=".xlsx,.xlsm" hidden></label>`;
+  if(!entrada && !ARQE.erro) return '';   // tudo lido: a barra do topo já mostra o estoque
   let txt;
   if(ARQE.estado==='aguardando') txt = `<span class="dot off"></span><span>Clique para liberar a leitura de <b>${esc(ARQE.nome)}</b> nesta sessão.</span>`;
   else if(EST) txt = `<span class="dot"></span><span>Estoque de <b>${esc(EST.arquivo||ARQE.nome)}</b> · lido às ${hhmm(EST.lidoEm)} · ${fmt(EST.itens.length)} kits classificados</span>`;
