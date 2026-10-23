@@ -180,6 +180,15 @@ input[readonly]{background:var(--mag-soft);color:var(--muted)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
+.acoes-grid.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media (max-width:760px){.acoes-grid.g3{grid-template-columns:1fr}}
+.pend-lista{display:flex;flex-direction:column;gap:8px}
+details.pend{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--panel)}
+details.pend summary{cursor:pointer;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+details.pend .pend-n{min-width:34px;text-align:center;font-family:var(--disp);font-weight:700;font-size:15px;border-radius:999px;padding:2px 9px;background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+details.pend.ok .pend-n{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+details.pend .note{margin:8px 0}.pend-bt{display:flex;gap:8px;margin:0 0 8px;flex-wrap:wrap}
+.lnk-btn{background:none;border:0;color:var(--mag);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;padding:0}
+.orc-subs{margin:6px 0 0}.ata-card .ata-top{margin-top:0}
 .card.aviso-neg{border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}.neg-cab{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px}.neg-cab h2 .tag{font-size:11px;vertical-align:middle}.neg-bt{display:flex;gap:8px;flex-wrap:wrap}
 @media (max-width:760px){.tw table.compacta{min-width:1100px}}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
@@ -555,6 +564,7 @@ window.__VIEWER={
   </div>
 </header>
 <div class="wrap"><div class="basebar" id="basebar" hidden></div></div>
+<div id="orc-sub" class="wrap" hidden></div>
 <main id="main" class="wrap"><div class="empty">Carregando…</div></main>
 <div id="orc-host" class="wrap" hidden></div>
 <div id="lit-host" class="wrap" hidden></div>
@@ -621,9 +631,9 @@ const S = {tab:'faturamento',
 /* duas linhas de negócio, cada uma com as suas abas */
 const LINHAS = [['proj','Projetos'],['lit','Literatura']];
 const TABS_LINHA = {
-  proj:[['faturamento','Faturamento'],['vendas','Vendas'],['futuras','Vendas futuras'],['pagamentos','Pagamentos'],['estoque','Estoque'],['orc','Orçamentos'],['tabelas','Tabelas']],
-  lit:[['acervo','Faturamento'],['lvendas','Vendas'],['lestoque','Estoque'],['limp','Sugestão de impressão'],['lprecos','Lista de preços'],['lorc','Orçamentos']] };
-const tabsAtuais = () => TABS_LINHA[S.linha] || TABS_LINHA.proj;
+  proj:[['faturamento','Faturamento'],['vendas','Vendas'],['futuras','Vendas futuras'],['pagamentos','Pagamentos'],['estoque','Estoque'],['orc','Orçamentos'],['gestao','Gestão']],
+  lit:[['acervo','Faturamento'],['lvendas','Vendas'],['lestoque','Estoque'],['limp','Sugestão de impressão'],['lprecos','Lista de preços'],['lorc','Orçamentos'],['gestao','Gestão']] };
+const tabsAtuais = () => (TABS_LINHA[S.linha] || TABS_LINHA.proj).filter(([k])=>!(k==='gestao'&&window.__SNAP));
 S.linha='proj'; S.tabL={proj:'faturamento', lit:'acervo'};
 try{ const l=localStorage.getItem('mvt-linha'); if(TABS_LINHA[l]) S.linha=l; const t=JSON.parse(localStorage.getItem('mvt-tabs')||'null'); if(t) Object.assign(S.tabL,t); }catch(e){}
 S.tab=S.tabL[S.linha];
@@ -2285,6 +2295,72 @@ function ataLiga(){
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+L.join('\r\n')],{type:'text/csv'})); a.download='Ata CIMAMS 012-2026 - consumos.csv'; document.body.appendChild(a); a.click(); a.remove(); };
 }
 function ataAtualizaBotao(){}
+/* ---------------- Gestão (só no app do administrador) ----------------
+   Junta o que é exclusivo do administrador: comissões, consumo das atas e as pendências
+   que precisam ser corrigidas na origem (NetSuite e planilha de vendas). */
+function pendencias(){
+  const P=[], isoOk=d=>/^\d{4}-\d{2}-\d{2}$/.test(String(d||'')), rede=v=>(v.rede==='_ESTADO'?'Estado':v.rede)+(v.uf?' ('+v.uf+')':'');
+  const negs=(EST&&EST.negativos)||[];
+  P.push({id:'neg', onde:'NetSuite', tit:'Estoque com saldo negativo', desc:`Itens negativos no relatório ${EST&&EST.arquivo?EST.arquivo:''}. No painel contam como zero.`,
+    cols:['Código','Descrição no NetSuite','Projeto / tipo','Série','Saldo'], num:[4],
+    rows:negs.slice().sort((a,b)=>a.qtd-b.qtd).map(i=>[i.item||i.isbn||'—', i.desc||i.titulo||'', i.projeto?short(i.projeto):(i.origem==='livros'?'Livro':'Avulso'), i.serie?(ROT[i.serie]||i.serie):'—', i.qtd]),
+    msg:'Itens com saldo negativo no NetSuite — favor ajustar:'});
+  const soltos=((EST&&EST.soltos)||[]).filter(i=>(i.qtd||0)!==0);
+  P.push({id:'solto', onde:'NetSuite', tit:'Kits fora das tabelas de estoque', desc:'Kits que o relatório traz sem projeto, sem ano de escolaridade ou com outro público: não entram nos totais por projeto.',
+    cols:['Código','Descrição no NetSuite','Saldo'], num:[2], rows:soltos.map(i=>[i.item||'—', i.desc||'', i.qtd||0]),
+    msg:'Kits do NetSuite sem projeto/série/público reconhecível — conferir o cadastro:'});
+  const V=BASE? vendas() : [];
+  const semNF=V.filter(v=>v.operacao==='VENDA' && (!v.nf || !isoOk(v.emissao)));
+  P.push({id:'nf', onde:'Planilha de vendas', tit:'Vendas sem NF ou sem data de emissão', desc:'Pedidos de venda ainda sem nota ou com a emissão em branco/inválida: ficam fora das comissões e dos cortes por data.',
+    cols:['Pedido','Rede','Projeto','NF','Emissão','Valor'], num:[5], rows:semNF.map(v=>[v.pedido||'—', rede(v), short(v.projeto), v.nf||'—', isoOk(v.emissao)?brD(v.emissao):(v.emissao||'—'), BRLf(v.valor)]),
+    msg:'Vendas sem NF ou sem emissão na planilha VENDAS - Controle:'});
+  const semCad=V.filter(v=>!v.uf || !v.cnpj);
+  P.push({id:'cad', onde:'Planilha de vendas', tit:'Vendas sem UF ou sem empresa faturadora', desc:'Linhas sem UF (somem do mapa) ou sem a empresa que faturou (CNPJ).',
+    cols:['Pedido','Rede','Projeto','UF','Empresa','NF'], rows:semCad.map(v=>[v.pedido||'—', v.rede==='_ESTADO'?'Estado':(v.rede||'—'), short(v.projeto), v.uf||'—', v.cnpj||'—', v.nf||'—']),
+    msg:'Vendas sem UF ou sem empresa faturadora na planilha VENDAS - Controle:'});
+  const semMes=((BASE&&BASE.futuras)||[]).filter(f=>!f.mesPrevisto);
+  P.push({id:'fut', onde:'Planilha de vendas', tit:'Negociações futuras sem mês previsto', desc:'Ficam fora de Vendas futuras (totais, gráficos e mapas) até ganhar mês.',
+    cols:['Rede','Projeto','Distribuidor','Valor'], num:[3], rows:semMes.map(f=>[(f.rede==='_ESTADO'?'Estado':f.rede)+' ('+f.uf+')', short(f.projeto), f.via||'—', BRLf(f.valor)]),
+    msg:'Negociações em VENDAS FUTURAS sem mês previsto:'});
+  return P;
+}
+function viewGestao(){
+  if(window.__SNAP){ $('#main').innerHTML='<div class="card"><div class="empty">Área do administrador.</div></div>'; return; }
+  const P=pendencias(), tot=P.reduce((s,p)=>s+p.rows.length,0);
+  if(!S.gAberto) S.gAberto={};
+  let h=`<div class="card"><h2>Gestão</h2><p class="sub">Só no seu app de administrador: não vai para o site.</p>
+    <div class="acoes-grid g3">
+      <div class="ag"><span class="ag-t">Comissões</span><div class="ag-b"><button class="btn" id="g-comd" type="button">Douglas</button><button class="btn" id="g-come" type="button">Enzo</button></div></div>
+      <div class="ag"><span class="ag-t">Atas</span><div class="ag-b"><button class="btn" id="g-ata" type="button">Ata CIMAMS 012/2026</button></div></div>
+      <div class="ag"><span class="ag-t">Publicação</span><div class="ag-b"><button class="btn primary" id="g-pub" type="button">Publicar base</button></div></div>
+    </div></div>
+    <div class="card"><div class="pend-cab"><div><h2>Pendências nos dados <span class="tag">${fmt(tot)}</span></h2><p class="sub">O que precisa ser corrigido na origem. Cada lista tem um botão para copiar o texto da cobrança.</p></div></div>
+    <div class="pend-lista">${P.map(p=>`<details class="pend${p.rows.length?'':' ok'}" data-pend="${p.id}"${S.gAberto[p.id]?' open':''}><summary><span class="pend-n">${fmt(p.rows.length)}</span><b>${esc(p.tit)}</b><span class="tag">${esc(p.onde)}</span></summary>
+      <p class="note">${esc(p.desc)}</p>
+      ${p.rows.length? `<div class="pend-bt"><button class="btn sm" type="button" data-pcopia="${p.id}">Copiar para cobrança</button><button class="btn sm" type="button" data-pcsv="${p.id}">Baixar CSV</button></div>
+      <div class="tw" style="max-height:360px"><table class="alinhada"><thead><tr>${p.cols.map((c,i)=>`<th class="${(p.num||[]).includes(i)?'':'l'}">${esc(c)}</th>`).join('')}</tr></thead><tbody>${
+        p.rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${(p.num||[]).includes(i)?'':'l wrap-t'}"${p.id==='neg'&&i===4?' style="color:var(--bad);font-weight:600"':''}>${esc(typeof c==='number'?fmt(c):c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '<p class="msg ok">Nada pendente.</p>'}
+    </details>`).join('')}</div></div>`;
+  $('#main').innerHTML=h;
+  const on=(sel,fn)=>{ const e=$(sel); if(e) e.onclick=fn; };
+  on('#g-comd',()=>janelaComissao('douglas')); on('#g-come',()=>janelaComissao('enzo'));
+  on('#g-ata',()=>{ S.linha='proj'; S.tab='orc'; S.tabL.proj='orc'; S.orcSub='atas'; guardaNav(); render(); window.scrollTo(0,0); });
+  on('#g-pub',()=>janelaPublicar());
+  $$('[data-pend]').forEach(d=>d.addEventListener('toggle',()=>{ S.gAberto[d.dataset.pend]=d.open; }));
+  const ach=id=>P.find(p=>p.id===id);
+  $$('[data-pcopia]').forEach(b=>b.onclick=async()=>{ const p=ach(b.dataset.pcopia);
+    const t=[p.msg,''].concat(p.rows.map(r=>'• '+r.map(c=>typeof c==='number'?fmt(c):c).filter(c=>c&&c!=='—').join(' – '))).join('\n');
+    try{ await navigator.clipboard.writeText(t); aviso('Lista copiada: é só colar no e-mail ou no Teams.'); }catch(e){ aviso('Não consegui copiar neste navegador.'); } });
+  $$('[data-pcsv]').forEach(b=>b.onclick=()=>{ const p=ach(b.dataset.pcsv), q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
+    const L=[p.cols.map(q).join(';')].concat(p.rows.map(r=>r.map(q).join(';')));
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+L.join('\r\n')],{type:'text/csv'})); a.download=p.tit+'.csv'; document.body.appendChild(a); a.click(); a.remove(); });
+}
+/* Orçamentos › Atas: a mesma consulta da ata, aberta direto na tela (sem orçamento) */
+async function viewAtas(){
+  $('#main').innerHTML=`<div class="card ata-card"><div id="ata-corpo"><p class="note">Lendo o histórico de consumo…</p></div></div>`;
+  if(!ATA_UI) ATA_UI={rede:'', modo:'part', aba:'saldo', projs:[], reg:null, confEst:null, ajuste:{}};
+  await ataCarrega(); ataRender();
+}
 function viewOrcLit(){}
 /* ---------------- literatura: sugestão de impressão ----------------
    Histórico de venda de cada obra (últimos 12 meses e meses 13 a 18), estoque atual e a solicitação de compra.
@@ -2390,12 +2466,12 @@ function detalheFutura(f, al){
   const linhas = al.det.filter(d=>d.pedido);
   if(!linhas.length) return detalheSeries(f);
   if(linhas.some(d=>d.monta!=null)){ const mont=linhas.reduce((t,d)=>t+(d.monta||0),0), falta=al.ped-al.atd;
-    return `<div class="tw" style="max-width:780px"><table class="miuda"><thead><tr><th class="l">Ano de escolaridade</th><th class="l">Público</th><th>Previsto</th><th>Atende com kits prontos</th><th>Atende montando</th><th>Produzir</th></tr></thead><tbody>
-    ${linhas.map(d=>{ const fa=d.pedido-d.atendido, m=d.monta||0, pr=fa-m;
-      return `<tr><td class="l">${ROT[d.serie]||d.serie}</td><td class="l">${d.pub}</td><td>${fmt(d.pedido)}</td><td>${fmt(d.atendido)}</td><td>${m? `<b style="color:var(--mag)">${fmt(m)}</b>` : '—'}</td>
+    return `<div class="tw" style="max-width:780px"><table class="miuda"><thead><tr><th class="l">Ano de escolaridade</th><th class="l">Público</th><th>Previsto</th><th>Kits prontos</th><th>A montar</th><th>Atende</th><th>Produzir</th></tr></thead><tbody>
+    ${linhas.map(d=>{ const m=d.monta||0, pr=d.pedido-d.atendido;
+      return `<tr><td class="l">${ROT[d.serie]||d.serie}</td><td class="l">${d.pub}</td><td>${fmt(d.pedido)}</td><td>${fmt(d.pronto!=null?d.pronto:d.atendido-m)}</td><td>${m? `<b style="color:var(--mag)" title="Precisa ser montado">${fmt(m)}</b>` : '—'}</td><td><b style="color:${pr>0?'inherit':'var(--ok)'}">${fmt(d.atendido)}</b></td>
         <td>${pr>0? `<span style="color:var(--bad);font-weight:700">${fmt(pr)}</span>` : '<span style="color:var(--ok)">—</span>'}</td></tr>`; }).join('')}
-    <tr class="tot"><td class="l">Total</td><td></td><td>${fmt(al.ped)}</td><td>${fmt(al.atd)}</td><td>${fmt(mont)}</td><td>${fmt(falta-mont)}</td></tr>
-    </tbody></table></div><p class="note" style="margin-top:8px">"Atende montando" usa os kits que dá para montar com livros, jogos e embalagens da 2ª edição em estoque (Estoque &gt; Montagem MAJOG). "Produzir" é o que ainda falta depois disso. ${S.fModo==='ind'
+    <tr class="tot"><td class="l">Total</td><td></td><td>${fmt(al.ped)}</td><td>${fmt(al.atd-mont)}</td><td>${fmt(mont)}</td><td>${fmt(al.atd)}</td><td>${fmt(falta)}</td></tr>
+    </tbody></table></div><p class="note" style="margin-top:8px">"A montar" são kits que dá para montar com livros, jogos e embalagens da 2ª edição em estoque (Estoque &gt; Montagem MAJOG): contam como atendidos, mas precisam ser montados antes da entrega. "Produzir" é o que ainda falta. ${S.fModo==='ind'
       ? 'Comparado com o estoque cheio, sem descontar as outras negociações.'
       : 'Na ordem do mês previsto, já descontado o que as negociações anteriores reservaram.'}</p>`; }
   return `<div class="tw" style="max-width:640px"><table class="miuda"><thead><tr><th class="l">Ano de escolaridade</th><th class="l">Público</th><th>Previsto</th><th>Atende</th><th>Falta</th></tr></thead><tbody>
@@ -2559,8 +2635,8 @@ function linhasFutura(f, al){
 function tabelaFutura(L, comEst){
   if(!L.length) return '';
   const mt = comEst && L.some(d=>d.monta!=null);   // MAJOG: kits que dá para montar com os componentes em estoque
-  const th = comEst? '<th class="sep">Atende</th><th>Falta</th>'+(mt?'<th class="sep" title="Kits que dá para montar com os componentes em estoque">Montando</th><th title="O que falta depois de montar">Produzir</th>':'')+'<th class="sep">Fat. atendido</th><th>Fat. faltante</th>' : '';
-  const mtc = (ped,at,mo)=>{ const fa=ped-at, pr=fa-(mo||0); return `<td class="sep">${mo? `<b style="color:var(--mag)">${fmt(mo)}</b>` : '—'}</td><td class="${pr>0?'bad':'ok'}">${pr>0? fmt(pr) : '—'}</td>`; };
+  const th = comEst? '<th class="sep"'+(mt?' title="Kits prontos + kits que dá para montar com os componentes em estoque"':'')+'>Atende</th><th>Falta</th>'+(mt?'<th class="sep" title="Parte do atendido que precisa ser montada (componentes em estoque)">A montar</th>':'')+'<th class="sep">Fat. atendido</th><th>Fat. faltante</th>' : '';
+  const mtc = (ped,at,mo)=> `<td class="sep">${mo? `<b style="color:var(--mag)" title="Precisa ser montado">${fmt(mo)}</b>` : '—'}</td>`;
   const soma=(arr,k)=>arr.reduce((a,x)=>a+(x[k]||0),0);
   const linha=(d)=>`<tr><td class="l">${ROT[d.serie]||d.serie}</td><td>${BRLf(d.tab)}</td><td>${BRLf(d.liq)}</td><td>${fmt(d.pedido)}</td><td>${BRLf(d.fatPrev)}</td>${comEst? `
       <td class="sep ${d.atendido>=d.pedido?'ok2':''}">${fmt(d.atendido)}</td>
@@ -2568,7 +2644,7 @@ function tabelaFutura(L, comEst){
       <td class="sep ${d.atendido>=d.pedido?'ok2':''}">${BRLf(d.fatAt)}</td><td class="${d.fatFalta>0?'bad':'ok'}">${d.fatFalta>0? BRLf(d.fatFalta) : '—'}</td>` : ''}</tr>`;
   const tot=(rot,arr,cls)=>`<tr class="${cls}"><td class="l">${rot}</td><td></td><td></td><td>${fmt(soma(arr,'pedido'))}</td><td>${BRLf(soma(arr,'fatPrev'))}</td>${comEst?
       `<td class="sep ${soma(arr,'pedido')-soma(arr,'atendido')<=0?'ok2':''}">${fmt(soma(arr,'atendido'))}</td><td class="${soma(arr,'pedido')-soma(arr,'atendido')>0?'bad':''}">${fmt(soma(arr,'pedido')-soma(arr,'atendido'))}</td>${mt? mtc(soma(arr,'pedido'),soma(arr,'atendido'),soma(arr,'monta')) : ''}<td class="sep ${soma(arr,'pedido')-soma(arr,'atendido')<=0?'ok2':''}">${BRLf(soma(arr,'fatAt'))}</td><td class="${soma(arr,'fatFalta')>0.005?'bad':''}">${BRLf(soma(arr,'fatFalta'))}</td>`:''}</tr>`;
-  const ncol = comEst? (mt?11:9) : 5;
+  const ncol = comEst? (mt?10:9) : 5;
   let corpo='';
   [['aluno','Kits de aluno'],['professor','Kits de professor']].forEach(([pub,nome])=>{
     const g=L.filter(d=>d.pub===pub); if(!g.length) return;
@@ -2843,9 +2919,10 @@ function alocaFunil(modo, conj){
         // o valor atendido sai da proporção pelo preço de tabela, aplicada sobre o
         // faturamento da própria negociação — assim o desconto dela é respeitado
         const preco = precoDe(f.projeto, segDe(s), pub==='aluno'?'aluno':'prof');
-        brutoTudo += q * preco; brutoAtend += usa * preco;
-        if(pub==='aluno'){ pedA+=q; atdA+=usa; } else { pedP+=q; atdP+=usa; }
-        det.push({pub, serie:s, pedido:q, atendido:usa, cadastrado, monta});
+        const atende = usa + (monta||0);   // kits prontos + kits que dá para montar
+        brutoTudo += q * preco; brutoAtend += atende * preco;
+        if(pub==='aluno'){ pedA+=q; atdA+=atende; } else { pedP+=q; atdP+=atende; }
+        det.push({pub, serie:s, pedido:q, atendido:atende, pronto:usa, cadastrado, monta});
       });
     });
     const ped = pedA+pedP, atd = atdA+atdP;
@@ -2889,7 +2966,7 @@ function ligaNegativos(){
     const L=[['Código','Descrição','Projeto/tipo','Público','Série','Saldo no relatório'].map(q).join(';')].concat(negs.map(i=>linha(i).map(q).join(';')));
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\ufeff'+L.join('\r\n')],{type:'text/csv'})); a.download='Estoque negativo NetSuite.csv'; document.body.appendChild(a); a.click(); a.remove(); };
 }
-function ligaEstoqueBotoes(){ ligaNegativos();
+function ligaEstoqueBotoes(){ ligaNegativos(); const ng=$('#neg-gestao'); if(ng) ng.onclick=()=>{ S.tab='gestao'; S.tabL[S.linha]='gestao'; S.gAberto=Object.assign(S.gAberto||{},{neg:true}); guardaNav(); render(); window.scrollTo(0,0); };
   const on=(sel,fn)=>{const b=$(sel); if(b) b.onclick=fn;};
   on('#e-troca', temPasta? atualizaEstoque : escolherEstoque); on('#e-aut', temPasta&&PASTA.handle? atualizaEstoque : autorizaEstoque);
   on('#e-rec', async()=>{ if(ARQE.handle) await leEstoque(await ARQE.handle.getFile()); });
@@ -3004,11 +3081,7 @@ function viewEstoque(){
   const qSoltos = soltos.reduce((s,i)=>s+(i.qtd||0),0);
   const negs = (EST.negativos||[]).slice().sort((a,b)=>a.qtd-b.qtd);
   // painel do administrador: o que sai negativo no relatório do NetSuite (entra como zero nos totais)
-  if(negs.length && !window.__SNAP) h += `<div class="card aviso-neg"><div class="neg-cab"><div><h2>Ajustes pendentes no NetSuite <span class="tag">${fmt(negs.length)}</span></h2>
-      <p class="sub">Itens com saldo negativo no relatório ${esc(EST.arquivo||'')}. Nesta tela eles contam como zero; cobre o ajuste no sistema.</p></div>
-      <div class="neg-bt"><button class="btn sm" type="button" id="neg-copia">Copiar lista para cobrança</button><button class="btn sm" type="button" id="neg-csv">Baixar CSV</button></div></div>
-    <div class="tw" style="max-height:320px"><table class="alinhada"><thead><tr><th class="l">Código</th><th class="l">Descrição no NetSuite</th><th class="l">Projeto / tipo</th><th class="l">Público</th><th class="l">Série</th><th>Saldo no relatório</th></tr></thead><tbody>${
-      negs.map(i=>`<tr><td class="l mono">${esc(i.item||i.isbn||'—')}</td><td class="l wrap-t">${esc(i.desc||i.titulo||'')}</td><td class="l">${esc(i.projeto?short(i.projeto):i.origem==='livros'?'Livro':'Avulso')}</td><td class="l">${esc(i.publico||'—')}</td><td class="l">${esc(i.serie?(ROT[i.serie]||i.serie):'—')}</td><td style="color:var(--bad);font-weight:600">${fmt(i.qtd)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  if(negs.length && !window.__SNAP) h += `<div class="banner aviso-neg"><b>${fmt(negs.length)} ${negs.length===1?'item está':'itens estão'} com saldo negativo no NetSuite</b> e ${negs.length===1?'conta':'contam'} como zero nesta tela. <button class="lnk-btn" type="button" id="neg-gestao">Ver em Gestão › Pendências</button></div>`;
   h += `<div class="kpis">
     <div class="kpi"><div class="l">Kits de aluno</div><div class="v">${fmt(soma(itens,'aluno'))}</div><div class="d">em estoque</div></div>
     <div class="kpi"><div class="l">Kits de professor</div><div class="v">${fmt(soma(itens,'professor'))}</div><div class="d">em estoque</div></div>
@@ -3480,9 +3553,7 @@ function viewPagamentos(){
         <button class="btn" id="p-rel" type="button" ${CONC?'':'disabled'}>Ver relatório</button>
         <label class="f inline"><select id="p-ext" aria-label="Extratos" title="Extratos" ${extratos.length?'':'disabled'}><option value="">Todos os credores</option>${extratos.map(n=>`<option value="${esc(n)}"${S_P.ext===n?' selected':''}>${esc(n)}</option>`).join('')}</select></label>
         <button class="btn" id="p-vex" type="button" ${extratos.length?'':'disabled'}>Ver extrato</button></div></div>
-      ${window.__SNAP? '' : `<div class="ag"><span class="ag-t">Comissões</span><div class="ag-b">
-        <button class="btn" id="p-comd" type="button" title="Só no app do administrador">Douglas</button>
-        <button class="btn" id="p-com" type="button" title="Só no app do administrador">Enzo</button></div></div>`}
+
     </div>
     ${ARQC.msg? `<p class="msg ok" style="margin-top:10px">${esc(ARQC.msg)}</p>`:''}
     ${painelAcoes(aberto,naoId,extratos)}</div>`;
@@ -3568,7 +3639,7 @@ function painelAcoes(aberto,naoId,extratos){
 }
 
 /* ---------------- render ---------------- */
-const VIEWS={orc:()=>{}, lprecos:()=>{}, limp:()=>viewImpressao(), lvendas:()=>viewVendas(), lestoque:()=>viewEstoqueLivros(), lorc:()=>viewOrcLit(),pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas};
+const VIEWS={orc:()=>{}, lprecos:()=>{}, limp:()=>viewImpressao(), lvendas:()=>viewVendas(), lestoque:()=>viewEstoqueLivros(), lorc:()=>viewOrcLit(),pagamentos:viewPagamentos,faturamento:viewFaturamento,acervo:viewAcervo,series:viewSeries,vendas:viewVendas,futuras:viewFuturas,estoque:viewEstoque,tabelas:viewTabelas,gestao:viewGestao};
 /* ---------------- literatura: catálogo e clientes (1 - FONTES) ---------------- */
 let LIT = null;   // {catalogo, catMeta, distribuidores}
 const LIT_KEY = 'movimenta-lit-app-v1';
@@ -3693,7 +3764,15 @@ function cabecalho(){
 }
 function render(){
   matar(); abas(); cabecalho(); barraBase();
-  const naOrc = S.tab==='orc', naLit = S.tab==='lorc'||S.tab==='lprecos'; $('#orc-host').hidden=!naOrc; $('#lit-host').hidden=!naLit; $('#main').hidden=naOrc||naLit;
+  if(S.tab==='tabelas'){ S.tab='orc'; S.orcSub='tabelas'; }          // link antigo da aba Tabelas
+  if(S.tab==='gestao' && window.__SNAP){ S.tab=tabsAtuais()[0][0]; }
+  const sub = S.tab==='orc'? (S.orcSub||'gerador') : '';
+  const os=$('#orc-sub'); os.hidden=S.tab!=='orc';
+  if(S.tab==='orc') os.innerHTML=`<div class="sub-tabs orc-subs">${[['gerador','Gerador de orçamentos'],['atas','Atas de registro de preços'],['tabelas','Tabelas de apoio']].map(([k,l])=>`<button type="button" data-osub="${k}" aria-pressed="${sub===k}">${l}</button>`).join('')}</div>`;
+  $$('[data-osub]').forEach(b=>b.onclick=()=>{ S.orcSub=b.dataset.osub; guardaNav(); render(); });
+  const naOrc = sub==='gerador', naLit = S.tab==='lorc'||S.tab==='lprecos'; $('#orc-host').hidden=!naOrc; $('#lit-host').hidden=!naLit; $('#main').hidden=naOrc||naLit;
+  if(sub==='atas'){ if(pronto) viewAtas(); return; }
+  if(sub==='tabelas'){ if(pronto){ viewTabelas(); ajustaFcols(); } return; }
   if(naLit){ if(!LIT_FR){ if(!montaLit.rodando){ montaLit.rodando=true; montaLit($('#lit-host')).finally(()=>{montaLit.rodando=false;}); } } else { litAltura(); litModo(); } return; }
   if(naOrc){ if(!ORC_FR){ if(!montaOrc.rodando){ montaOrc.rodando=true; montaOrc($('#orc-host')).finally(()=>{montaOrc.rodando=false;}); } } else orcAltura(); return; }
   if(!pronto){
