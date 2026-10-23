@@ -213,6 +213,10 @@ table.compacta th{font-size:10.5px;letter-spacing:.04em}
 #tcorpo .note{font-size:12px}
 table.precos{table-layout:fixed;min-width:860px}
 table.precos input{width:100%}
+table.canais td.ano-c{vertical-align:top;border-right:1px solid var(--grid)}
+table.canais td.can{color:var(--muted);font-size:12px}
+table.canais tr.tot-can td{background:var(--mag-soft);border-bottom:2px solid var(--grid)}
+table.canais tr.tot-can td.can{color:var(--ink)}
 table.compacta .un,#tcorpo .un{font-weight:400;color:var(--muted);font-size:9.5px;display:block;letter-spacing:.02em}
 .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;vertical-align:-1px}
 .tag{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--muted);white-space:nowrap}
@@ -305,6 +309,18 @@ table.mt tr.mt-sem td{color:var(--muted)}
 table.miuda.com{font-size:11.5px}table.miuda.com th{font-size:9.5px}table.com td,table.com th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:5px 6px}table.com th{text-align:right;vertical-align:bottom}table.com th.l{text-align:left}
 table.com td .tag{font-size:9.5px;padding:0 4px}table.com td .tag.inx{color:var(--mag);border-color:color-mix(in srgb,var(--mag) 45%,var(--line));font-weight:700}
 .com-ar{color:var(--bad);font-weight:700}
+.imp-cab{display:flex;align-items:center;gap:14px;margin-bottom:12px}.imp-cab h2{margin:0}.imp-cab .jcapa{width:54px;height:auto;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.ij-can{display:grid;gap:3px;margin-top:8px;font-size:12px;color:var(--muted)}.ij-can div{display:flex;align-items:center;gap:6px}.ij-b .ij-can b{display:inline;margin:0 0 0 auto;font-family:var(--body);font-size:13px;color:var(--ink)}
+.ij-can i{width:8px;height:8px;border-radius:2px;flex:none}.ij-can i.cd{background:var(--mag)}.ij-can i.cm{background:var(--sun)}
+.ij-graf36 .chart{height:260px}
+.ij-eq.ij-eq3{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ij-b.ij-in input{font:inherit;font-family:var(--disp);font-size:24px;font-weight:600;width:100%;padding:2px 8px;margin:2px 0;border:1px solid var(--field-line);border-radius:8px;background:var(--field);color:var(--ink)}
+.imp-calc{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}.imp-calc .btn{height:40px;padding:0 24px}
+.ij-conta{display:grid;grid-template-columns:1fr 22px 1fr 22px 1fr 22px 1fr 22px 1.25fr;align-items:stretch}
+.ij-conta .ij-b b{font-size:22px}.ij-conta .ij-rec b{font-size:26px}
+table.ij-tab th .un{display:block;font-weight:400;color:var(--muted);font-size:9.5px;letter-spacing:.02em;text-transform:none}
+table.ij-tab tr.sub td{border-top:1px solid var(--line);font-weight:600}
+@media (max-width:760px){.ij-eq.ij-eq3,.ij-conta{grid-template-columns:1fr}.ij-conta .ij-op{height:20px}}
 .imp-linha{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}.imp-obra{flex:1 1 380px;min-width:0}.imp-sol{width:200px}.imp-go{height:38px;padding:0 22px}
 .ij-sec{margin:4px 0 16px}.ij-sec h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
 .ij-sec h3 i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--mag);color:#fff;font-size:11px;letter-spacing:0}
@@ -613,6 +629,8 @@ const ROTC = {EI1:'01',EI2:'02',EI3:'03',EI4:'04',EI5:'05',AI1:'1º',AI2:'2º',A
 const CODS = SER.map(([,c])=>c);
 const segDe = c => c.slice(0,2);
 const ACERVO = '11 - ACERVO';
+const MARKETPLACES = ['AMAZON','MAGALU','MERCADO LIVRE'];
+const ehMarketplace = v => MARKETPLACES.includes(String(v.via||'').trim().toUpperCase());
 
 let BASE = {vendas:[], futuras:[], precos:[], projetos:[], distribuidores:[], operacoes:[], status:[], arquivo:'', lidoEm:0};
 let EST = null;                                    // estoque lido da planilha física
@@ -623,7 +641,7 @@ let pronto = false;   // ORDEM é declarada junto com as cores dos projetos
 
 const S = {tab:'faturamento',
   mAnoCom:0, mAnoS:null, mRegS:[], mUFS:[], mRedeS:[], mProjS:[], mMed:'valor',
-  aAno:0, aAnoS:null, aRegS:[], aUFS:[], aViaS:[], aOpS:null, aMed:'kits', aEsc:'linear',
+  aAno:0, aAnoS:null, aRegS:[], aUFS:[], aViaS:[], aOpS:null, aMed:'valor', aEsc:'linear',
   sAno:0, sProj:'', sUF:'', sReg:'', sOp:'VENDA', sPub:'aluno', sEixo:'projeto',
   vq:'', vAno:[], vProj:[], vUF:[], vVia:[], vPag:[], vRede:[], vPed:[], vVal:[], vNF:[], vOp:'VENDA', pRede:[], pProj:[], pCred:[], pSit:[], pNF:[], pEm:[], pVal:[], pEmp:[], vLim:60, vDet:'',
   fq:'', fProj:[], fUF:'', fMes:[], fRede:[], fVia:[], fLim:60, fDet:'', fModo:'fila', fSit:'', sub:'precos',
@@ -683,7 +701,10 @@ function grafico(id,spec){
     const W=el.clientWidth||600, H=el.clientHeight||300; if(!W) return;
     const ink2=css('--muted'), gr=css('--grid'), ax=css('--axis'), pn=css('--panel'), ink=css('--ink');
     const soma = i => sets.reduce((s,x)=>s+(x.data[i]||0),0);
-    const mx = spec.stacked? Math.max(...spec.labels.map((_,i)=>soma(i))) : Math.max(...sets.flatMap(s=>s.data));
+    // empilhado: cada "grupo" (ex.: um ano comercial) é uma barra; as séries do grupo se somam nela
+    const grupos = spec.stacked? [...new Set(sets.map(s=>s.grupo??''))] : null;
+    const somaG = (i,gr) => sets.reduce((s,x)=>s+((x.grupo??'')===gr?(x.data[i]||0):0),0);
+    const mx = spec.stacked? Math.max(...spec.labels.flatMap((_,i)=>grupos.map(gr=>somaG(i,gr)))) : Math.max(...sets.flatMap(s=>s.data));
     const log = !!spec.log && !spec.stacked && mx>0;
     const top = log? Math.pow(10,Math.ceil(Math.log10(mx))) : (()=>{ const t=ticksRedondos(mx*1.02); return t[t.length-1]; })();
     const piso = 1;
@@ -735,9 +756,14 @@ function grafico(id,spec){
       const ultimo=ticks.length-1, mostraT=ti=> ti===0 || ti===ultimo || (ti%step===0 && ultimo-ti>=step);
       ticks.forEach((t,ti)=>{g+=`<line y1="${m.t}" y2="${m.t+ph}" x1="${X(t)}" x2="${X(t)}" stroke="${t===0?ax:gr}"/>`;
         if(mostraT(ti)) g+=`<text x="${X(t)}" y="${H-7}" text-anchor="${ti===0?'start':ti===ticks.length-1?'end':'middle'}" fill="${ink2}" font-size="11">${vc(t)}</text>`;});
-      const bh=Math.min(18,(band-7)/K);
+      const G=grupos?grupos.length:K, bh=Math.min(18,(band-7)/G);
       spec.labels.forEach((lab,i)=>{const cy=m.t+band*(i+.5);
         g+=`<text x="${m.l-8}" y="${cy+4}" text-anchor="end" fill="${ink2}" font-size="11.5">${esc(String(lab).length>24?String(lab).slice(0,23)+'…':lab)}</text>`;
+        if(grupos){ grupos.forEach((gr,gi)=>{ const y=cy-G*bh/2+gi*bh; let acc=0;
+            sets.forEach(s=>{ if((s.grupo??'')!==gr) return; const v=s.data[i]||0; if(!v) return; const x0=X(acc); acc+=v; const w=Math.max(X(acc)-x0,2);
+              g+=`<rect x="${x0}" y="${y}" width="${w}" height="${bh-1.5}" rx="3" fill="url(#${grad(s.color,'h')})" stroke="${pn}" stroke-width="1" filter="url(#${id}-sh)"/>`; });
+            if(acc&&(G===1||bh>=9)) g+=`<text x="${X(acc)+5}" y="${y+bh/2+3.5}" fill="${ink}" font-size="${G===1?11:10}" font-weight="600">${vc(acc)}</text>`; });
+          return; }
         sets.forEach((s,k)=>{const v=s.data[i]||0, y=cy-K*bh/2+k*bh, w=Math.max(X(v)-m.l,v?2:0);
           g+=`<rect x="${m.l}" y="${y}" width="${w}" height="${bh-1.5}" rx="3" fill="url(#${grad((s.colors&&s.colors[i])||s.color,'h')})" filter="url(#${id}-sh)"/>`;
           if(v&&(K===1||bh>=9)) g+=`<text x="${m.l+w+5}" y="${y+bh/2+3.5}" fill="${K===1?ink:ink2}" font-size="${K===1?11:10}">${vc(v)}</text>`;});});
@@ -751,8 +777,11 @@ function grafico(id,spec){
       cr.innerHTML = hor? `<rect x="${m.l}" y="${m.t+band*i}" width="${pw}" height="${band}" fill="${ink2}" opacity=".07"/>`
                         : `<line x1="${m.l+band*(i+.5)}" x2="${m.l+band*(i+.5)}" y1="${m.t}" y2="${m.t+ph}" stroke="${ax}" stroke-dasharray="3 3"/>`;
       let h=`<b>${esc(spec.labels[i])}</b>`;
+      if(grupos && grupos.length>1){ grupos.forEach(gr=>{ const t=somaG(i,gr); if(!t) return; h+=`<div class="tt" style="margin-top:4px">${esc(gr)}: <b>${vf(t)}</b></div>`;
+          sets.forEach(s=>{ if((s.grupo??'')===gr && s.data[i]) h+=`<div><span class="sw" style="background:${s.color}"></span>${esc(s.rotulo||s.label)}: ${vf(s.data[i])}</div>`; }); }); }
+      else {
       sets.forEach(s=>{if(s.data[i]) h+=`<div><span class="sw" style="background:${s.color}"></span>${esc(s.label)}: <b>${vf(s.data[i])}</b></div>`;});
-      if(spec.stacked&&K>1) h+=`<div class="tt">Total: <b>${vf(soma(i))}</b></div>`;
+      if(spec.stacked&&K>1) h+=`<div class="tt">Total: <b>${vf(soma(i))}</b></div>`; }
       tip.innerHTML=h; tip.hidden=false;
       tip.style.left=Math.min(Math.max(px+14,4),W-tip.offsetWidth-4)+'px';
       tip.style.top=Math.min(Math.max(py-tip.offsetHeight-10,4),H-tip.offsetHeight-4)+'px';};
@@ -1761,14 +1790,22 @@ function viewAcervo(){
   const money = S.aMed==='valor';
   const med = v => money? (v.valor||0) : (v.kitsAluno||0);
   const MESC = COM.map(i=>MES[i]);
-  const mat = {}; anos.forEach(a=>mat[a]=Array(13).fill(0));
-  f.forEach(v=>{ if(mat[v.anoCom]) mat[v.anoCom][v.mes? COM.indexOf(v.mes-1) : 12] += med(v); });
-  const n = x => x? (money? 'R$ '+curto(x) : fmt(x)) : '<span style="color:var(--muted)">·</span>';
-  const totMes = Array(13).fill(0); vis.forEach(a=>mat[a].forEach((x,i)=>totMes[i]+=x));
-  const geral = totMes.reduce((a,b)=>a+b,0), semData = totMes[12];
-  let corpo = vis.map(a=>{const t=mat[a].reduce((x,y)=>x+y,0);
-    return `<tr><td class="l"><b>${rotCom(a)}</b></td>${mat[a].slice(0,12).map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+' exemplares'} em ${MESC[i]}">${n(x)}</td>`).join('')}<td><b>${money? BRLf(t) : fmt(t)}</b></td></tr>`;}).join('');
-  corpo += `<tr class="tot"><td class="l">Total</td>${totMes.slice(0,12).map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+' exemplares'} em ${MESC[i]}">${n(x)}</td>`).join('')}<td title="${money?BRLf(geral):''}">${money? BRLf(geral) : fmt(geral)}</td></tr>`;
+  // dois canais: marketplace (Amazon, Magalu e Mercado Livre) e vendas diversas (todo o resto)
+  const CAN = [['div','Vendas diversas'],['mkt','Marketplace']];
+  const mat = {}; anos.forEach(a=>mat[a]={div:Array(13).fill(0), mkt:Array(13).fill(0)});
+  f.forEach(v=>{ if(mat[v.anoCom]) mat[v.anoCom][ehMarketplace(v)?'mkt':'div'][v.mes? COM.indexOf(v.mes-1) : 12] += med(v); });
+  const n = x => x? (money? curto(x) : fmt(x)) : '<span style="color:var(--muted)">·</span>';   // como em projetos: o R$ fica no título da coluna
+  const soma2 = (a,b) => a.map((x,i)=>x+b[i]), tot = arr => arr.reduce((x,y)=>x+y,0);
+  const totC = {div:Array(13).fill(0), mkt:Array(13).fill(0)}; vis.forEach(a=>CAN.forEach(([k])=>mat[a][k].forEach((x,i)=>totC[k][i]+=x)));
+  const totMes = soma2(totC.div, totC.mkt);
+  const geral = tot(totMes), semData = totMes[12];
+  const vt = x => money? BRLf(x) : fmt(x);
+  const celulas = (arr,rot) => arr.slice(0,12).map((x,i)=>`<td title="${rot}: ${money?BRLf(x):fmt(x)+' exemplares'} em ${MESC[i]}">${n(x)}</td>`).join('');
+  const bloco = (rotulo, porCanal, cls) => { const t3 = soma2(porCanal.div, porCanal.mkt);
+    return CAN.map(([k,nm],j)=>`<tr class="${cls} sub-can">${j===0?`<td class="l ano-c" rowspan="3"><b>${rotulo}</b></td>`:''}<td class="l can">${nm}</td>${celulas(porCanal[k],nm)}<td>${vt(tot(porCanal[k]))}</td></tr>`).join('')
+      + `<tr class="${cls} tot-can"><td class="l can"><b>Total</b></td>${t3.slice(0,12).map((x,i)=>`<td title="Total: ${money?BRLf(x):fmt(x)+' exemplares'} em ${MESC[i]}"><b>${n(x)}</b></td>`).join('')}<td><b>${vt(tot(t3))}</b></td></tr>`; };
+  let corpo = vis.map(a=>bloco(rotCom(a), mat[a], 'grp')).join('');
+  if(vis.length>1) corpo += bloco('Todos', totC, 'grp tot');
   const sel = f.filter(v=>vis.includes(v.anoCom));
   const TODOS = S.aAno==='todos';
   const ant = TODOS? [] : f.filter(v=>v.anoCom===+S.aAno-1);
@@ -1786,13 +1823,13 @@ function viewAcervo(){
       ${multi('ms-auf','UF',comMarcados(baseA('uf').map(v=>v.uf),S.aUFS).map(u=>[u,u]),S.aUFS,'Todas','UFs',4)}
       ${multi('ms-avia','Canal',comMarcados(baseA('via').map(v=>v.via),S.aViaS).map(x=>[x,x]),S.aViaS,'Todos','canais',1)}
       ${multi('ms-aop','Operação',comMarcados(baseA('op').map(v=>v.operacao),S.aOpS).map(o=>[o,o]),S.aOpS,'Todas','operações',2)}
-      <div class="f full"><div class="f"><span>Medida</span><div class="seg" role="group"><button type="button" data-amed="kits" aria-pressed="${!money}">Exemplares</button><button type="button" data-amed="valor" aria-pressed="${money}">Valores</button></div></div>
+      <div class="f full"><div class="f"><span>Medida</span><div class="seg" role="group"><button type="button" data-amed="valor" aria-pressed="${money}">Valores</button><button type="button" data-amed="kits" aria-pressed="${!money}">Exemplares</button></div></div>
 </div>
     </div>
-    <div class="tw"><table class="compacta"><colgroup><col style="width:10%">${MES.map(()=>'<col style="width:6.25%">').join('')}<col style="width:15%"></colgroup>
-      <thead><tr><th class="l">Ano comercial</th>${MESC.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':'exemplares'}</span></th></tr></thead>
+    <div class="tw"><table class="compacta canais"><colgroup><col style="width:9.2%"><col style="width:9.8%">${MES.map(()=>'<col style="width:5.9%">').join('')}<col style="width:10.2%"></colgroup>
+      <thead><tr><th class="l">Ano comercial</th><th class="l">Canal</th>${MESC.map(m=>`<th>${m}</th>`).join('')}<th>Total<span class="un">${money?'R$':'exemplares'}</span></th></tr></thead>
       <tbody>${corpo}</tbody></table></div>
-    <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.':'Exemplares vendidos.'} Ano comercial de agosto a julho.${semData?` ${money?BRLf(semData):fmt(semData)} sem data de emissão entram no total do ano, mas não em nenhum mês.`:''}</p></div>`;
+    <p class="note" style="margin-top:10px">${money?'Valores em reais: os meses aparecem resumidos (mil e mi) e o total traz o número cheio. Passe o mouse para ver o valor exato.':'Exemplares vendidos.'} Marketplace = Amazon, Magalu e Mercado Livre; vendas diversas = todos os outros canais. Ano comercial de agosto a julho.${semData?` ${money?BRLf(semData):fmt(semData)} sem data de emissão entram no total do ano, mas não em nenhum mês.`:''}</p></div>`;
   // mapa nacional por estado + meses na vertical, lado a lado e na mesma altura
   const mUF = new Map(); sel.forEach(v=>{ if(v.uf && MAPA.ufs[v.uf]) mUF.set(v.uf,(mUF.get(v.uf)||0)+med(v)); });
   const vU = [...mUF.values()].filter(x=>x>0);
@@ -1806,7 +1843,7 @@ function viewAcervo(){
   const periodoA = rotAnos;
   h += `<div class="acv2">
     <div class="card"><h2>Brasil por estado</h2><p class="sub">${money?'Receita':'Exemplares'} de ${periodoA}, por estado do cliente</p>${mapaH}<div class="legend">${legU}</div></div>
-    <div class="card"><h2>Mês a mês</h2><p class="sub">${money?'Receita':'Exemplares'} por mês, de agosto a julho${vis.length>1?', uma barra para cada ano comercial':''} · escala logarítmica</p><div class="chart" id="g-acv"></div><div class="legend" id="g-acv-lg"></div></div></div>`;
+    <div class="card"><h2>Mês a mês</h2><p class="sub">${money?'Receita':'Exemplares'} por mês, de agosto a julho: vendas diversas + marketplace somados na mesma barra${vis.length>1?', uma barra para cada ano comercial':''}</p><div class="chart" id="g-acv"></div><div class="legend" id="g-acv-lg"></div></div></div>`;
   $('#main').innerHTML = h;
   const cxU=$('#mapa-lit'); if(cxU){ const tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; cxU.appendChild(tip); const sv=cxU.querySelector('svg');
     sv.addEventListener('pointermove',e=>{ const a=e.target.closest('path[data-uf]'); if(!a){ tip.hidden=true; return; } const r=cxU.getBoundingClientRect(), v=+a.dataset.v;
@@ -1815,8 +1852,13 @@ function viewAcervo(){
     sv.addEventListener('pointerleave',()=>{ tip.hidden=true; }); }
   ligaMulti('ms-aano','aAnoS'); ligaMulti('ms-areg','aRegS'); ligaMulti('ms-auf','aUFS'); ligaMulti('ms-avia','aViaS'); ligaMulti('ms-aop','aOpS');
   $$('[data-amed]').forEach(b=>b.onclick=()=>{S.aMed=b.dataset.amed; render();});
-  grafico('g-acv',{kind:'hbar',altura:true,money,log:true,rotulos:true,labels:MESC,
-    sets:vis.map((a,i)=>({label:rotCom(a),data:mat[a].slice(0,12),color:pal()[i%8]}))});
+  // cores fixas por canal; anos anteriores em tom mais claro (o mais recente fica na cor cheia)
+  const corC = {div:pal()[0], mkt:pal()[1]}, fundo = css('--panel');
+  const tom = (c,j) => j? `color-mix(in srgb, ${c} ${Math.max(35,100-j*30)}%, ${fundo})` : c;
+  grafico('g-acv',{kind:'hbar',altura:true,money,stacked:true,rotulos:true,semLegenda:true,labels:MESC,
+    sets:vis.flatMap((a,i)=>CAN.map(([k,nm])=>({label:nm+(vis.length>1?' '+rotCom(a):''),rotulo:nm,grupo:rotCom(a),data:mat[a][k].slice(0,12),color:tom(corC[k],vis.length-1-i)})))});
+  const lgA=$('#g-acv-lg'); if(lgA) lgA.innerHTML = CAN.map(([k,nm])=>`<span><span class="sw" style="background:${corC[k]}"></span>${nm}</span>`).join('')
+    + (vis.length>1? `<span class="note" style="margin:0">tons mais claros = anos anteriores (de cima para baixo: ${vis.map(rotCom).join(', ')})</span>` : '');
 }
 
 /* ---------------- aba: anos de escolaridade ---------------- */
@@ -2380,9 +2422,11 @@ function vendasPorObra(){
     if(ym<ini || ym>fim) return;
     if(extra===1){ extras+=q; return; }
     const c = porI.get(isbn) || porT.get(chaveTitL(String(tit).replace(/\s*-\s*VOL\.?\s*\d+$/i,''))); if(!c){ ignorados+=q; return; }
-    const o = ob.get(c.i) || (ob.set(c.i,{meses:{}, mesesI:{}, b:[0,0,0], bi:[0,0,0]}), ob.get(c.i)), k=bloco(ym);
+    const o = ob.get(c.i) || (ob.set(c.i,{meses:{}, mesesI:{}, mesesM:{}, b:[0,0,0], bi:[0,0,0], bm:[0,0,0]}), ob.get(c.i)), k=bloco(ym);
     if(extra===2){ o.mesesI[ym]=(o.mesesI[ym]||0)+q; o.bi[k]+=q; return; }
-    o.meses[ym]=(o.meses[ym]||0)+q; o.b[k]+=q; });
+    o.meses[ym]=(o.meses[ym]||0)+q; o.b[k]+=q;
+    // marketplace (Amazon, Magalu, Mercado Livre) é uma parte do total; o resto são vendas diversas
+    if(/MERCADO\s*LIVRE|AMAZON|MAGALU/i.test(canal)){ o.mesesM[ym]=(o.mesesM[ym]||0)+q; o.bm[k]+=q; } });
   return {ob, fim, ini, prim, ignorados, extras, ate:V.ate, arquivo:V.arquivo};
 }
 function viewImpressao(){
@@ -2393,56 +2437,89 @@ function viewImpressao(){
     return; }
   const ops = cat.slice().sort((a,b)=>a.t.localeCompare(b.t,'pt-BR')).map(c=>[c.i, c.t+' · '+(ED_NOME[c.e]||c.e)]);
   if(S.impObra && !cat.some(c=>c.i===S.impObra)) S.impObra='';
-  $('#main').innerHTML = `<div class="card imp-busca"><h2>Sugestão de impressão</h2>
-    <p class="sub">Escolha a obra, informe a solicitação de compra e clique em pesquisar.</p>
-    <div class="imp-linha">
-      <div class="imp-obra">${multi('ms-iobra','Obra',ops,S.impObra||'','Escolha a obra','obras',1,true)}</div>
-      <label class="f imp-sol"><span>Solicitação de compra</span><input id="imp-sol" type="text" inputmode="numeric" value="${S.impSolV? fmt(S.impSolV) : ''}" placeholder="exemplares"></label>
-      <button class="btn primary imp-go" id="imp-go" type="button"${S.impObra?'':' disabled'}>Pesquisar</button></div></div>`;
+  // 1) busca da obra
+  let h = `<div class="card imp-busca"><h2>Sugestão de impressão</h2>
+    <p class="sub">Escolha a obra para ver o histórico de vendas, o estoque e calcular a sugestão.</p>
+    <div class="imp-linha"><div class="imp-obra">${multi('ms-iobra','Obra',ops,S.impObra||'','Escolha a obra','obras',1,true)}</div></div></div>`;
+  const c = S.impObra && cat.find(x=>x.i===S.impObra);
+  if(!c){ $('#main').innerHTML = h; ligaMulti('ms-iobra','impObra'); return; }
+  const D = dadosImpressao(R, c);
+  const { o, B, rot, e } = D;
+  const aut = String(c.a||'').trim(), varios = /,|\se\s|;|\//.test(aut);
+  // 2) histórico: cada bloco separa vendas diversas e marketplace (somados) e mostra o total com intercompany
+  const varia = (a,b) => !b? '' : (()=>{ const p=Math.round((a/b-1)*100); return ` <em class="${p>=0?'up':'dn'}">${p>=0?'▲':'▼'} ${p>=200? dec(a/b,1)+'x o' : Math.abs(p)+'% vs.'} bloco anterior</em>`; })();
+  const hb = (k,cls,rotulo) => { const v=o.b[k], vm=o.bm[k], vd=v-vm, vi=o.bi[k], parcial = R.prim>B[k].de;
+    return `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${rot(B[k].de)} a ${rot(B[k].ate)}${k<2&&!(R.prim>B[k+1].de)? varia(v,o.b[k+1]) : ''}</small>
+      ${parcial? `<small class="ij-parc">relatório só tem dados a partir de ${rot(R.prim)}</small>` : ''}
+      <div class="ij-can"><div><i class="cd"></i>Vendas diversas<b>${fmt(vd)}</b></div><div><i class="cm"></i>Marketplace<b>${fmt(vm)}</b></div></div>
+      <div class="ij-com"><svg width="8" height="8"><rect width="8" height="8" rx="2" fill="${css('--sky')}"/></svg>com intercompany <b>${fmt(v+vi)}</b>${vi? ` <em>(+${fmt(vi)})</em>` : ''}</div></div>`; };
+  const sol = S.impSolV||0;
+  h += `<div class="card imp-obra-c">
+    <div class="imp-cab">${capaDe(c.i)? capaImg(c.i,'jcapa') : ''}<div><h2>${esc(c.t)}</h2><p class="sub">${aut? `${varios?'Autores':'Autor'}: <b>${esc(aut)}</b> · ` : ''}ISBN ${esc(c.i)}</p></div></div>
+    <div class="ij-sec"><h3><i>1</i>Histórico de vendas</h3>
+      <div class="ij-hist">${hb(0,'m12','Últimos 12 meses')}${hb(1,'m24','Meses 13 a 24')}${hb(2,'m36','Meses 25 a 36')}</div>
+      <p class="note" style="margin:8px 0 0">Marketplace = Amazon, Magalu e Mercado Livre; vendas diversas = todos os outros canais. Os dois somados dão o total do bloco, sem intercompany.</p></div>
+    <div class="ij-sec"><h3><i>2</i>Últimos 36 meses</h3>
+      <div class="ij-graf ij-graf36"><div class="chart" id="g-imp"></div><div class="legend" id="g-imp-lg"></div></div></div>
+    <div class="ij-sec"><h3><i>3</i>Estoque e pedido de compra</h3>
+      <div class="ij-eq ij-eq3">
+        <div class="ij-b neu"><span>Estoque atual</span><b>${fmt(e)}</b><small>NetSuite${EST&&EST.arquivo? ' · '+esc(EST.arquivo):''}</small></div>
+        <div class="ij-b neu ij-in"><span>Pedido de compra</span><input id="imp-sol" type="text" inputmode="numeric" value="${sol? fmt(sol) : ''}" placeholder="0" aria-label="Pedido de compra em exemplares"><small>exemplares solicitados</small></div>
+        <div class="ij-b" id="imp-falta"></div></div>
+      <div class="imp-calc"><button class="btn primary" id="imp-calc" type="button">Calcular sugestão</button>
+        <span class="note">Sugestão para atender o pedido e cobrir 12 meses de vendas, sem e com intercompany.</span></div></div>
+  </div>`;
+  $('#main').innerHTML = h;
   ligaMulti('ms-iobra','impObra');
-  const si=$('#imp-sol'), le=()=>{ S.impSolV=Math.max(0,parseInt(String(si.value).replace(/\D/g,''))||0); };
-  si.oninput=le; si.onkeydown=e=>{ if(e.key==='Enter'&&S.impObra){ le(); janelaImpressao(); } };
-  $('#imp-go').onclick=()=>{ le(); janelaImpressao(); };
+  const si=$('#imp-sol'), fx=$('#imp-falta');
+  const mostraFalta = () => { const falta=Math.max(0,(S.impSolV||0)-e);
+    fx.className='ij-b '+(falta?'bad':'ok'); fx.innerHTML=`<span>Falta para atender o pedido</span><b>${fmt(falta)}</b><small>${falta?'o estoque não cobre o pedido':'o estoque atende o pedido'}</small>`; };
+  const le=()=>{ S.impSolV=Math.max(0,parseInt(String(si.value).replace(/\D/g,''))||0); mostraFalta(); };
+  si.oninput=le; si.onblur=()=>{ si.value = S.impSolV? fmt(S.impSolV) : ''; };
+  si.onkeydown=ev=>{ if(ev.key==='Enter'){ le(); janelaImpressao(); } };
+  mostraFalta();
+  $('#imp-calc').onclick=()=>{ le(); janelaImpressao(); };
+  // gráfico: 36 meses em ordem, cada barra soma vendas diversas + marketplace + intercompany
+  const ms=[]; for(let k=35;k>=0;k--) ms.push(mesesAtras(R.fim,k));
+  const pos = x => Math.max(0,x||0);
+  grafico('g-imp',{kind:'vbar',stacked:true,labels:ms.map(rot),sets:[
+    {label:'Vendas diversas', data:ms.map(m=>pos((o.meses[m]||0)-(o.mesesM[m]||0))), color:css('--mag')},
+    {label:'Marketplace', data:ms.map(m=>pos(o.mesesM[m])), color:css('--sun')},
+    {label:'Intercompany', data:ms.map(m=>pos(o.mesesI[m])), color:css('--sky')}]});
+}
+/* números da obra usados na tela e na janela do cálculo */
+function dadosImpressao(R, c){
+  const o = R.ob.get(c.i)||{meses:{},mesesI:{},mesesM:{},b:[0,0,0],bi:[0,0,0],bm:[0,0,0]};
+  const e = (estoqueLivros().find(x=>x.cat&&x.isbn===c.i)||{qtd:0}).qtd||0;
+  const rot = ym => MES[+ym.slice(5,7)-1]+'/'+ym.slice(2,4);
+  const B = [0,1,2].map(k=>({de:mesesAtras(R.fim,12*k+11), ate:mesesAtras(R.fim,12*k)}));
+  return {o, e, rot, B};
 }
 function janelaImpressao(){
   const R = vendasPorObra(), c = catalogoLit().find(x=>x.i===S.impObra); if(!R||!c) return;
-  const o = R.ob.get(c.i)||{meses:{},mesesI:{},b:[0,0,0],bi:[0,0,0]};
-  const e = (estoqueLivros().find(x=>x.cat&&x.isbn===c.i)||{qtd:0}).qtd||0;
-  const sol = S.impSolV||0, falta = Math.max(0, sol-e);
-  const rot = ym => MES[+ym.slice(5,7)-1]+'/'+ym.slice(2,4);
-  const B = [0,1,2].map(k=>({de:mesesAtras(R.fim,12*k+11), ate:mesesAtras(R.fim,12*k)}));
-  const box = (cls,rotulo,v,nota) => `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${nota}</small></div>`;
-  const varia = (a,b) => !b? '' : (()=>{ const p=Math.round((a/b-1)*100); return ` <em class="${p>=0?'up':'dn'}">${p>=0?'▲':'▼'} ${p>=200? dec(a/b,1)+'x o' : Math.abs(p)+'% vs.'} bloco anterior</em>`; })();
-  const hb = (k,cls,rotulo) => { const v=o.b[k], vi=o.bi[k], parcial = R.prim>B[k].de;
-    return `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${rot(B[k].de)} a ${rot(B[k].ate)}${k<2&&!(R.prim>B[k+1].de)? varia(v,o.b[k+1]) : ''}</small>
-      ${parcial? `<small class="ij-parc">relatório só tem dados a partir de ${rot(R.prim)}</small>` : ''}
-      <div class="ij-com"><svg width="8" height="8"><rect width="8" height="8" rx="2" fill="${css('--sky')}"/></svg>com intercompany <b>${fmt(v+vi)}</b>${vi? ` <em>(+${fmt(vi)})</em>` : ''}</div></div>`; };
-  const op = t => `<div class="ij-op">${t}</div>`;
-  const rec = (cls,rotulo,v) => `<div class="ij-rec ${cls}"><span>${rotulo}</span><b>${fmt(v)}<em>exemplares</em></b></div>`;
-  const acum = (arr,k) => arr.slice(0,k+1).reduce((t,x)=>t+x,0);
-  const cen = (cls,titulo,nota,arr) => `<div class="ij-cen ${cls}"><div class="ij-ct"><b>${titulo}</b><small>${nota}</small></div>
-      <div class="ij-recs">${[0,1,2].map(k=>rec(k?'r18':'r12',`Atender e cobrir ${12*(k+1)} meses`,ate100(sol+acum(arr,k)-e))).join('')}</div></div>`;
-  const comI = o.b.map((v,k)=>v+o.bi[k]), totI = o.bi.reduce((t,x)=>t+x,0);
+  const { o, e, rot, B } = dadosImpressao(R, c);
+  const sol = S.impSolV||0;
   const aut = String(c.a||'').trim(), varios = /,|\se\s|;|\//.test(aut);
+  // histórico concatenado: canais por bloco de 12 meses
+  const lin = (rotulo, f, cls) => `<tr class="${cls||''}"><td class="l">${rotulo}</td>${[0,1,2].map(k=>`<td>${fmt(f(k))}</td>`).join('')}</tr>`;
+  const tab = `<div class="tw"><table class="miuda ij-tab"><thead><tr><th class="l">Vendas (exemplares)</th>${[0,1,2].map(k=>`<th>${k? `Meses ${12*k+1} a ${12*k+12}` : 'Últimos 12 meses'}<span class="un">${rot(B[k].de)} a ${rot(B[k].ate)}</span></th>`).join('')}</tr></thead><tbody>
+    ${lin('Vendas diversas', k=>o.b[k]-o.bm[k])}${lin('Marketplace', k=>o.bm[k])}
+    ${lin('<b>Total sem intercompany</b>', k=>o.b[k], 'sub')}${lin('Intercompany', k=>o.bi[k])}
+    ${lin('<b>Total com intercompany</b>', k=>o.b[k]+o.bi[k], 'tot')}</tbody></table></div>
+    ${R.prim>B[2].de? `<p class="note" style="margin:6px 0 0">O relatório só tem dados a partir de ${rot(R.prim)}.</p>` : ''}`;
+  // necessidade e sugestão: pedido + vendas dos últimos 12 meses − estoque = necessidade → arredondada para cima na centena
+  const bx = (cls,rotulo,v,nota) => `<div class="ij-b ${cls}"><span>${rotulo}</span><b>${fmt(v)}</b><small>${nota}</small></div>`;
+  const op = t => `<div class="ij-op">${t}</div>`;
+  const conta = (cls, titulo, nota, v12) => { const nec = Math.max(0, sol + v12 - e), sug = ate100(nec);
+    return `<div class="ij-cen ${cls}"><div class="ij-ct"><b>${titulo}</b><small>${nota}</small></div>
+      <div class="ij-conta">${bx('neu','Pedido de compra',sol,'informado')}${op('+')}${bx('m12','Vendas 12 meses',v12,rot(B[0].de)+' a '+rot(B[0].ate))}${op('−')}${bx('neu','Estoque atual',e,'NetSuite')}${op('=')}${bx(nec?'bad':'ok','Necessidade',nec,nec?'exemplares':'o estoque cobre')}${op('→')}
+        <div class="ij-rec r12"><span>Sugestão de impressão</span><b>${fmt(sug)}<em>exemplares</em></b><small>${sug? 'arredondada para cima na centena' : 'não precisa imprimir'}</small></div></div></div>`; };
   abreJanela(`<h2>${esc(c.t)}</h2><p class="sub">${aut? `${varios?'Autores':'Autor'}: <b>${esc(aut)}</b><br>` : ''}ISBN ${esc(c.i)}</p>
-    <div class="ij-sec"><h3><i>1</i>Situação hoje</h3>
-      <div class="ij-eq">${box('neu','Solicitação de compra',sol,'informada na consulta')}${op('−')}${box('neu','Estoque atual',e,'NetSuite')}${op('=')}${
-        falta? box('bad','Falta para atender',falta,'precisa produzir') : box('ok','Falta para atender',0,'o estoque atende')}</div></div>
-    <div class="ij-sec"><h3><i>2</i>Histórico de vendas</h3>
-      <div class="ij-hist">${hb(0,'m12','Últimos 12 meses')}${hb(1,'m24','Meses 13 a 24')}${hb(2,'m36','Meses 25 a 36')}</div>
-      <div class="ij-graf"><div class="chart" id="g-imp"></div><div class="legend" id="g-imp-lg"></div></div></div>
-    <div class="ij-sec"><h3><i>3</i>Sugestão de produção</h3>
-      ${cen('c-sem','Sem intercompany','só vendas a clientes de fora do grupo',o.b)}
-      ${cen('c-com','Com intercompany','soma as vendas entre empresas do grupo'+(totI? ` (${fmt(totI)} em 36 meses)` : ' — nenhuma no período'),comI)}</div>`, true);
+    <div class="ij-sec"><h3><i>1</i>Histórico de vendas</h3>${tab}</div>
+    <div class="ij-sec"><h3><i>2</i>Necessidade e sugestão para 12 meses</h3>
+      ${conta('c-sem','Sem intercompany','só vendas a clientes de fora do grupo (diversas + marketplace)',o.b[0])}
+      ${conta('c-com','Com intercompany','soma as vendas entre empresas do grupo'+(o.bi[0]? ` (+${fmt(o.bi[0])} nos últimos 12 meses)` : ' — nenhuma nos últimos 12 meses'),o.b[0]+o.bi[0])}</div>`, true);
   if(capaDe(c.i)){ const t=$('#janela .jtit'); if(t){ t.classList.add('com-capa'); t.innerHTML = capaImg(c.i,'jcapa') + '<div>'+t.innerHTML+'</div>'; } }
-  // gráfico: mês a mês, um bloco ao lado do outro, para comparar o mesmo mês em cada ano
-  const ordem=[]; for(let k=11;k>=0;k--) ordem.push(k);
-  grafico('g-imp',{kind:'vbar',rotulos:true,rotFmt:true,labels:ordem.map(k=>MES[+mesesAtras(R.fim,k).slice(5,7)-1]),sets:[
-    {label:'Meses 25 a 36 ('+rot(B[2].de)+' a '+rot(B[2].ate)+')', data:ordem.map(k=>{ const m=mesesAtras(R.fim,k+24); return (o.meses[m]||0); }), color:css('--sun')},
-    {label:'Meses 13 a 24 ('+rot(B[1].de)+' a '+rot(B[1].ate)+')', data:ordem.map(k=>{ const m=mesesAtras(R.fim,k+12); return (o.meses[m]||0); }), color:css('--muted')},
-    {label:'Últimos 12 meses ('+rot(B[0].de)+' a '+rot(B[0].ate)+')', data:ordem.map(k=>{ const m=mesesAtras(R.fim,k); return (o.meses[m]||0); }), color:css('--mag')}]});
-  // na imagem copiada, a amostra de cor vazia some: vira um quadrado desenhado
-  $$('#g-imp-lg .sw').forEach(w=>{ const c=w.style.background; w.outerHTML=`<svg width="10" height="10" style="margin-right:6px;vertical-align:-1px"><rect width="10" height="10" rx="2" fill="${c}"/></svg>`; });
 }
 /* situação do pagamento a partir da coluna PAGAMENTO: data ou SIM = pago; vazia = em aberto;
    outro texto (consignação, bonificação, doação…) aparece como está */
