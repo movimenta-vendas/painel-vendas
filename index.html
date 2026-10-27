@@ -135,6 +135,10 @@ nav.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:12px;scrollbar-width:th
 nav.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font:inherit;font-family:var(--disp);font-weight:500;padding:9px 13px;cursor:pointer;white-space:nowrap;border-radius:0 0 0 0}
 nav.tabs button:hover{color:var(--ink);background:var(--wash)}
 nav.tabs button[aria-selected=true]{color:var(--mag);border-bottom-color:var(--mag);font-weight:600}
+.tabs-sel{display:none}
+@media (max-width:760px){nav.tabs{overflow:visible;padding-bottom:10px}nav.tabs button{display:none}
+  .tabs-sel{display:flex;align-items:center;gap:10px;width:100%}.tabs-sel span{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .tabs-sel select{flex:1;min-height:40px;font:inherit;font-weight:600;color:var(--mag);border:1px solid var(--field-line);background:var(--field);padding:6px 10px}}
 
 main{padding-top:18px;display:flex;flex-direction:column;gap:16px}
 .grid{display:grid;gap:16px;grid-template-columns:repeat(12,minmax(0,1fr))}
@@ -506,6 +510,20 @@ table.atd th.sep,table.atd td.sep{border-left:1px solid var(--line)}
 .ficha div b{font-weight:600;font-size:14px;overflow-wrap:anywhere}
 body.modal-on{overflow:hidden}
 @media (max-width:520px){.serie .linhas{grid-template-columns:1fr 72px 72px}.topo img{height:32px}}
+
+/* escala de texto do tema grupo nas telas (Montserrat é mais larga que a fonte anterior) */
+body{font-size:13px}
+table,table.compacta,#tcorpo table{font-size:12px}
+th,table.compacta th,#tcorpo th{font-size:9.5px;letter-spacing:.05em}
+th,td{padding-left:7px;padding-right:7px}
+.kpi .v{font-size:22px}.kpi .l{font-size:10.5px}.kpi .d{font-size:11.5px}
+.card>h2{font-size:14px}.card .sub{font-size:12px}.note{font-size:12px}
+.btn{font-size:13px}.btn.sm{font-size:12px}
+nav.tabs button{font-size:13.5px;padding:9px 11px}
+.ms-btn,select,input{font-size:13px}
+.fun-tag{text-transform:uppercase;letter-spacing:.04em;font-size:10.5px}
+td.l{white-space:normal}
+/* nomes longos quebram linha em vez de serem cortados */
 </style>
 
 <style>:root{color-scheme:light}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -617,6 +635,9 @@ const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&l
 // nome do projeto para exibir: sem o número e com o nome por extenso nas siglas
 const NOME_PROJ = {TL:'TESOURO LITERÁRIO', VV:'A VOZ E A VEZ DA CRIANÇA', STP:'SÃO TANTAS PERGUNTAS', PLE:'PENSO LOGO ESCREVO', COLCHA:'COLCHA DE LEITURAS', PCE:'PALAVRA CANTADA NA ESCOLA'};
 const short = p => { const s=String(p||'').replace(/^\d+\s*-\s*/,'').trim(); return NOME_PROJ[s.toUpperCase()]||s; };
+/* nome curto do projeto, para as células de tabela (o nome por extenso segue nos títulos, filtros e detalhes) */
+const NOME_CURTO = {'TESOURO LITERÁRIO':'TESOURO','A VOZ E A VEZ DA CRIANÇA':'A VOZ E A VEZ','SÃO TANTAS PERGUNTAS':'SÃO TANTAS','PENSO LOGO ESCREVO':'PENSO','COLCHA DE LEITURAS':'COLCHA','PALAVRA CANTADA NA ESCOLA':'PALAVRA CANTADA'};
+const curtoP = p => { const n=short(p); return NOME_CURTO[String(n).toUpperCase()]||n; };
 const MES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const COM = [7,8,9,10,11,0,1,2,3,4,5,6];                 // ago..jul (índice 0-11)
 const brD = s => s? s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4) : '';
@@ -725,8 +746,8 @@ function grafico(id,spec){
     const ticks = log
       ? Array.from({length:Math.max(2,Math.round(Math.log10(top))+1)},(_,i)=>Math.pow(10,i)).filter(t=>t<=top)
       : ticksRedondos(mx*1.02);
-    const tw=Math.max(...ticks.map(t=>vc(t).length))*6.6+12, hor=spec.kind==='hbar';
-    const lw = hor? Math.min(170,Math.max(...spec.labels.map(l=>Math.min(String(l).length,24)))*7.2+18) : Math.ceil(tw);
+    const tw=Math.max(...ticks.map(t=>vc(t).length))*7.4+12, hor=spec.kind==='hbar';
+    const lw = hor? Math.min(200,Math.max(...spec.labels.map(l=>Math.min(String(l).length,26)))*7.6+18) : Math.ceil(tw);
     const m = hor? {l:lw,r:Math.max(54,tw*0.9),t:6,b:22} : {l:lw,r:12,t:spec.rotulos?22:10,b:24};
     const pw=W-m.l-m.r, ph=H-m.t-m.b; let g='';
     // visual encorpado: cada cor ganha um degradê (mais claro em cima / na ponta) e as barras uma sombra suave
@@ -767,7 +788,7 @@ function grafico(id,spec){
       }
     } else {
       const step=Math.max(1,Math.ceil(tw*1.6/(pw/Math.max(1,ticks.length-1))));
-      const ultimo=ticks.length-1, mostraT=ti=> ti===0 || ti===ultimo || (ti%step===0 && ultimo-ti>=step);
+      const ultimo=ticks.length-1, cabe0=pw>tw*1.5, mostraT=ti=> (ti===0&&cabe0) || ti===ultimo || (ti>0 && ti%step===0 && ultimo-ti>=step);
       ticks.forEach((t,ti)=>{g+=`<line y1="${m.t}" y2="${m.t+ph}" x1="${X(t)}" x2="${X(t)}" stroke="${t===0?ax:gr}"/>`;
         if(mostraT(ti)) g+=`<text x="${X(t)}" y="${H-7}" text-anchor="${ti===0?'start':ti===ticks.length-1?'end':'middle'}" fill="${ink2}" font-size="11">${vc(t)}</text>`;});
       const G=grupos?grupos.length:K, bh=Math.min(18,(band-7)/G);
@@ -800,6 +821,13 @@ function grafico(id,spec){
       tip.style.left=Math.min(Math.max(px+14,4),W-tip.offsetWidth-4)+'px';
       tip.style.top=Math.min(Math.max(py-tip.offsetHeight-10,4),H-tip.offsetHeight-4)+'px';};
     svg.addEventListener('pointermove',mostra); svg.addEventListener('pointerdown',mostra);
+    // clique numa barra: quem desenha o gráfico decide o que fazer (ex.: filtrar pela categoria)
+    // (pointerdown/pointerup e não "click": o destaque redesenhado no pointerdown troca o elemento sob o cursor e o navegador perde o clique)
+    if(spec.aoClicar){ svg.style.cursor='pointer'; let ini=null;
+      svg.addEventListener('pointerdown',e=>{ ini=[e.clientX,e.clientY]; });
+      svg.addEventListener('pointerup',e=>{ if(!ini||Math.hypot(e.clientX-ini[0],e.clientY-ini[1])>8){ ini=null; return; } ini=null;
+        const r=svg.getBoundingClientRect(), px=e.clientX-r.left, py=e.clientY-r.top;
+        const i=Math.floor((hor?py-m.t:px-m.l)/band); if(i>=0&&i<n) spec.aoClicar(i); }); }
     svg.addEventListener('pointerleave',()=>{tip.hidden=true;cr.innerHTML='';});
   }
   pinta();
@@ -1647,7 +1675,7 @@ function viewFaturamento(){
   const geral = tot.reduce((a,b)=>a+b,0);
   const n = x => x? (money? curto(x) : fmt(x)) : '<span style="color:var(--muted)">·</span>';
   let corpo = projs.map(p=>{const t=mat[p].reduce((x,y)=>x+y,0);
-    return `<tr><td class="l" title="${esc(p)}"><span class="sw" style="background:${corDe(p)}"></span>${esc(short(p))}</td>${mat[p].map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+(pessoas?' pessoas':' kits')} em ${rot[i]}">${n(x)}</td>`).join('')}<td><b>${fmt(t)}</b></td></tr>`;}).join('');
+    return `<tr><td class="l" title="${esc(p)}"><span class="sw" style="background:${corDe(p)}"></span>${esc(curtoP(p))}</td>${mat[p].map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+(pessoas?' pessoas':' kits')} em ${rot[i]}">${n(x)}</td>`).join('')}<td><b>${fmt(t)}</b></td></tr>`;}).join('');
   corpo += `<tr class="tot"><td class="l">Total</td>${tot.map((x,i)=>`<td title="${money?BRLf(x):fmt(x)+(pessoas?' pessoas':' kits')} em ${rot[i]}">${n(x)}</td>`).join('')}<td title="${money?BRLf(geral):''}">${fmt(geral)}</td></tr>`;
   // os quadros do topo não dependem do botão Valores/Kits/Alunos: sempre faturamento, kits, pedidos e redes
   const ant = TODOS? [] : filtra(+S.mAnoCom-1);
@@ -1771,7 +1799,7 @@ function janelaUF(uf, tipo, f, todosAnos, cfg){
   const ord = [...redes.entries()].map(([r,pm])=>({r, pm:[...pm.entries()].sort((a,b)=>b[1].val-a[1].val), t:soma([...pm.values()])})).sort((a,b)=>b.t.val-a.t.val);
   const T = soma(ord.map(o=>o.t));
   const linha = (rot,o,cls) => `<tr class="${cls||''}"><td class="l">${rot}</td><td>${fmt(o.ped)}</td><td>${fmt(o.ka)}</td><td>${fmt(o.kp)}</td><td>${BRLf(o.val)}</td></tr>`;
-  const corpo = ord.map(o=> linha(`<b>${esc(o.r)}</b>`, o.t, 'rede') + o.pm.map(([p,x])=>linha(`<span class="sw" style="background:${corDe(p)}"></span>${esc(short(p))}`, x, 'proj')).join('')).join('')
+  const corpo = ord.map(o=> linha(`<b>${esc(o.r)}</b>`, o.t, 'rede') + o.pm.map(([p,x])=>linha(`<span class="sw" style="background:${corDe(p)}"></span>${esc(curtoP(p))}`, x, 'proj')).join('')).join('')
     + linha('Total', T, 'tot');
   const projs = new Map(); lista.forEach(v=>projs.set(v.projeto,(projs.get(v.projeto)||0)+(v.valor||0)));
   const periodo = cfg.periodo || (todosAnos? 'todos os anos' : 'ano comercial '+rotCom(+S.mAnoCom));
@@ -2913,7 +2941,7 @@ function viewVendas(){
   h += r.length? `<div class="tw" style="max-height:640px"><table class="alinhada">${colg(COLS)}<thead><tr><th class="l">Emissão</th><th class="l">Pedido</th><th class="l">Rede</th><th class="l">Distribuidor</th>${LIT?'':'<th class="l">Projeto</th>'}<th class="l">Operação</th>${LIT?'<th>Exemplares</th>':'<th>Kits aluno</th><th>Kits prof.</th>'}<th>Valor</th><th class="l">NF</th><th class="l">Pagamento</th><th><button class="btn sm" id="csv" type="button" title="Baixar as vendas deste filtro em CSV">Baixar CSV</button></th></tr></thead><tbody>`+
     mostra.map(v=>`<tr><td class="l">${brD(v.emissao)||'<span class="tag">sem data</span>'}</td><td class="l">${esc(v.pedido)}</td>
       <td class="l wrap-t">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(v.via)}</td>
-      ${LIT?'':`<td class="l"><span class="sw" style="background:${corDe(v.projeto)}"></span>${esc(short(v.projeto))}</td>`}
+      ${LIT?'':`<td class="l"><span class="sw" style="background:${corDe(v.projeto)}"></span>${esc(curtoP(v.projeto))}</td>`}
       <td class="l">${esc(v.operacao)}</td>${LIT?`<td>${fmt(v.kitsAluno)}</td>`:`<td>${fmt(v.kitsAluno)}</td><td>${fmt(v.kitsProf)}</td>`}<td>${BRLf(v.valor)}</td><td class="l">${esc(v.nf)}</td>
       <td class="l">${(k=>seloCor(k, k==='Pago'?'var(--ok)':k==='Em aberto'?'var(--warn)':'var(--muted)'))(sitPag(v))}</td>
       <td><button class="btn sm" data-det="${v.id}" type="button">Detalhes</button></td></tr>`).join('')+
@@ -2969,14 +2997,14 @@ function viewFuturas(){
   // projeções por status do funil (todos os filtros, menos o do próprio funil) + quem está sem status
   const baseFun = baseF('fun');
   if(temFunil){ const F=(BASE&&BASE.funil)||FUNIL, semS=baseFun.filter(f=>statusFunil(f)===SEM_STATUS).sort((a,b)=>b.valor-a.valor);
-    h += `<div class="grid iguais"><div class="c7">${caixa('g-fun','','Projeções por status do funil','Faturamento previsto de cada etapa'+(F.arquivo? ' · '+esc(F.arquivo) : '')+' · em vermelho, as redes sem status')}</div>
+    h += `<div class="grid iguais"><div class="c7">${caixa('g-fun','','Projeções por status do funil','Faturamento previsto de cada etapa'+(F.arquivo? ' · '+esc(F.arquivo) : '')+' · em destaque, as redes sem status · clique numa barra para filtrar a tela por aquele status'+(S.fFun.length? ' (clique de novo para limpar)' : ''))}</div>
       <div class="c5"><div class="card fun-sem"><h2>Sem status no funil <span class="tag bad">${fmt(semS.length)}</span></h2>
         <p class="sub">${semS.length? `${BRL(semS.reduce((t,f)=>t+(f.valor||0),0))} em projeções de redes que não aparecem na planilha do funil. Consulte os responsáveis e atualize.` : 'Todas as projeções do filtro têm status no funil.'}</p>
-        ${semS.length? `<div class="tw" style="max-height:300px"><table class="miuda"><thead><tr><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th>Previsto</th></tr></thead><tbody>${semS.map(f=>`<tr><td class="l">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td><td class="l">${esc(short(f.projeto))}</td><td>${BRLf(f.valor)}</td></tr>`).join('')}</tbody></table></div>
+        ${semS.length? `<div class="tw" style="max-height:300px"><table class="miuda"><thead><tr><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th>Previsto</th></tr></thead><tbody>${semS.map(f=>`<tr><td class="l">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td><td class="l">${esc(curtoP(f.projeto))}</td><td>${BRLf(f.valor)}</td></tr>`).join('')}</tbody></table></div>
         <p style="margin:10px 0 0"><button class="btn sm" id="fun-copia" type="button">Copiar lista</button></p>` : ''}</div></div></div>`; }
   else h += `<div class="banner">Coloque a planilha do funil (<b>PROJETOS - Funil.xlsx</b>, com as colunas Entes e Status) em 1 - FONTES e clique em <b>Atualizar fonte</b> para ver o status de cada projeção.</div>`;
   // mapas: todas as negociações com mês previsto, de qualquer período (o filtro de mês não se aplica)
-  const fMapa = todas.filter(f=>critF.rede(f)&&critF.via(f)&&critF.proj(f));
+  const fMapa = todas.filter(f=>critF.rede(f)&&critF.via(f)&&critF.proj(f)&&critF.fun(f));
   const CFG_FUT = {tit:'Vendas futuras por estado', rot:'Vendas futuras', vazio:'sem previsão', periodo:'todas com mês previsto',
     sub:'Faturamento previsto de todas as negociações com mês previsto, de qualquer período (o filtro de mês não se aplica aos mapas), separado entre redes municipais e redes estaduais.'};
   h += mapaCalor(fMapa, true, v=>v.valor||0, true, CFG_FUT);
@@ -3004,7 +3032,7 @@ function viewFuturas(){
   h += lista.length? `<div class="tw tw-fut" style="max-height:600px"><table class="alinhada"><colgroup>${COLS.map(c=>`<col style="width:${c}%">`).join('')}</colgroup><thead><tr><th class="l">Mês previsto</th><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th class="l">Funil</th><th>Kits aluno</th><th>Kits prof.</th><th>Faturamento</th>${al?'<th class="l">Estoque</th>':''}<th></th></tr></thead><tbody>`+
     mostra.map(f=>`<tr><td class="l">${MES[+f.mesPrevisto.slice(5,7)-1]}/${f.mesPrevisto.slice(2,4)}</td>
       <td class="l wrap-t">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td>
-      <td class="l"><span class="sw" style="background:${corDe(f.projeto)}"></span>${esc(short(f.projeto))}</td>
+      <td class="l"><span class="sw" style="background:${corDe(f.projeto)}"></span>${esc(curtoP(f.projeto))}</td>
       <td class="l">${(()=>{ const st=statusFunil(f); return st? `<span class="fun-tag${st===SEM_STATUS?' sem':''}" style="--c:${corFunil(st)}">${esc(st)}</span>` : '<span style="color:var(--muted)">—</span>'; })()}</td>
       <td>${fmt(f.kitsAluno)}</td><td>${fmt(f.kitsProf)}</td><td>${BRLf(f.valor)}</td>
       ${al? `<td class="l">${selo((al.get(f.id)||{}).cobertura||0)}</td>`:''}
@@ -3036,7 +3064,12 @@ function viewFuturas(){
     const ks=[...sm.keys()].sort((a,b)=>ordemFunil(a)-ordemFunil(b));
     const ef=document.getElementById('g-fun'); if(ef) ef.style.height=Math.max(260, ks.length*44+34)+'px';
     const cv = s => { const v=corFunil(s); return v.startsWith('var(')? css(v.slice(4,-1)) : v; };
-    grafico('g-fun',{altura:true,kind:'hbar',money:true,labels:ks.map(k=>k+' ('+fmt(nm.get(k))+')'),sets:[{label:'Previsto',data:ks.map(k=>sm.get(k)),color:pal()[0],colors:ks.map(cv)}]});
+    // clicar num status filtra a tabela, os gráficos de previsão e as redes por esse status; clicar de novo limpa o filtro
+    const selF = S.fFun.length? S.fFun : null, apaga = k => selF && !selF.includes(k);
+    grafico('g-fun',{altura:true,kind:'hbar',money:true,labels:ks.map(k=>(selF&&selF.includes(k)?'› ':'')+k+' ('+fmt(nm.get(k))+')'),
+      sets:[{label:'Previsto',data:ks.map(k=>sm.get(k)),color:pal()[0],colors:ks.map(k=>apaga(k)? css('--grid') : cv(k))}],
+      aoClicar:i=>{ const st=ks[i]; S.fFun = (S.fFun.length===1&&S.fFun[0]===st)? [] : [st]; S.fLim=60; render();
+        const t=document.querySelector('.tw-fut'); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }});
     const bc=$('#fun-copia'); if(bc) bc.onclick=()=>{ const semS=baseFun.filter(f=>statusFunil(f)===SEM_STATUS).sort((a,b)=>b.valor-a.valor);
       const t=['Projeções sem status no funil:'].concat(semS.map(f=>`- ${f.rede==='_ESTADO'?'Estado':f.rede}/${f.uf} · ${f.via} · ${short(f.projeto)} · ${BRLf(f.valor)}`)).join('\n');
       navigator.clipboard.writeText(t).then(()=>aviso('Lista copiada.'),()=>aviso('Não consegui copiar.')); }; }
@@ -3150,7 +3183,7 @@ function tabelaEstoque(pub, itens, projs){
   const geral = Object.values(totCol).reduce((x,y)=>x+y,0);
   const nz = x => x>0? fmt(x) : x<0? `<span style="color:var(--bad)">${fmt(x)}</span>` : '<span style="color:var(--muted)">·</span>';
   const corpo = linhas.map(p=>{const t=usadas.reduce((s,c)=>s+mat[p][c],0);
-    return `<tr><td class="l"><span class="sw" style="background:${corDe(p)}"></span>${esc(short(p))}</td>${usadas.map(c=>`<td>${nz(mat[p][c])}</td>`).join('')}<td><b>${fmt(t)}</b></td></tr>`;}).join('')
+    return `<tr><td class="l"><span class="sw" style="background:${corDe(p)}"></span>${esc(curtoP(p))}</td>${usadas.map(c=>`<td>${nz(mat[p][c])}</td>`).join('')}<td><b>${fmt(t)}</b></td></tr>`;}).join('')
     + `<tr class="tot"><td class="l">Total</td>${usadas.map(c=>`<td>${fmt(totCol[c])}</td>`).join('')}<td>${fmt(geral)}</td></tr>`;
   const larg = Math.max(5, (100-18-10)/usadas.length);
   return `<div class="tw"><table class="compacta"><colgroup><col style="width:18%">${usadas.map(()=>`<col style="width:${larg.toFixed(2)}%">`).join('')}<col style="width:10%"></colgroup>
@@ -3166,11 +3199,11 @@ function pizza(fatias, money){
     const g=frac>0.5?1:0, [x0,y0]=pt(a0,R), [x1,y1]=pt(a1,R), [x2,y2]=pt(a1,r), [x3,y3]=pt(a0,r);
     const d = frac>=0.9999 ? `M${cx-R},${cy}a${R},${R} 0 1,0 ${2*R},0a${R},${R} 0 1,0 ${-2*R},0M${cx-r},${cy}a${r},${r} 0 1,1 ${2*r},0a${r},${r} 0 1,1 ${-2*r},0`
       : `M${x0},${y0}A${R},${R} 0 ${g},1 ${x1},${y1}L${x2},${y2}A${r},${r} 0 ${g},0 ${x3},${y3}Z`;
-    const gi=uid+'g'+defs.length; defs+=`<radialGradient id="${gi}" cx="90" cy="90" r="${R}" gradientUnits="userSpaceOnUse"><stop offset="${r/R}" style="stop-color:color-mix(in srgb,${f.cor} 82%,#000)"/><stop offset="1" style="stop-color:color-mix(in srgb,${f.cor} 80%,#fff)"/></radialGradient>`;
+    const gi=uid+'g'+defs.length; defs+=`<radialGradient id="${gi}" cx="90" cy="90" r="${R}" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:${f.cor}"/><stop offset="1" style="stop-color:${f.cor}"/></radialGradient>`;
     arcs += `<path d="${d}" fill="url(#${gi})" fill-rule="evenodd" stroke="var(--panel)" stroke-width="1.5"><title>${esc(f.rot)}: ${money?BRLf(f.v):fmt(f.v)+' kits'} (${dec(frac*100,1)}%)</title></path>`;
     a0=a1; });
   const ord=fatias.filter(f=>f.v>0).sort((a,b)=>b.v-a.v);
-  return `<div class="pizza"><svg viewBox="0 0 180 180" role="img" aria-label="Distribuição"><defs>${defs}<filter id="${uid}-sh" x="-15%" y="-15%" width="130%" height="135%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="${escuro()?.5:.18}"/></filter></defs><g filter="url(#${uid}-sh)">${arcs}</g>
+  return `<div class="pizza"><svg viewBox="0 0 180 180" role="img" aria-label="Distribuição"><defs>${defs}<filter id="${uid}-sh" x="-15%" y="-15%" width="130%" height="135%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0"/></filter></defs><g filter="url(#${uid}-sh)">${arcs}</g>
       <text x="90" y="86" text-anchor="middle" class="pz-t">${money? BRL(tot) : fmt(tot)}</text><text x="90" y="104" text-anchor="middle" class="pz-s">${money?'valor líquido':'kits'}</text></svg>
     <ul class="pz-leg">${ord.map(f=>`<li><span class="sw" style="background:${f.cor}"></span><span class="pz-n">${esc(f.rot)}</span><b>${money? BRL(f.v) : fmt(f.v)}</b><span class="pz-p">${dec(f.v/tot*100,1)}%</span></li>`).join('')}</ul></div>`;
 }
@@ -3277,7 +3310,7 @@ function viewEstoque(){
     h += `<div class="card"><h2>Itens fora das tabelas</h2><p class="sub">Kits que a planilha traz sem projeto, sem ano de escolaridade ou com outro público</p>
       <p><button class="btn" id="e-soltos" type="button">${S.eSoltos?'Ocultar':'Mostrar'} os ${fmt(soltos.length)} itens</button></p>
       ${S.eSoltos? `<div class="tw" style="max-height:420px"><table class="miuda"><thead><tr><th class="l">Descrição</th><th class="l">Projeto</th><th class="l">Público</th><th class="l">Série</th><th>Em estoque</th></tr></thead><tbody>
-        ${soltos.slice().sort((x,y)=>y.qtd-x.qtd).map(i=>`<tr><td class="l wrap-t">${esc(i.desc)}</td><td class="l">${esc(short(i.projeto)||'—')}</td><td class="l">${esc(i.publico||'—')}</td><td class="l">${esc(i.serie||'—')}</td><td>${fmt(i.qtd)}</td></tr>`).join('')}
+        ${soltos.slice().sort((x,y)=>y.qtd-x.qtd).map(i=>`<tr><td class="l wrap-t">${esc(i.desc)}</td><td class="l">${esc(curtoP(i.projeto)||'—')}</td><td class="l">${esc(i.publico||'—')}</td><td class="l">${esc(i.serie||'—')}</td><td>${fmt(i.qtd)}</td></tr>`).join('')}
         </tbody></table></div>`:''}</div>`;
   }
   $('#main').innerHTML = h;
@@ -3300,7 +3333,7 @@ function viewTabelas(){
     c.innerHTML = `<p class="note" style="margin-bottom:10px">Preço de tabela por segmento. ${BASE.tabProj? `Os projetos marcados com • vêm de <b>${esc(BASE.tabProj.arquivo)}</b> (professor inclui o kit sala de aula); os demais, da aba T_PREÇOS.` : 'Da aba T_PREÇOS.'} "Unid. por kit" é quantos alunos cada kit atende.</p>
     <div class="tw"><table class="precos"><colgroup><col style="width:15%"><col style="width:9%">${segs.map(()=>'<col style="width:9.5%"><col style="width:9.5%">').join('')}</colgroup>
     <thead><tr><th class="l">Projeto</th><th>Unid.<span class="un">por kit</span></th>${segs.map(s=>`<th>${SEGCURTO[s]}<span class="un">aluno</span></th><th>${SEGCURTO[s]}<span class="un">professor</span></th>`).join('')}</tr></thead><tbody>
-    ${BASE.precos.map(p=>`<tr><td class="l">${esc(short(p.projeto))}${p.fonte==='tabela'?' •':''}</td><td>${fmt(p.mult)}</td>${segs.map(s=>`<td>${BRLf(p[s+'_aluno']||0)}</td><td>${BRLf(p[s+'_prof']||0)}</td>`).join('')}</tr>`).join('')}
+    ${BASE.precos.map(p=>`<tr><td class="l">${esc(curtoP(p.projeto))}${p.fonte==='tabela'?' •':''}</td><td>${fmt(p.mult)}</td>${segs.map(s=>`<td>${BRLf(p[s+'_aluno']||0)}</td><td>${BRLf(p[s+'_prof']||0)}</td>`).join('')}</tr>`).join('')}
     </tbody></table></div>`;
   } else {
     const rot={projetos:'Projeto',distribuidores:'Distribuidor',operacoes:'Operação',status:'Status'}[S.sub];
@@ -3630,7 +3663,7 @@ function janelaComissaoAnteriores(k){
   const html = `<h2>Comissão ${C.nome} · ${C.foraTit.toLowerCase()}</h2><p class="sub">${C.foraTxt}</p>
     <div data-noprint style="margin:0 0 12px"><button class="btn sm" id="com-volta" type="button">← Voltar</button></div>
     ${L.length? `<div class="tw"><table class="miuda alinhada com">${colg([10,6,26,9,15,11,13,10])}<thead><tr><th class="l">Emissão</th><th class="l">NF</th><th class="l">Rede</th><th class="l">Projeto</th><th class="l">Distribuidor</th><th>Desc.</th><th>Valor da NF</th><th class="l">Pagamento</th></tr></thead><tbody>
-      ${L.map(v=>`<tr><td class="l">${brD(v.emissao)}</td><td class="l">${esc(v.nf)}</td><td class="l">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(short(v.projeto))}</td><td class="l">${esc(v.via)}</td><td>${dec((+v.desconto||0)*100,1)}%</td><td>${BRLf(v.valor)}</td><td class="l">${pg(v)}</td></tr>`).join('')}
+      ${L.map(v=>`<tr><td class="l">${brD(v.emissao)}</td><td class="l">${esc(v.nf)}</td><td class="l">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span></td><td class="l">${esc(curtoP(v.projeto))}</td><td class="l">${esc(v.via)}</td><td>${dec((+v.desconto||0)*100,1)}%</td><td>${BRLf(v.valor)}</td><td class="l">${pg(v)}</td></tr>`).join('')}
       <tr class="tot"><td class="l">Total</td><td></td><td></td><td></td><td></td><td></td><td>${BRLf(L.reduce((t,v)=>t+(v.valor||0),0))}</td><td></td></tr></tbody></table></div>` : `<div class="empty">${C.foraVazio}</div>`}`;
   abreJanela(html, true);
   const vb=$('#com-volta'); if(vb) vb.onclick=()=>janelaComissao(k);
@@ -3654,7 +3687,7 @@ function janelaComissaoMes(mes,k,soArec){
   const CCOL=[9,4.5,19.5,7,13,5.5,11.5,11.5,9,9.5];
   const bloco = (titulo, L, pago) => `<h3 class="com-tit ${pago?'rec':'arec'}">${titulo} <span>· ${fmt(L.length)} nota${L.length===1?'':'s'}</span></h3>
     ${L.length? `<div class="tw com-tw ${pago?'rec':'arec'}"><table class="miuda alinhada com">${colg(CCOL)}<thead><tr><th class="l">Emissão</th><th class="l">NF</th><th class="l">Rede</th><th class="l">Projeto</th><th class="l">Distribuidor</th><th>Desc.</th><th>Valor da NF</th><th>Base de cálculo</th><th>Comissão</th><th class="l">${pago?'Pago em':'Pagamento'}</th></tr></thead><tbody>
-      ${L.map(v=>`<tr><td class="l">${brD(v.emissao)}</td><td class="l">${esc(v.nf)}</td><td class="l" title="${esc(v.rede==='_ESTADO'?'Estado':v.rede)} (${esc(v.uf)})">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span>${comInexig(v)?' <span class="tag inx" title="Venda de inexigibilidade (Movimenta, MVT ou Prefácio com 50% de desconto): comissão sobre 50% do valor">Inexig.</span>':''}</td><td class="l">${esc(short(v.projeto))}</td><td class="l">${esc(v.via)}</td><td>${dec((+v.desconto||0)*100,1)}%</td><td>${BRLf(v.valor)}</td>
+      ${L.map(v=>`<tr><td class="l">${brD(v.emissao)}</td><td class="l">${esc(v.nf)}</td><td class="l" title="${esc(v.rede==='_ESTADO'?'Estado':v.rede)} (${esc(v.uf)})">${esc(v.rede==='_ESTADO'?'Estado':v.rede)} <span class="tag">${esc(v.uf)}</span>${comInexig(v)?' <span class="tag inx" title="Venda de inexigibilidade (Movimenta, MVT ou Prefácio com 50% de desconto): comissão sobre 50% do valor">Inexig.</span>':''}</td><td class="l">${esc(curtoP(v.projeto))}</td><td class="l">${esc(v.via)}</td><td>${dec((+v.desconto||0)*100,1)}%</td><td>${BRLf(v.valor)}</td>
         <td>${BRLf(comBase(v))}</td><td><b>${BRLf(com(v))}</b></td><td class="l">${pago? pg(v) : `<span class="com-ar">${sitPag(v)==='Em aberto'? 'À receber' : esc(sitPag(v))}</span>`}</td></tr>`).join('')}
       <tr class="tot"><td class="l">Subtotal</td><td></td><td></td><td></td><td></td><td></td><td>${BRLf(soma(L,v=>v.valor||0))}</td><td>${BRLf(soma(L,comBase))}</td><td>${BRLf(soma(L,com))}</td><td></td></tr></tbody></table></div>`
       : '<p class="note">Nenhuma nota.</p>'}`;
@@ -3755,7 +3788,7 @@ function viewPagamentos(){
       const gE={}; (c.empenhos||[]).forEach(e=>{ const g=gE[e.numero]||(gE[e.numero]={numero:e.numero,quitado:e.quitado,datas:[]}); g.datas.push(e.data); });
       const emp=Object.values(gE).map(g=>`${esc(g.numero)}${g.quitado?' ✔':''} <span class="note">${g.datas.length>1? g.datas.length+' pagamentos, '+esc(g.datas[0])+' a '+esc(g.datas[g.datas.length-1]) : esc(g.datas[0])}</span>`).join('<br>');
       const url=c.link||(CONC&&CONC.portais&&CONC.portais[p.rede]&&CONC.portais[p.rede].url)||'';
-      return `<tr><td class="l">${esc(nomeRede(p))}</td><td class="l">${esc(p.nfn)}</td><td class="l">${brD(p.emissao)}</td><td>${p.dias==null?'':fmt(p.dias)}</td><td class="l">${esc(short(p.projeto))}</td><td>${BRLf(p.valor)}</td>
+      return `<tr><td class="l">${esc(nomeRede(p))}</td><td class="l">${esc(p.nfn)}</td><td class="l">${brD(p.emissao)}</td><td>${p.dias==null?'':fmt(p.dias)}</td><td class="l">${esc(curtoP(p.projeto))}</td><td>${BRLf(p.valor)}</td>
         <td class="l">${seloCor(p.situacao, SITCOR[p.situacao]||'var(--muted)', /--sun|--saldo/.test(SITCOR[p.situacao]||''))}</td><td class="l wrap-t">${esc(c.credor||'')}</td><td class="l">${emp||'—'}</td>
         <td class="l wrap-t" style="min-width:220px" title="${esc(c.achado||'')}">${esc(c.proximo||(p.situacao==='Não consultado'?'Pesquisar empenho e pagamento':''))}</td>
         <td class="l">${url?`<a href="${esc(url)}" target="_blank" rel="noopener">abrir</a>`:'—'}</td></tr>`;}).join('') || '<tr><td colspan="11" class="l"><span class="note">Nenhuma nota neste filtro.</span></td></tr>'}
@@ -3917,7 +3950,10 @@ function abas(){
   const lb=$('#linhas'); if(lb){
     lb.innerHTML = LINHAS.map(([k,l])=>`<button type="button" data-linha="${k}" aria-pressed="${S.linha===k}">${l}</button>`).join('');
     $$('#linhas button').forEach(b=>b.onclick=()=>{ if(S.linha===b.dataset.linha) return; S.linha=b.dataset.linha; S.tab=S.tabL[S.linha]; guardaNav(); render(); window.scrollTo(0,0); }); }
-  $('#tabs').innerHTML = tabsAtuais().map(([k,l])=>`<button role="tab" type="button" data-t="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('');
+  $('#tabs').innerHTML = tabsAtuais().map(([k,l])=>`<button role="tab" type="button" data-t="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('')
+    // no celular as abas viram um seletor (as abas não cabem na largura)
+    + `<label class="tabs-sel"><span>Seção</span><select id="tabs-sel" aria-label="Seção">${tabsAtuais().map(([k,l])=>`<option value="${k}"${S.tab===k?' selected':''}>${l}</option>`).join('')}</select></label>`;
+  { const ts=$('#tabs-sel'); if(ts) ts.onchange=()=>{ const b=document.querySelector('#tabs button[data-t="'+ts.value+'"]'); if(b) b.click(); }; }
   $$('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t; S.tabL[S.linha]=S.tab; if(litInvalida.pend && S.tab!=='lorc' && S.tab!=='lprecos'){ litInvalida.pend=false; litInvalida(); } guardaNav(); render(); window.scrollTo(0,0);});
 }
 function guardaNav(){
