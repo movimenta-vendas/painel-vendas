@@ -521,7 +521,7 @@ th,td{padding-left:7px;padding-right:7px}
 .btn{font-size:13px}.btn.sm{font-size:12px}
 nav.tabs button{font-size:13.5px;padding:9px 11px}
 .ms-btn,select,input{font-size:13px}
-.fun-tag{text-transform:uppercase;letter-spacing:.04em;font-size:10.5px}
+.fun-tag{text-transform:uppercase;letter-spacing:0;font-size:inherit;font-weight:400;white-space:normal;align-items:flex-start;line-height:1.3}.fun-tag::before{margin-top:.35em}
 td.l{white-space:normal}
 /* nomes longos quebram linha em vez de serem cortados */
 </style>
@@ -1142,11 +1142,14 @@ async function interpretaFunil(file){
   return {st, arquivo:file.name, modificado:file.lastModified};
 }
 /* ordem das etapas do funil; o que não estiver aqui vai para o fim, e quem não está na planilha fica "Sem status" */
-const FUNIL_ORDEM = ['Reservados','Apresentação feita','Amostras enviadas','Parecer técnico','Documentação em processo'];
+const FUNIL_ORDEM = ['Reservados','Apresentação feita','Amostras enviadas','Parecer técnico','Documentação em processo','Aguardando empenho'];
 const SEM_STATUS = 'Sem status';
-const statusFunil = f => { const F=(BASE&&BASE.funil)||FUNIL; if(!F) return null; return F.st[chaveEnte(f.rede==='_ESTADO'?'ESTADO':f.rede, f.uf)] || SEM_STATUS; };
+const statusFunil = f => { const F=(BASE&&BASE.funil)||FUNIL; if(!F) return null; const nome=f.rede==='_ESTADO'?'ESTADO':f.rede;
+  // "FIRJAN - SESI RJ" também casa com "SESI RJ" (a parte depois do último travessão)
+  const alt=String(nome).includes(' - ')? String(nome).split(' - ').pop() : null;
+  return F.st[chaveEnte(nome, f.uf)] || (alt && F.st[chaveEnte(alt, f.uf)]) || SEM_STATUS; };
 const ordemFunil = s => { const i=FUNIL_ORDEM.findIndex(x=>SEMACENTO(x)===SEMACENTO(s)); return s===SEM_STATUS? 99 : i<0? 50 : i; };
-const corFunil = s => s===SEM_STATUS? 'var(--bad)' : ['var(--muted)','var(--sky)','var(--sun)','var(--clay)','var(--ok)'][ordemFunil(s)] || 'var(--mag)';
+const corFunil = s => s===SEM_STATUS? 'var(--bad)' : ['var(--muted)','var(--sky)','var(--sun)','var(--mv-lavanda)','var(--ok)','var(--mag)'][ordemFunil(s)] || 'var(--mag)';
 async function interpretaComposicao(file){
   const z = await abreZip(await file.arrayBuffer()); leSST(z);
   const nome = [...xml(z['xl/workbook.xml']).getElementsByTagName('sheet')].map(x=>x.getAttribute('name')).find(n=>/^composi/i.test(SEMACENTO(n)));
@@ -2676,9 +2679,9 @@ function abreJanela(html, larga, proj){
       <div class="jlogo">${logoProj(proj)}</div>
       <div class="jtit"><h2>${titulo}</h2>${sub?`<p class="sub">${sub}</p>`:''}</div>
       <div class="jbtn" data-noprint>
-        <button class="btn sm" type="button" data-print="copiar" title="Copiar imagem — depois é só colar (Ctrl+V) no WhatsApp">${forma('retangulo')}<span>Copiar</span></button>
-        <button class="btn sm" type="button" data-print="baixar" title="Baixar imagem — salva a janela como PNG na pasta Downloads">${forma('triangulo-invertido')}<span>Baixar</span></button>
-        <button class="btn sm x" type="button" title="Fechar (Esc)">${forma('circulo')}<span>Fechar</span></button></div></div>`;
+        <button class="btn sm" type="button" data-print="copiar" title="Copiar imagem — depois é só colar (Ctrl+V) no WhatsApp">Copiar</button>
+        <button class="btn sm" type="button" data-print="baixar" title="Baixar imagem — salva a janela como PNG na pasta Downloads">Baixar</button>
+        <button class="btn sm x" type="button" title="Fechar (Esc)">Fechar</button></div></div>`;
   bg.innerHTML=`<div class="modal${larga?' larga':''}" role="dialog" aria-modal="true">${cab}${corpo}</div>`;
   document.body.appendChild(bg); document.body.classList.add('modal-on');
   bg.onclick=e=>{ if(e.target===bg) fechaJanela(); };
@@ -2871,7 +2874,7 @@ function janelaFutura(f, al){
     <h3>Por ano de escolaridade</h3>${tabela}`, comEst, f.projeto);
   // botão de gerar orçamento ao lado dos de copiar e baixar a imagem (só no app do administrador)
   const jb=$('#janela .jbtn'); if(jb && !window.__SNAP){ const tem=!!ORC_PROJ_ID(f.projeto);
-    jb.insertAdjacentHTML('afterbegin',`<button class="btn sm ico" type="button" id="fut-orc"${tem?'':' disabled'} aria-label="Gerar orçamento" title="${tem?'Gerar orçamento com os números desta negociação':'Este projeto não está no gerador de orçamentos'}">${forma('retangulo',13)}</button>`);
+    jb.insertAdjacentHTML('afterbegin',`<button class="btn sm" type="button" id="fut-orc"${tem?'':' disabled'} title="${tem?'Gerar orçamento com os números desta negociação':'Este projeto não está no gerador de orçamentos'}">Orçamento</button>`);
     const bo=$('#fut-orc'); if(bo&&tem) bo.onclick=()=>janelaOrcFutura(f, al); }
 }
 /* ---------- orçamento a partir de uma negociação de Vendas futuras ---------- */
@@ -2956,6 +2959,17 @@ function viewVendas(){
 }
 
 /* ---------------- aba: vendas futuras ---------------- */
+/* janela do funil: redes e projetos de um status, uma linha por negociação */
+function janelaFunil(st, itens){
+  const L=itens.slice().sort((a,b)=>(b.valor||0)-(a.valor||0));
+  const ka=L.reduce((t,f)=>t+(f.kitsAluno||0),0), kp=L.reduce((t,f)=>t+(f.kitsProf||0),0), v=L.reduce((t,f)=>t+(f.valor||0),0);
+  const redes=new Set(L.map(f=>f.rede+'|'+f.uf)).size;
+  abreJanela(`<h2>${esc(st)}</h2><p class="sub">${fmt(L.length)} negociaç${L.length===1?'ão':'ões'} · ${fmt(redes)} rede${redes===1?'':'s'} de ensino · ${BRL(v)} previstos</p>
+    <div class="tw" style="max-height:60vh"><table class="miuda"><thead><tr><th class="l">Rede</th><th class="l">Projeto</th><th class="l">Mês previsto</th><th>Kits aluno</th><th>Kits prof.</th><th>Faturamento estimado</th></tr></thead><tbody>
+    ${L.map(f=>`<tr><td class="l">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l"><span class="sw" style="background:${corDe(f.projeto)}"></span>${esc(curtoP(f.projeto))}</td>
+      <td class="l">${f.mesPrevisto? MES[+f.mesPrevisto.slice(5,7)-1]+'/'+f.mesPrevisto.slice(2,4) : '—'}</td><td>${fmt(f.kitsAluno||0)}</td><td>${fmt(f.kitsProf||0)}</td><td>${BRLf(f.valor||0)}</td></tr>`).join('')}
+    <tr class="tot"><td class="l">Total</td><td></td><td></td><td>${fmt(ka)}</td><td>${fmt(kp)}</td><td>${BRLf(v)}</td></tr></tbody></table></div>`, true);
+}
 function viewFuturas(){
   // negociação sem mês previsto fica fora desta tela
   const semMes = BASE.futuras.filter(f=>!f.mesPrevisto).length;
@@ -2990,14 +3004,17 @@ function viewFuturas(){
     <div class="kpi"><div class="l">Kits de professor</div><div class="v">${fmt(lista.reduce((s,f)=>s+(f.kitsProf||0),0))}</div></div>
     ${al? `<div class="kpi"><div class="l">Atende com o estoque</div><div class="v">${BRL(somaAt)}</div>
         <div class="d">${prev? dec(somaAt/prev*100):'0,0'}% do previsto · ${fmt(integral)} ${integral===1?'integral':'integrais'} de ${fmt(lista.length)}</div></div>`
-       : `<div class="kpi"><div class="l">Redes</div><div class="v">${fmt(new Set(lista.map(f=>f.rede+'|'+f.uf)).size)}</div></div>`}</div>`;
+       : ''}
+    <div class="kpi"><div class="l">Projetos</div><div class="v">${fmt(new Set(lista.map(f=>f.rede+'|'+f.uf+'|'+f.projeto)).size)}</div><div class="d">somando os projetos de cada rede · ${fmt(new Set(lista.map(f=>f.projeto)).size)} projetos diferentes</div></div>
+    <div class="kpi"><div class="l">Redes de ensino</div><div class="v">${fmt(new Set(lista.map(f=>f.rede+'|'+f.uf)).size)}</div>
+      <div class="d">${(()=>{ const r=[...new Set(lista.map(f=>f.rede+'|'+f.uf))], e=r.filter(x=>ehRedeEstadual(x.split('|')[0])).length; return `${fmt(r.length-e)} municipa${r.length-e===1?'l':'is'} · ${fmt(e)} estadua${e===1?'l':'is'}`; })()}</div></div></div>`;
   if(!EST) h += `<div class="banner">Carregue a planilha de estoque na aba <b>Estoque</b> para ver quanto de cada negociação o estoque atual atende.</div>`;
   h += `<div class="grid iguais"><div class="c7">${caixa('g-fut','','Previsão por mês','Faturamento por projeto, no mês previsto')}</div>
         <div class="c5">${caixa('g-futp','','Previsão por projeto','Total previsto')}</div></div>`;
   // projeções por status do funil (todos os filtros, menos o do próprio funil) + quem está sem status
   const baseFun = baseF('fun');
   if(temFunil){ const F=(BASE&&BASE.funil)||FUNIL, semS=baseFun.filter(f=>statusFunil(f)===SEM_STATUS).sort((a,b)=>b.valor-a.valor);
-    h += `<div class="grid iguais"><div class="c7">${caixa('g-fun','','Projeções por status do funil','Faturamento previsto de cada etapa'+(F.arquivo? ' · '+esc(F.arquivo) : '')+' · em destaque, as redes sem status · clique numa barra para filtrar a tela por aquele status'+(S.fFun.length? ' (clique de novo para limpar)' : ''))}</div>
+    h += `<div class="grid iguais"><div class="c7">${caixa('g-fun','','Projeções por status do funil','Faturamento previsto de cada etapa'+(F.arquivo? ' · '+esc(F.arquivo) : '')+' · em destaque, as redes sem status · clique numa barra para ver as redes e os projetos daquele status')}</div>
       <div class="c5"><div class="card fun-sem"><h2>Sem status no funil <span class="tag bad">${fmt(semS.length)}</span></h2>
         <p class="sub">${semS.length? `${BRL(semS.reduce((t,f)=>t+(f.valor||0),0))} em projeções de redes que não aparecem na planilha do funil. Consulte os responsáveis e atualize.` : 'Todas as projeções do filtro têm status no funil.'}</p>
         ${semS.length? `<div class="tw" style="max-height:300px"><table class="miuda"><thead><tr><th class="l">Rede</th><th class="l">Distribuidor</th><th class="l">Projeto</th><th>Previsto</th></tr></thead><tbody>${semS.map(f=>`<tr><td class="l">${esc(f.rede==='_ESTADO'?'Estado':f.rede)} <span class="tag">${esc(f.uf)}</span></td><td class="l">${esc(f.via)}</td><td class="l">${esc(curtoP(f.projeto))}</td><td>${BRLf(f.valor)}</td></tr>`).join('')}</tbody></table></div>
@@ -3022,7 +3039,7 @@ function viewFuturas(){
       [2,1,multi('ms-frede','Rede',comMarcados(baseF('rede').map(chRede),S.fRede).map(r=>[r,r.startsWith('_ESTADO')? 'Estado · '+r.slice(-2) : r.replace(' | ',' · ')]),S.fRede,'Todas','redes',1)],
       [3,1,multi('ms-fvia','Distribuidor',comMarcados(baseF('via').map(f=>f.via),S.fVia).map(v=>[v,v]),S.fVia,'Todos','distribuidores',1)],
       [4,1,multi('ms-fproj','Projeto',comMarcados(baseF('proj').map(f=>f.projeto),S.fProj).map(p=>[p,short(p)]),S.fProj,'Todos','projetos',2)],
-      [5,1,multi('ms-ffun','Funil',comMarcados(baseF('fun').map(f=>statusFunil(f)||SEM_STATUS),S.fFun).map(x=>[x,x+' ('+fmt(baseF('fun').filter(f=>(statusFunil(f)||SEM_STATUS)===x).length)+')']),S.fFun,'Todos','status',1)],
+      [5,1,multi('ms-ffun','Funil',comMarcados(baseF('fun').map(f=>statusFunil(f)||SEM_STATUS),S.fFun).map(x=>[x,x+' ('+fmt(baseF('fun').filter(f=>(statusFunil(f)||SEM_STATUS)===x).length)+')',ordemFunil(x)]),S.fFun,'Todos','status',1)],
       al? [9,1,multi('ms-fsit','Estoque',
         [['int','Atende integral',semSit.filter(f=>cobre(f)>=0.999).length],
          ['par','Atende parcial',semSit.filter(f=>cobre(f)>0&&cobre(f)<0.999).length],
@@ -3068,8 +3085,7 @@ function viewFuturas(){
     const selF = S.fFun.length? S.fFun : null, apaga = k => selF && !selF.includes(k);
     grafico('g-fun',{altura:true,kind:'hbar',money:true,labels:ks.map(k=>(selF&&selF.includes(k)?'› ':'')+k+' ('+fmt(nm.get(k))+')'),
       sets:[{label:'Previsto',data:ks.map(k=>sm.get(k)),color:pal()[0],colors:ks.map(k=>apaga(k)? css('--grid') : cv(k))}],
-      aoClicar:i=>{ const st=ks[i]; S.fFun = (S.fFun.length===1&&S.fFun[0]===st)? [] : [st]; S.fLim=60; render();
-        const t=document.querySelector('.tw-fut'); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }});
+      aoClicar:i=>janelaFunil(ks[i], baseFun.filter(f=>statusFunil(f)===ks[i]))});
     const bc=$('#fun-copia'); if(bc) bc.onclick=()=>{ const semS=baseFun.filter(f=>statusFunil(f)===SEM_STATUS).sort((a,b)=>b.valor-a.valor);
       const t=['Projeções sem status no funil:'].concat(semS.map(f=>`- ${f.rede==='_ESTADO'?'Estado':f.rede}/${f.uf} · ${f.via} · ${short(f.projeto)} · ${BRLf(f.valor)}`)).join('\n');
       navigator.clipboard.writeText(t).then(()=>aviso('Lista copiada.'),()=>aviso('Não consegui copiar.')); }; }
@@ -3379,6 +3395,8 @@ function chaveData(t){ t=String(t==null?'':t).trim().toLowerCase();
   return null; }
 function ordenaOpcoes(lista, rot, desc){ // lista de itens; rot(item) devolve o texto mostrado; desc: datas e números do maior para o menor
   if(lista.length<2) return lista;
+  // opções com ordem própria no 3º campo (ex.: etapas do funil) seguem essa ordem
+  if(lista.every(o=>Array.isArray(o)&&typeof o[2]==='number')) return lista.slice().sort((a,b)=>a[2]-b[2]);
   const sg=desc?-1:1;
   const ks=lista.map(o=>chaveData(rot(o)));
   if(ks.every(k=>k!=null)) return lista.map((o,i)=>[o,ks[i]]).sort((a,b)=>sg*(a[1]-b[1])).map(x=>x[0]);
@@ -3539,9 +3557,9 @@ function janelaPDF(arquivo, titulo){
   bg.innerHTML=`<div class="modal pdfjan" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
     <div class="pdfcab"><div class="pdftit"><h2>${esc(titulo)}</h2><p class="sub">${esc(nome)}</p></div>
       <div class="pdfbtn">
-        <button class="btn sm" type="button" data-pdfa="imprimir" title="Imprimir o documento">${forma('barras')}<span>Imprimir</span></button>
-        <button class="btn sm" type="button" data-pdfa="baixar" title="Salvar o PDF na pasta Downloads">${forma('triangulo-invertido')}<span>Baixar</span></button>
-        <button class="btn sm" type="button" data-pdfa="fechar" title="Fechar (Esc)">${forma('circulo')}<span>Fechar</span></button>
+        <button class="btn sm" type="button" data-pdfa="imprimir" title="Imprimir o documento">Imprimir</button>
+        <button class="btn sm" type="button" data-pdfa="baixar" title="Salvar o PDF na pasta Downloads">Baixar</button>
+        <button class="btn sm" type="button" data-pdfa="fechar" title="Fechar (Esc)">Fechar</button>
       </div></div>
     <iframe class="pdfvis" src="${PDF_URL}#view=FitH" title="${esc(titulo)}"></iframe></div>`;
   document.body.appendChild(bg); document.body.classList.add('modal-on');
